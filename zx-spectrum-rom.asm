@@ -1,8 +1,3 @@
-
-#define DEFB .BYTE      ; TASM cross-assembler instructions
-#define DEFW .WORD
-#define EQU .EQU
-
 ;************************************************************************
 ;** An assembly file listing to generate a 16K Rom for the ZX Spectrum **
 ;************************************************************************
@@ -1556,6 +1551,7 @@ L053F   PUSH    AF              ; preserve accumulator throughout.
         LD      A,$7F           ; read from port address $7FFE the
         IN      A,($FE)         ; row with the space key at outside.
  
+
         RRA                     ; test for space key pressed.
         EI                      ; enable interrupts
         JR      C,L0554         ; forward to SA/LD-END if not
@@ -2706,6 +2702,7 @@ L093E   EX      AF,AF'          ; save or re-save flags.
         PUSH    BC              ; ** save length of new program line/variable.
         EX      AF,AF'          ; fetch flags back.
         JR      C,L0955         ; skip to ME-ENT-2 if variable
+
 
         DEC     HL              ; address location before pointer
         CALL    L1655           ; routine MAKE-ROOM creates room for basic line
@@ -9578,6 +9575,7 @@ L2089   CALL    L2530           ; routine SYNTAX-Z to check if in runtime.
 ;; INPUT-1
 L2096   LD      (IY+$02),$01    ; set TV_FLAG - signal lower screen in use
                                 ; and clear the other bits.
+
 
         CALL    L20C1           ; routine IN-ITEM-1 to handle the input.
 
@@ -17020,6 +17018,7 @@ L367A   EXX                     ; switch in set that addresses code
         DEC     (HL)            ; decrement it
         POP     HL              ; restore pointer
 
+
         JR      NZ,L3687        ; to JUMP-2 if not zero
 
         INC     HL              ; step past the jump length.
@@ -18671,7 +18670,6 @@ L3D00   DEFB    %00000000
         DEFB    %01000010
         DEFB    %00111100
 
-.END                                ;TASM assembler instruction.
 
 ; Acknowledgements
 ; -----------------
