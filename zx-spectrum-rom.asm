@@ -13,11 +13,11 @@
 ; This location can also be 'called' to reset the machine.
 ; Typically with PRINT USR 0.
 
-;; START
-L0000   DI                      ; disable interrupts.
-        XOR     A               ; signal coming from START.
-        LD      DE,$FFFF        ; top of possible physical RAM.
-        JP      L11CB           ; jump forward to common code at START-NEW.
+;; $0000
+START:		DI			; disable interrupts.
+		XOR	A		; signal coming from START.
+		LD	DE,$FFFF	; top of possible physical RAM.
+		JP	L11CB		; jump forward to common code at START-NEW.
 
 ;--------------
 ; Error restart
@@ -28,10 +28,10 @@ L0000   DI                      ; disable interrupts.
 ; An instruction fetch on address $0008 may page in a peripheral ROM
 ; although this was not an original design concept.
 
-;; ERROR-1
-L0008   LD      HL,($5C5D)      ; fetch the character address from CH_ADD.
-        LD      ($5C5F),HL      ; copy it to the error pointer X_PTR.
-        JR      L0053           ; forward to continue at ERROR-2.
+;; $0008
+ERROR-1:	LD	HL,($5C5D)	; fetch the character address from CH_ADD.
+		LD	($5C5F),HL	; copy it to the error pointer X_PTR.
+		JR	ERROR-2		; forward to continue at ERROR-2.
 
 ;------------------
 ; Print a character
@@ -42,11 +42,11 @@ L0008   LD      HL,($5C5D)      ; fetch the character address from CH_ADD.
 ; so there is no need to preserve any of the current registers.
 ; This restart occurs 21 times.
 
-;; PRINT-A
-L0010   JP      L15F2           ; jump forward to continue at PRINT-A-2.
+;; $0010
+PRINT-A:	JP	L15F2		; jump forward to continue at PRINT-A-2.
 
-        DEFB    $FF, $FF, $FF   ; five unused locations.
-        DEFB    $FF, $FF        ;
+		DEFB	$FF, $FF, $FF	; five unused locations.
+		DEFB	$FF, $FF	;
 
 ;--------------------
 ; Collect a character
@@ -60,13 +60,12 @@ L0010   JP      L15F2           ; jump forward to continue at PRINT-A-2.
 ; 3) in the edit buffer if parsing a direct command or a new basic line.
 ; 4) in workspace if accepting input but not that from INPUT LINE.
 
-;; GET-CHAR
-L0018   LD      HL,($5C5D)      ; fetch the address from CH_ADD.
-        LD      A,(HL)          ; use it to pick up current character.
-
-;; TEST-CHAR
-L001C   CALL    L007D           ; routine SKIP-OVER tests if the character
-        RET     NC              ; is relevant. Return if it is so.
+;; $0018
+GET-CHAR:	LD	HL,($5C5D)	; fetch the address from CH_ADD.
+		LD	A,(HL)		; use it to pick up current character.
+;; $001C
+TEST-CHAR:	CALL	L007D		; routine SKIP-OVER tests if the character
+		RET	NC		; is relevant. Return if it is so.
 
 ;-----------------------
 ; Collect next character
@@ -74,13 +73,13 @@ L001C   CALL    L007D           ; routine SKIP-OVER tests if the character
 ; As the BASIC commands and expressions are interpreted, this routine is
 ; called repeatedly to step along the line. It is used 83 times.
 
-;; NEXT-CHAR
-L0020   CALL    L0074           ; routine CH-ADD+1 fetches the next immediate
-                                ; character.
-        JR      L001C           ; jump back to TEST-CHAR until a valid
-                                ; character is found.
+;; $0020
+NEXT-CHAR:	CALL	L0074		; routine CH-ADD+1 fetches the next immediate
+					; character.
+		JR	TEST-CHAR	; jump back to TEST-CHAR until a valid
+					; character is found.
 
-        DEFB    $FF, $FF, $FF   ; unused
+		DEFB    $FF, $FF, $FF	; unused
 
 ;-------------------
 ; Calculator restart
@@ -90,12 +89,12 @@ L0020   CALL    L0074           ; routine CH-ADD+1 fetches the next immediate
 ; It is further used recursively from within the calculator.
 ; It is used on 77 occasions.
 
-;; FP-CALC
-L0028   JP      L335B           ; jump forward to the CALCULATE routine.
+;; $0028
+FP-CALC:	JP	L335B		; jump forward to the CALCULATE routine.
 
-        DEFB    $FF, $FF, $FF   ; spare - note that on the ZX81, space being a 
-        DEFB    $FF, $FF        ; little cramped, these same locations were
-                                ; used for the five-byte end-calc literal.
+		DEFB	$FF, $FF, $FF	; spare - note that on the ZX81, space being a 
+		DEFB	$FF, $FF	; little cramped, these same locations were
+					; used for the five-byte end-calc literal.
 
 ;------------------------------------
 ; Create free locations in work space
@@ -103,11 +102,11 @@ L0028   JP      L335B           ; jump forward to the CALCULATE routine.
 ; This restart is used on only 12 occasions to create BC spaces
 ; between workspace and the calculator stack.
 
-;; BC-SPACES
-L0030   PUSH    BC              ; save number of spaces.
-        LD      HL,($5C61)      ; fetch WORKSP.
-        PUSH    HL              ; save address of workspace.
-        JP      L169E           ; jump forward to continuation code RESERVE.
+;; $0030
+BC-SPACES:	PUSH	BC		; save number of spaces.
+		LD	HL,($5C61)	; fetch WORKSP.
+		PUSH	HL		; save address of workspace.
+		JP	L169E		; jump forward to continuation code RESERVE.
 
 ;---------------------------
 ; Maskable interrupt routine
@@ -118,31 +117,31 @@ L0030   PUSH    BC              ; save number of spaces.
 ; the IY register to access system variables and flags so a user-written
 ; program must disable interrupts to make use of the IY register.
 
-;; MASK-INT
-L0038   PUSH    AF              ; save the registers.
-        PUSH    HL              ; but not IY unfortunately.
-        LD      HL,($5C78)      ; fetch two bytes at FRAMES1.
-        INC     HL              ; increment lowest two bytes of counter.
-        LD      ($5C78),HL      ; place back in FRAMES1.
-        LD      A,H             ; test if the result
-        OR      L               ; was zero.
-        JR      NZ,L0048        ; forward to KEY-INT if not.
+;; $0038
+MASK-INT:	PUSH	AF		; save the registers.
+		PUSH	HL		; but not IY unfortunately.
+		LD	HL,($5C78)	; fetch two bytes at FRAMES1.
+		INC	HL		; increment lowest two bytes of counter.
+		LD	($5C78),HL	; place back in FRAMES1.
+		LD	A,H		; test if the result
+		OR	L		; was zero.
+		JR	NZ,KEY-INT	; forward to KEY-INT if not.
 
-        INC     (IY+$40)        ; otherwise increment FRAMES3 the third byte.
+		INC	(IY+$40)	; otherwise increment FRAMES3 the third byte.
 
 ; now save the rest of the main registers and read and decode the keyboard.
 
-;; KEY-INT
-L0048   PUSH    BC              ; save the other
-        PUSH    DE              ; main registers.
-        CALL    L02BF           ; routine KEYBOARD executes a stage
-                                ; in the process of reading a key-press.
-        POP     DE              ;
-        POP     BC              ; restore registers.
-        POP     HL              ;
-        POP     AF              ;
-        EI                      ; enable interrupts.
-        RET                     ; return.
+;; $0048
+KEY-INT:	PUSH	BC		; save the other
+		PUSH	DE		; main registers.
+		CALL	L02BF		; routine KEYBOARD executes a stage
+					; in the process of reading a key-press.
+		POP	DE		;
+		POP	BC		; restore registers.
+		POP	HL		;
+		POP	AF		;
+		EI			; enable interrupts.
+		RET			; return.
 
 ;----------------
 ; Error-2 routine
@@ -151,35 +150,35 @@ L0048   PUSH    BC              ; save the other
 ; The error code is stored and after clearing down stacks,
 ; an indirect jump is made to MAIN-4, etc. to handle the error.
 
-;; ERROR-2
-L0053   POP     HL              ; drop the return address - the location
-                                ; after the RST 08H instruction.
-        LD      L,(HL)          ; fetch the error code that follows.
-                                ; (nice to see this instruction used.)
+;; $0053
+ERROR-2:	POP	HL		; drop the return address - the location
+					; after the RST 08H instruction.
+		LD	L,(HL)		; fetch the error code that follows.
+					; (nice to see this instruction used.)
 
 ; Note. this entry point is used when out of memory at REPORT-4.
 ; The L register has been loaded with the report code but X-PTR is not
 ; updated.
 
-;; ERROR-3
-L0055   LD      (IY+$00),L      ; store it in the system variable ERR_NR.
-        LD      SP,($5C3D)      ; ERR_SP points to an error handler on the
-                                ; machine stack. There may be a hierarchy
-                                ; of routines.
-                                ; to MAIN-4 initially at base.
-                                ; or REPORT-G on line entry.
-                                ; or  ED-ERROR when editing.
-                                ; or   ED-FULL during ed-enter.
-                                ; or  IN-VAR-1 during runtime input etc.
+;; $0055
+ERROR-3:	LD	(IY+$00),L	; store it in the system variable ERR_NR.
+		LD	SP,($5C3D)	; ERR_SP points to an error handler on the
+					; machine stack. There may be a hierarchy
+					; of routines.
+					; to MAIN-4 initially at base.
+					; or REPORT-G on line entry.
+					; or  ED-ERROR when editing.
+					; or   ED-FULL during ed-enter.
+					; or  IN-VAR-1 during runtime input etc.
 
-        JP      L16C5           ; jump to SET-STK to clear the calculator
-                                ; stack and reset MEM to usual place in the
-                                ; systems variables area.
-                                ; and then indirectly to MAIN-4, etc.
+		JP	L16C5		; jump to SET-STK to clear the calculator
+					; stack and reset MEM to usual place in the
+					; systems variables area.
+					; and then indirectly to MAIN-4, etc.
 
-        DEFB    $FF, $FF, $FF   ; unused locations
-        DEFB    $FF, $FF, $FF   ; before the fixed-position
-        DEFB    $FF             ; NMI routine.
+		DEFB	$FF, $FF, $FF	; unused locations
+		DEFB	$FF, $FF, $FF	; before the fixed-position
+		DEFB	$FF 		; NMI routine.
 
 ;-------------------------------
 ; Non-maskable interrupt routine
@@ -196,20 +195,20 @@ L0055   LD      (IY+$00),L      ; store it in the system variable ERR_NR.
 ; On later Spectrums, and the Brazilian Spectrum, the logic of this
 ; routine was reversed.
 
-;; RESET
-L0066   PUSH    AF              ; save the
-        PUSH    HL              ; registers.
-        LD      HL,($5CB0)      ; fetch the system variable NMIADD.
-        LD      A,H             ; test address
-        OR      L               ; for zero.
-        JR      NZ,L0070        ; skip to NO-RESET if NOT ZERO
+;; $0066
+RESET:		PUSH	AF		; save the
+		PUSH	HL		; registers.
+		LD	HL,($5CB0)	; fetch the system variable NMIADD.
+		LD	A,H		; test address
+		OR	L		; for zero.
+		JR      NZ,NO-RESET	; skip to NO-RESET if NOT ZERO
 
-        JP      (HL)            ; jump to routine ( i.e. L0000 )
+		JP	(HL)		; jump to routine ( i.e. START )
 
-;; NO-RESET
-L0070   POP     HL              ; restore the
-        POP     AF              ; registers.
-        RETN                    ; return to previous interrupt state.
+;; $0070
+NO-RESET:	POP	HL		; restore the
+		POP	AF		; registers.
+		RETN			; return to previous interrupt state.
 
 ;----------------------
 ; CH ADD + 1 subroutine
@@ -9063,7 +9062,7 @@ L1F05   LD      HL,($5C65)      ; fetch STKEND
 
 ;; REPORT-4
 L1F15   LD      L,$03           ; prepare 'Out of Memory' 
-        JP      L0055           ; jump back to ERROR-3 at $0055
+        JP      ERROR-3           ; jump back to ERROR-3 at $0055
                                 ; Note. this error can't be trapped at $0008
 
 ;------------
@@ -11611,7 +11610,7 @@ L2734   POP     DE              ; fetch last priority and operation
 ; the last priority was greater or equal this one.
 
         AND     A               ; if it is zero then so is this
-        JP      Z,L0018         ; jump to exit via get-char pointing at
+        JP      Z,GET-CHAR      ; jump to exit via get-char pointing at
                                 ; next character.
                                 ; This may be the character after the
                                 ; expression or, if exiting a recursive call,
@@ -12128,6 +12127,7 @@ L28B2   SET     6,(IY+$01)      ; update FLAGS - presume numeric result
                                 ; character is alphanumeric.
         JR      NC,L28E3        ; forward to V-TEST-FN if just one character
 
+
 ; it is more than one character but re-test current character so that 6 reset
 ; Note. this is a rare lack of elegance. Bit 6 could be reset once before
 ; entering the loop. Another puzzle is that this loop renders the similar
@@ -12523,6 +12523,7 @@ L29E0   RST     18H             ; GET-CHAR
 
 ;; SV-COUNT
 L29E7   LD      HL,$0000        ; initialize data pointer to zero.
+
 
 ;; SV-LOOP
 L29EA   PUSH    HL              ; save the data pointer.
