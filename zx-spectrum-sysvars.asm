@@ -13,4 +13,8 @@ KSTATE_4	equ	$5C04
 REPDEL		equ	$5C09
 LASTK		equ	$5C08
 REPPER		equ	$5C0A
+BORDCR		equ	$5C48
+MEM_0		equ	$5C92
+FLAGS		equ	$5C3B
+T_ADDR		equ	$5C74
 
