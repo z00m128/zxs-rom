@@ -17,4 +17,7 @@ BORDCR		equ	$5C48
 MEM_0		equ	$5C92
 FLAGS		equ	$5C3B
 T_ADDR		equ	$5C74
+E_LINE		equ	$5C59
+PROG		equ	$5C53
+VARS		equ	$5C4B
 

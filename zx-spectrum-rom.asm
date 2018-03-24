@@ -1743,7 +1743,7 @@ LD_8_BITS:	CALL	LD_EDGE_2	; routine LD_EDGE_2 increments B relative to
 
 		LD	A,D		; check length of
 		OR	E		; expected bytes.
-		JR	NZ,LD_LOOP		; back to LD_LOOP 
+		JR	NZ,LD_LOOP	; back to LD_LOOP 
 					; while there are more.
 
 					; when all bytes loaded then parity byte should be zero.
@@ -1928,7 +1928,7 @@ SA_NAME:	PUSH	IX		; push start of file descriptor.
 ;; $0652
 SA_DATA:	RST	18H		; GET_CHAR
 		CP	$E4		; is character after filename the token 'DATA' ?
-		JR	NZ,L06A0	; forward to SA-SCR$ to consider SCREEN$ if
+		JR	NZ,SA_SCR	; forward to SA_SCR to consider SCREEN$ if
 					; not.
 
 					; continue to consider DATA.
@@ -1953,7 +1953,7 @@ SA_DATA:	RST	18H		; GET_CHAR
 		LD	HL,$0000	; set destination to zero as not fixed.
 		LD	A,(T_ADDR)	; fetch command from T_ADDR
 		DEC	A		; test for 1 - LOAD
-		JR	Z,L0685		; forward to SA-V-NEW with LOAD DATA.
+		JR	Z,SA_V_NEW	; forward to SA_V_NEW with LOAD DATA.
 					; to load a new array.
 
 					; otherwise the variable was not found in run-time with SAVE/MERGE.
@@ -1971,7 +1971,7 @@ SA_V_OLD:	JP	NZ,L1C8A	; to REPORT-C if not an array variable.
 
 
 		CALL	L2530		; routine SYNTAX-Z
-		JR	Z,L0692		; forward to SA_DATA-1 if checking syntax.
+		JR	Z,SA_DATA_1	; forward to SA_DATA_1 if checking syntax.
 
 		INC	HL		; step past single character variable name.
 		LD	A,(HL)		; fetch low byte of length.
@@ -1981,23 +1981,23 @@ SA_V_OLD:	JP	NZ,L1C8A	; to REPORT-C if not an array variable.
 		LD	(IX+$0C),A	; to descriptor.
 		INC	HL		; increase pointer within variable.
 
-;; SA-V-NEW
-L0685	LD	(IX+$0E),C	; place character array name in  header.
+;; $0685
+SA_V_NEW:	LD	(IX+$0E),C	; place character array name in  header.
 		LD	A,$01		; default to type numeric.
 		BIT	6,C		; test result from look-vars.
-		JR	Z,L068F		; forward to SA-V-TYPE if numeric.
+		JR	Z,SA_V_TYPE	; forward to SA_V_TYPE if numeric.
 
 		INC	A		; set type to 2 - string array.
 
-;; SA-V-TYPE
-L068F	LD	(IX+$00),A	; place type 0, 1 or 2 in descriptor.
+;; $068F
+SA_V_TYPE:	LD	(IX+$00),A	; place type 0, 1 or 2 in descriptor.
 
-;; SA-DATA-1
-L0692	EX	DE,HL		; save var pointer in DE
+;; $0692
+SA_DATA_1:	EX	DE,HL		; save var pointer in DE
 
 		RST	20H		; NEXT_CHAR
 		CP	$29		; is character ')' ?
-		JR	NZ,SA_V_OLD		; back if not to SA_V_OLD to report
+		JR	NZ,SA_V_OLD	; back if not to SA_V_OLD to report
 					; 'Nonsense in basic'
 
 		RST	20H		; NEXT_CHAR advances character address.
@@ -2005,42 +2005,42 @@ L0692	EX	DE,HL		; save var pointer in DE
 					; the statement.
 
 		EX	DE,HL		; bring back variables data pointer.
-		JP	L075A		; jump forward to SA-ALL
+		JP	SA_ALL		; jump forward to SA_ALL
 
 ; ---
 ; the branch was here to consider a 'SCREEN$', the display file.
 
-;; SA-SCR$
-L06A0	CP	$AA		; is character the token 'SCREEN$' ?
-		JR	NZ,L06C3		; forward to SA-CODE if not.
+;; $ 06A0
+SA_SCR: 	CP	$AA		; is character the token 'SCREEN$' ?
+		JR	NZ,SA_CODE	; forward to SA_CODE if not.
 
 		LD	A,(T_ADDR)	; fetch command from T_ADDR
 		CP	$03		; is it MERGE ?
 		JP	Z,L1C8A		; jump to REPORT-C if so.
 					; 'Nonsense in basic'
 
-; continue with SAVE/LOAD/VERIFY SCREEN$.
+					; continue with SAVE/LOAD/VERIFY SCREEN$.
 
 		RST	20H		; NEXT_CHAR
 		CALL	L1BEE		; routine CHECK-END errors if not at end of
 					; statement.
 
-; continue in runtime.
+					; continue in runtime.
 
 		LD	(IX+$0B),$00	; set descriptor length
 		LD	(IX+$0C),$1B	; to $1b00 to include bitmaps and attributes.
 
-		LD	HL,$4000		; set start to display file start.
+		LD	HL,$4000	; set start to display file start.
 		LD	(IX+$0D),L	; place start in
 		LD	(IX+$0E),H	; the descriptor.
-		JR	L0710		; forward to SA-TYPE-3
+		JR	SA_TYPE_3	; forward to SA_TYPE_3
 
 ; ---
 ; the branch was here to consider CODE.
 
-;; SA-CODE
-L06C3	CP	$AF		; is character the token 'CODE' ?
-		JR	NZ,L0716		; forward if not to SA-LINE to consider an
+;; $06C3
+SA_CODE:	CP	$AF		; is character the token 'CODE' ?
+		JR	NZ,SA_LINE	; forward if not to SA_LINE to consider an
 					; auto-started basic program.
 
 		LD	A,(T_ADDR)	; fetch command from T_ADDR
@@ -2052,57 +2052,57 @@ L06C3	CP	$AF		; is character the token 'CODE' ?
 		RST	20H		; NEXT_CHAR advances character address.
 		CALL	L2048		; routine PR-ST-END checks if a carriage
 					; return or ':' follows.
-		JR	NZ,L06E1		; forward to SA-CODE-1 if there are parameters.
+		JR	NZ,SA_CODE_1	; forward to SA_CODE_1 if there are parameters.
 
 		LD	A,(T_ADDR)	; else fetch the command from T_ADDR.
 		AND	A		; test for zero - SAVE without a specification.
 		JP	Z,L1C8A		; jump to REPORT-C if so.
 					; 'Nonsense in basic'
 
-; for LOAD/VERIFY put zero on stack to signify handle at location saved from.
+					; for LOAD/VERIFY put zero on stack to signify handle at location saved from.
 
 		CALL	L1CE6		; routine USE-ZERO
-		JR	L06F0		; forward to SA-CODE-2
+		JR	SA_CODE_2	; forward to SA_CODE_2
 
 ; ---
 ; if there are more characters after CODE expect start and possibly length.
 
-;; SA-CODE-1
-L06E1	CALL	L1C82		; routine EXPT-1NUM checks for numeric
+;; $06E1
+SA_CODE_1:	CALL	L1C82		; routine EXPT-1NUM checks for numeric
 					; expression and stacks it in run-time.
 
 		RST	18H		; GET_CHAR
 		CP	$2C		; does a comma follow ?
-		JR	Z,L06F5		; forward if so to SA-CODE-3
+		JR	Z,SA_CODE_3	; forward if so to SA_CODE_3
 
-; else allow saved code to be loaded to a specified address.
+					; else allow saved code to be loaded to a specified address.
 
 		LD	A,(T_ADDR)	; fetch command from T_ADDR.
 		AND	A		; is the command SAVE which requires length ?
 		JP	Z,L1C8A		; jump to REPORT-C if so.
 					; 'Nonsense in basic'
 
-; the command LOAD code may rejoin here with zero stacked as start.
+					; the command LOAD code may rejoin here with zero stacked as start.
 
-;; SA-CODE-2
-L06F0	CALL	L1CE6		; routine USE-ZERO stacks zero for length.
-		JR	L06F9		; forward to SA-CODE-4
+;; $06F0
+SA_CODE_2:	CALL	L1CE6		; routine USE-ZERO stacks zero for length.
+		JR	SA_CODE_4	; forward to SA_CODE_4
 
 ; ---
 ; the branch was here with SAVE CODE start, 
 
-;; SA-CODE-3
-L06F5	RST	20H		; NEXT_CHAR advances character address.
+;; $06F5
+SA_CODE_3:	RST	20H		; NEXT_CHAR advances character address.
 		CALL	L1C82		; routine EXPT-1NUM checks for expression
 					; and stacks in run-time.
 
-; paths converge here and nothing must follow.
+					; paths converge here and nothing must follow.
 
-;; SA-CODE-4
-L06F9	CALL	L1BEE		; routine CHECK-END errors with extraneous
+;; $06F9
+SA_CODE_4:	CALL	L1BEE		; routine CHECK-END errors with extraneous
 					; characters and quits if checking syntax.
 
-; in run-time there are two 16-bit parameters on the calculator stack.
+					; in run-time there are two 16-bit parameters on the calculator stack.
 
 		CALL	L1E99		; routine FIND-INT2 gets length.
 		LD	(IX+$0B),C	; place length 
@@ -2113,38 +2113,36 @@ L06F9	CALL	L1BEE		; routine CHECK-END errors with extraneous
 		LD	H,B		; transfer the
 		LD	L,C		; start to HL also.
 
-;; SA-TYPE-3
-L0710	LD	(IX+$00),$03	; place type 3 - code in descriptor. 
-		JR	L075A		; forward to SA-ALL.
+;; $0710
+SA_TYPE_3:	LD	(IX+$00),$03	; place type 3 - code in descriptor. 
+		JR	SA_ALL		; forward to SA_ALL.
 
 ; ---
 ; the branch was here with basic to consider an optional auto-start line
 ; number.
 
-;; SA-LINE
-L0716	CP	$CA		; is character the token 'LINE' ?
-		JR	Z,L0723		; forward to SA-LINE-1 if so.
+;; $0716
+SA_LINE:	CP	$CA		; is character the token 'LINE' ?
+		JR	Z,SA_LINE_1	; forward to SA_LINE_1 if so.
 
-; else all possibilities have been considered and nothing must follow.
+					; else all possibilities have been considered and nothing must follow.
 
 		CALL	L1BEE		; routine CHECK-END
 
-; continue in run-time to save basic without auto-start.
+					; continue in run-time to save basic without auto-start.
 
 		LD	(IX+$0E),$80	; place high line number in descriptor to
 					; disable auto-start.
-		JR	L073A		; forward to SA-TYPE-0 to save program.
+		JR	SA_TYPE_0	; forward to SA_TYPE_0 to save program.
 
 ; ---
 ; the branch was here to consider auto-start.
 
-;; SA-LINE-1
-L0723	LD	A,(T_ADDR)	; fetch command from T_ADDR
+;; $0723
+SA_LINE_1:	LD	A,(T_ADDR)	; fetch command from T_ADDR
 		AND	A		; test for SAVE.
-		JP	NZ,L1C8A		; jump forward to REPORT-C with anything else.
-					; 'Nonsense in basic'
-
-; 
+		JP	NZ,L1C8A	; jump forward to REPORT-C with anything else.
+					; 'Nonsense in basic' 
 
 		RST	20H		; NEXT_CHAR
 		CALL	L1C82		; routine EXPT-1NUM checks for numeric
@@ -2155,49 +2153,49 @@ L0723	LD	A,(T_ADDR)	; fetch command from T_ADDR
 		LD	(IX+$0D),C	; place the auto-start
 		LD	(IX+$0E),B	; line number in the descriptor.
 
-; Note. this isn't checked, but is subsequently handled by the system.
-; If the user typed 40000 instead of 4000 then it won't auto-start
-; at line 4000, or indeed, at all.
+					; Note. this isn't checked, but is subsequently handled by the system.
+					; If the user typed 40000 instead of 4000 then it won't auto-start
+					; at line 4000, or indeed, at all.
 
-; continue to save program and any variables.
+					; continue to save program and any variables.
 
-;; SA-TYPE-0
-L073A	LD	(IX+$00),$00	; place type zero - program in descriptor.
-		LD	HL,($5C59)	; fetch E_LINE to HL.
-		LD	DE,($5C53)	; fetch PROG to DE.
+;; $073A
+SA_TYPE_0:	LD	(IX+$00),$00	; place type zero - program in descriptor.
+		LD	HL,(E_LINE)	; fetch E_LINE to HL.
+		LD	DE,(PROG)	; fetch PROG to DE.
 		SCF			; set carry flag to calculate from end of
 					; variables E_LINE -1.
 		SBC	HL,DE		; subtract to give total length.
 
 		LD	(IX+$0B),L	; place total length
 		LD	(IX+$0C),H	; in descriptor.
-		LD	HL,($5C4B)	; load HL from system variable VARS
+		LD	HL,(VARS)	; load HL from system variable VARS
 		SBC	HL,DE		; subtract to give program length.
 		LD	(IX+$0F),L	; place length of program
 		LD	(IX+$10),H	; in the descriptor.
 		EX	DE,HL		; start to HL, length to DE.
 
-;; SA-ALL
-L075A	LD	A,(T_ADDR)	; fetch command from T_ADDR
+;; $075A
+SA_ALL:		LD	A,(T_ADDR)	; fetch command from T_ADDR
 		AND	A		; test for zero - SAVE.
-		JP	Z,L0970		; jump forward to SA-CONTRL with SAVE  ->
+		JP	Z,SA_CONTRL	; jump forward to SA_CONTRL with SAVE  ->
 
 ; ---
 ; continue with LOAD, MERGE and VERIFY.
 
 		PUSH	HL		; save start.
-		LD	BC,$0011		; prepare to add seventeen
+		LD	BC,$0011	; prepare to add seventeen
 		ADD	IX,BC		; to point IX at second descriptor.
 
-;; LD-LOOK-H
-L0767	PUSH	IX		; save IX
-		LD	DE,$0011		; seventeen bytes
+;; $0767
+LD_LOOK_H:	PUSH	IX		; save IX
+		LD	DE,$0011	; seventeen bytes
 		XOR	A		; reset zero flag
 		SCF			; set carry flag
-		CALL	LD_BYTES		; routine LD_BYTES loads a header from tape
+		CALL	LD_BYTES	; routine LD_BYTES loads a header from tape
 					; to second descriptor.
 		POP	IX		; restore IX.
-		JR	NC,L0767		; loop back to LD-LOOK-H until header found.
+		JR	NC,LD_LOOK_H	; loop back to LD_LOOK_H until header found.
 
 		LD	A,$FE		; select system channel 'S'
 		CALL	L1601		; routine CHAN-OPEN opens it.
@@ -2208,19 +2206,19 @@ L0767	PUSH	IX		; save IX
 					; a default startpoint.
 
 		LD	A,(IX+$00)	; fetch loaded header type to A
-		CP	(IX-$11)		; compare with expected type.
-		JR	NZ,L078A		; forward to LD-TYPE with mis-match.
+		CP	(IX-$11)	; compare with expected type.
+		JR	NZ,LD_TYPE	; forward to LD_TYPE with mis-match.
 
 		LD	C,$F6		; set C to minus ten - will count characters
 					; up to zero.
 
-;; LD-TYPE
-L078A	CP	$04		; check if type in acceptable range 0 - 3.
-		JR	NC,L0767		; back to LD-LOOK-H with 4 and over.
+;; $078A
+LD_TYPE:	CP	$04		; check if type in acceptable range 0 - 3.
+		JR	NC,LD_LOOK_H	; back to LD_LOOK_H with 4 and over.
 
-; else A indicates type 0-3.
+					; else A indicates type 0-3.
 
-		LD	DE,L09C0		; address base of last 4 tape messages
+		LD	DE,TAPE_MSGS2	; address base of last 4 tape messages
 		PUSH	BC		; save BC
 		CALL	L0C0A		; routine PO-MSG outputs relevant message.
 					; Note. all messages have a leading newline.
@@ -2235,7 +2233,7 @@ L078A	CP	$04		; check if type in acceptable range 0 - 3.
 
 		LD	A,(HL)		; fetch first character and test for 
 		INC	A		; value 255.
-		JR	NZ,L07A6		; forward to LD-NAME if not the wildcard.
+		JR	NZ,LD_NAME	; forward to LD_NAME if not the wildcard.
 
 ; but if it is the wildcard, then add ten to C which is minus ten for a type
 ; match or -128 for a type mismatch. Although characters have to be counted
@@ -2248,47 +2246,47 @@ L078A	CP	$04		; check if type in acceptable range 0 - 3.
 ; At this point we have either a type mismatch, a wildcard match or ten
 ; characters to be counted. The characters must be shown on the screen.
 
-;; LD-NAME
-L07A6	INC	DE		; address next input character
+;; $07A6
+LD_NAME:	INC	DE		; address next input character
 		LD	A,(DE)		; fetch character
 		CP	(HL)		; compare to expected
 		INC	HL		; address next expected character
-		JR	NZ,L07AD		; forward to LD-CH-PR with mismatch
+		JR	NZ,LD_CH_PR	; forward to LD_CH_PR with mismatch
 
 		INC	C		; increment matched character count
 
-;; LD-CH-PR
-L07AD	RST	10H		; PRINT_A prints character
-		DJNZ	L07A6		; loop back to LD-NAME for ten characters.
+;; $07AD
+LD_CH_PR:	RST	10H		; PRINT_A prints character
+		DJNZ	LD_NAME		; loop back to LD_NAME for ten characters.
 
-; if ten characters matched and the types previously matched then C will 
-; now hold zero.
+					; if ten characters matched and the types previously matched then C will 
+					; now hold zero.
 
 		BIT	7,C		; test if all matched
-		JR	NZ,L0767		; back to LD-LOOK-H if not
+		JR	NZ,LD_LOOK_H	; back to LD_LOOK_H if not
 
-; else print a terminal carriage return.
+					; else print a terminal carriage return.
 
 		LD	A,$0D		; prepare carriage return.
 		RST	10H		; PRINT_A outputs it.
 
-; The various control routines for LOAD, VERIFY and MERGE are executed 
-; during the one-second gap following the header on tape.
+					; The various control routines for LOAD, VERIFY and MERGE are executed 
+					; during the one-second gap following the header on tape.
 
 		POP	HL		; restore xx
 		LD	A,(IX+$00)	; fetch incoming type 
 		CP	$03		; compare with CODE
-		JR	Z,L07CB		; forward to VR-CONTROL if it is CODE.
+		JR	Z,VR_CONTROL	; forward to VR_CONTROL if it is CODE.
 
-;  type is a program or an array.
+					; type is a program or an array.
 
 		LD	A,(T_ADDR)	; fetch command from T_ADDR
 		DEC	A		; was it LOAD ?
-		JP	Z,L0808		; JUMP forward to LD-CONTRL if so to 
+		JP	Z,LD_CONTRL	; JUMP forward to LD_CONTRL if so to 
 					; load BASIC or variables.
 
 		CP	$02		; was command MERGE ?
-		JP	Z,L08B6		; jump forward to ME-CONTRL if so.
+		JP	Z,ME_CONTRL	; jump forward to ME_CONTRL if so.
 
 ; else continue into VERIFY control routine to verify.
 
@@ -2299,55 +2297,55 @@ L07AD	RST	10H		; PRINT_A prints character
 ; 1) From above to verify a program or array
 ; 2) from earlier with no carry to load or verify code.
 
-;; VR-CONTROL
-L07CB	PUSH	HL		; save pointer to data.
+;; $07CB
+VR_CONTROL:	PUSH	HL		; save pointer to data.
 		LD	L,(IX-$06)	; fetch length of old data 
 		LD	H,(IX-$05)	; to HL.
 		LD	E,(IX+$0B)	; fetch length of new data
 		LD	D,(IX+$0C)	; to DE.
 		LD	A,H		; check length of old
 		OR	L		; for zero.
-		JR	Z,L07E9		; forward to VR-CONT-1 if length unspecified
+		JR	Z,VR_CONT_1	; forward to VR_CONT_1 if length unspecified
 					; e.g LOAD "x" CODE
 
-; as opposed to, say, LOAD 'x' CODE 32768,300.
+					; as opposed to, say, LOAD 'x' CODE 32768,300.
 
 		SBC	HL,DE		; subtract the two lengths.
-		JR	C,L0806		; forward to REPORT-R if the length on tape is 
+		JR	C,REPORT_R	; forward to REPORT_R if the length on tape is 
 					; larger than that specified in command.
 					; 'Tape loading error'
 
-		JR	Z,L07E9		; forward to VR-CONT-1 if lengths match.
+		JR	Z,VR_CONT_1	; forward to VR_CONT_1 if lengths match.
 
-; a length on tape shorter than expected is not allowed for CODE
+					; a length on tape shorter than expected is not allowed for CODE
 
 		LD	A,(IX+$00)	; else fetch type from tape.
 		CP	$03		; is it CODE ?
-		JR	NZ,L0806		; forward to REPORT-R if so
+		JR	NZ,REPORT_R	; forward to REPORT_R if so
 					; 'Tape loading error'
 
-;; VR-CONT-1
-L07E9	POP	HL		; pop pointer to data
+;; $07E9
+VR_CONT_1:	POP	HL		; pop pointer to data
 		LD	A,H		; test for zero
 		OR	L		; e.g. LOAD 'x' CODE
-		JR	NZ,L07F4		; forward to VR-CONT-2 if destination specified.
+		JR	NZ,VR_CONT_2	; forward to VR_CONT_2 if destination specified.
 
 		LD	L,(IX+$0D)	; else use the destination in the header
 		LD	H,(IX+$0E)	; and load code at address saved from.
 
-;; VR-CONT-2
-L07F4	PUSH	HL		; push pointer to start of data block.
+;; $07F4
+VR_CONT_2:	PUSH	HL		; push pointer to start of data block.
 		POP	IX		; transfer to IX.
 		LD	A,(T_ADDR)	; fetch reduced command from T_ADDR
 		CP	$02		; is it VERIFY ?
 		SCF			; prepare a set carry flag
-		JR	NZ,L0800		; skip to VR-CONT-3 if not
+		JR	NZ,VR_CONT_3	; skip to VR_CONT_3 if not
 
 		AND	A		; clear carry flag for VERIFY so that 
 					; data is not loaded.
 
-;; VR-CONT-3
-L0800	LD	A,$FF		; signal data block to be loaded
+;; $0800
+VR_CONT_3:	LD	A,$FF		; signal data block to be loaded
 
 ;------------------
 ; Load a data block
@@ -2356,13 +2354,13 @@ L0800	LD	A,$FF		; signal data block to be loaded
 ; In all cases the accumulator is first set to $FF so the routine could be 
 ; called at the previous instruction.
 
-;; LD-BLOCK
-L0802	CALL	LD_BYTES		; routine LD_BYTES
+;; $0802
+LD_BLOCK:	CALL	LD_BYTES	; routine LD_BYTES
 		RET	C		; return if successful.
 
 
-;; REPORT-R
-L0806	RST	08H		; ERROR_1
+;; $0806
+REPORT_R:	RST	08H		; ERROR_1
 		DEFB	$1A		; Error Report: Tape loading error
 
 ;--------------------
@@ -2370,50 +2368,48 @@ L0806	RST	08H		; ERROR_1
 ;--------------------
 ; This branch is taken when the command is LOAD with type 0, 1 or 2. 
 
-;; LD-CONTRL
-L0808	LD	E,(IX+$0B)	; fetch length of found data block 
+;; $0808
+LD_CONTRL:	LD	E,(IX+$0B)	; fetch length of found data block 
 		LD	D,(IX+$0C)	; from 2nd descriptor.
 		PUSH	HL		; save destination
 		LD	A,H		; test for zero
 		OR	L		;
-		JR	NZ,L0819		; forward if not to LD-CONT-1
+		JR	NZ,LD_CONT_1	; forward if not to LD_CONT_1
 
 		INC	DE		; increase length
 		INC	DE		; for letter name
 		INC	DE		; and 16-bit length
 		EX	DE,HL		; length to HL, 
-		JR	L0825		; forward to LD-CONT-2
+		JR	LD_CONT_2	; forward to LD_CONT_2
 
-; ---
-
-;; LD-CONT-1
-L0819	LD	L,(IX-$06)	; fetch length from 
+;; $0819
+LD_CONT_1:	LD	L,(IX-$06)	; fetch length from 
 		LD	H,(IX-$05)	; the first header.
 		EX	DE,HL		;
 		SCF			; set carry flag
 		SBC	HL,DE		;
-		JR	C,L082E		; to LD-DATA
+		JR	C,LD_DATA	; to LD_DATA
 
-;; LD-CONT-2
-L0825	LD	DE,$0005		; allow overhead of five bytes.
+;; $0825
+LD_CONT_2:	LD	DE,$0005	; allow overhead of five bytes.
 		ADD	HL,DE		; add in the difference in data lengths.
 		LD	B,H		; transfer to
 		LD	C,L		; the BC register pair
 		CALL	L1F05		; routine TEST-ROOM fails if not enough room.
 
-;; LD-DATA
-L082E	POP	HL		; pop destination
+;; $082E
+LD_DATA:	POP	HL		; pop destination
 		LD	A,(IX+$00)	; fetch type 0, 1 or 2.
 		AND	A		; test for program and variables.
-		JR	Z,L0873		; forward if so to LD-PROG
+		JR	Z,LD_PROG	; forward if so to LD_PROG
 
-; the type is a numeric or string array.
+					; the type is a numeric or string array.
 
 		LD	A,H		; test the destination for zero
 		OR	L		; indicating variable does not already exist.
-		JR	Z,L084C		; forward if so to LD-DATA-1
+		JR	Z,LD_DATA_1	; forward if so to LD_DATA_1
 
-; else the destination is the first dimension within the array structure
+					; else the destination is the first dimension within the array structure
 
 		DEC	HL		; address high byte of total length
 		LD	B,(HL)		; transfer to B.
@@ -2430,8 +2426,8 @@ L082E	POP	HL		; pop destination
 		LD	IX,(X_PTR)	; reload IX from X_PTR which will have been
 					; adjusted down by POINTERS routine.
 
-;; LD-DATA-1
-L084C	LD	HL,($5C59)	; address E_LINE
+;; $084C
+LD_DATA_1:	LD	HL,(E_LINE)	; address E_LINE
 		DEC	HL		; now point to the $80 variables end-marker.
 		LD	C,(IX+$0B)	; fetch new data length 
 		LD	B,(IX+$0C)	; from 2nd header.
@@ -2459,14 +2455,14 @@ L084C	LD	HL,($5C59)	; address E_LINE
 		POP	IX		; to IX register pair.
 		SCF			; set carry flag indicating load not verify.
 		LD	A,$FF		; signal data not header.
-		JP	L0802		; JUMP back to LD-BLOCK
+		JP	LD_BLOCK	; JUMP back to LD_BLOCK
 
 ; -----------------
 ; the branch is here when a program as opposed to an array is to be loaded.
 
-;; LD-PROG
-L0873	EX	DE,HL		; transfer dest to DE.
-		LD	HL,($5C59)	; address E_LINE
+;; $0873
+LD_PROG:	EX	DE,HL		; transfer dest to DE.
+		LD	HL,(E_LINE)	; address E_LINE
 		DEC	HL		; now variables end-marker.
 		LD	(X_PTR),IX	; place the IX header pointer in X_PTR
 		LD	C,(IX+$0B)	; get new length
@@ -2487,23 +2483,23 @@ L0873	EX	DE,HL		; transfer dest to DE.
 		LD	C,(IX+$0F)	; fetch length of BASIC on tape
 		LD	B,(IX+$10)	; from 2nd descriptor
 		ADD	HL,BC		; add to address the start of variables.
-		LD	($5C4B),HL	; set system variable VARS
+		LD	(VARS),HL	; set system variable VARS
 
 		LD	H,(IX+$0E)	; fetch high byte of autostart line number.
 		LD	A,H		; transfer to A
 		AND	$C0		; test if greater than $3F.
-		JR	NZ,L08AD		; forward to LD-PROG-1 if so with no autostart.
+		JR	NZ,LD_PROG_1	; forward to LD_PROG_1 if so with no autostart.
 
 		LD	L,(IX+$0D)	; else fetch the low byte.
 		LD	($5C42),HL	; set sytem variable to line number NEWPPC
 		LD	(IY+$0A),$00	; set statement NSPPC to zero.
 
-;; LD-PROG-1
-L08AD	POP	DE		; ** pop the length
+;; $08AD
+LD_PROG_1:	POP	DE		; ** pop the length
 		POP	IX		; * and start.
 		SCF			; set carry flag
 		LD	A,$FF		; signal data as opposed to a header.
-		JP	L0802		; jump back to LD-BLOCK
+		JP	LD_BLOCK	; jump back to LD_BLOCK
 
 ;---------------------
 ; Handle MERGE control
@@ -2511,15 +2507,15 @@ L08AD	POP	DE		; ** pop the length
 ; the branch was here to merge a program and it's variables or an array.
 ;
 
-;; ME-CONTRL
-L08B6	LD	C,(IX+$0B)	; fetch length
+;; $08B6
+ME_CONTRL:	LD	C,(IX+$0B)	; fetch length
 		LD	B,(IX+$0C)	; of data block on tape.
 		PUSH	BC		; save it.
 		INC	BC		; one for the pot.
 
 		RST	30H		; BC_SPACES creates room in workspace.
 					; HL addresses last new location.
-		LD	(HL),$80		; place end-marker at end.
+		LD	(HL),$80	; place end-marker at end.
 		EX	DE,HL		; transfer first location to HL.
 		POP	DE		; restore length to DE.
 		PUSH	HL		; save start.
@@ -2528,34 +2524,34 @@ L08B6	LD	C,(IX+$0B)	; fetch length
 		POP	IX		; to IX register.
 		SCF			; set carry flag to load data on tape.
 		LD	A,$FF		; signal data not a header.
-		CALL	L0802		; routine LD-BLOCK loads to workspace.
+		CALL	LD_BLOCK	; routine LD_BLOCK loads to workspace.
 		POP	HL		; restore first location in workspace to HL.
-		LD	DE,($5C53)	; set DE from system variable PROG.
+		LD	DE,(PROG)	; set DE from system variable PROG.
 
-; now enter a loop to merge the data block in workspace with the program and 
-; variables. 
+					; now enter a loop to merge the data block in workspace with the program and 
+					; variables. 
 
-;; ME-NEW-LP
-L08D2	LD	A,(HL)		; fetch next byte from workspace.
+;; $08D2
+ME_NEW_LP:	LD	A,(HL)		; fetch next byte from workspace.
 		AND	$C0		; compare with $3F.
-		JR	NZ,L08F0		; forward to ME-VAR-LP if a variable.
+		JR	NZ,ME_VAR_LP	; forward to ME_VAR_LP if a variable.
 
-; continue when HL addresses a Basic line number.
+					; continue when HL addresses a Basic line number.
 
-;; ME-OLD-LP
-L08D7	LD	A,(DE)		; fetch high byte from program area.
+;; $08D7
+ME_OLD_LP:	LD	A,(DE)		; fetch high byte from program area.
 		INC	DE		; bump prog address.
 		CP	(HL)		; compare with that in workspace.
 		INC	HL		; bump workspace address.
-		JR	NZ,L08DF		; forward to ME-OLD-L1 if high bytes don't match
+		JR	NZ,ME_OLD_L1	; forward to ME_OLD_L1 if high bytes don't match
 
 		LD	A,(DE)		; fetch the low byte of program line number.
 		CP	(HL)		; compare with that in workspace.
 
-;; ME-OLD-L1
-L08DF	DEC	DE		; point to start of
+;; $08DF
+ME_OLD_L1:	DEC	DE		; point to start of
 		DEC	HL		; respective lines again.
-		JR	NC,L08EB		; forward to ME-NEW-L2 if line number in 
+		JR	NC,ME_NEW_L2	; forward to ME_NEW_L2 if line number in 
 					; workspace is less than or equal to current
 					; program line as has to be added to program.
 
@@ -2563,100 +2559,100 @@ L08DF	DEC	DE		; point to start of
 		EX	DE,HL		; transfer prog pointer to HL
 		CALL	L19B8		; routine NEXT-ONE finds next line in DE.
 		POP	HL		; restore workspace pointer
-		JR	L08D7		; back to ME-OLD-LP until destination position 
+		JR	ME_OLD_LP	; back to ME_OLD_LP until destination position 
 					; in program area found.
 
 ; ---
 ; the branch was here with an insertion or replacement point.
 
-;; ME-NEW-L2
-L08EB	CALL	L092C		; routine ME-ENTER enters the line
-		JR	L08D2		; loop back to ME-NEW-LP.
+;; $08EB:
+ME_NEW_L2:	CALL	ME_ENTER	; routine ME_ENTER enters the line
+		JR	ME_NEW_LP	; loop back to ME_NEW_LP.
 
 ; ---
 ; the branch was here when the location in workspace held a variable.
 
-;; ME-VAR-LP
-L08F0	LD	A,(HL)		; fetch first byte of workspace variable.
+;; $08F0
+ME_VAR_LP:	LD	A,(HL)		; fetch first byte of workspace variable.
 		LD	C,A		; copy to C also.
 		CP	$80		; is it the end-marker ?
 		RET	Z		; return if so as complete.  >>>>>
 
 		PUSH	HL		; save workspace area pointer.
-		LD	HL,($5C4B)	; load HL with VARS - start of variables area.
+		LD	HL,(VARS)	; load HL with VARS - start of variables area.
 
-;; ME-OLD-VP
-L08F9	LD	A,(HL)		; fetch first byte.
+;; $08F9
+ME_OLD_VP:	LD	A,(HL)		; fetch first byte.
 		CP	$80		; is it the end-marker ?
-		JR	Z,L0923		; forward if so to ME-VAR-L2 to add
+		JR	Z,ME_VAR_L2	; forward if so to ME_VAR_L2 to add
 					; variable at end of variables area.
 
 		CP	C		; compare with variable in workspace area.
-		JR	Z,L0909		; forward to ME-OLD-V2 if a match to replace.
+		JR	Z,ME_OLD_V2	; forward to ME_OLD_V2 if a match to replace.
 
-; else entire variables area has to be searched.
+					; else entire variables area has to be searched.
 
-;; ME-OLD-V1
-L0901	PUSH	BC		; save character in C.
+;; $0901
+ME_OLD_V1:	PUSH	BC		; save character in C.
 		CALL	L19B8		; routine NEXT-ONE gets following variable 
 					; address in DE.
 		POP	BC		; restore character in C
 		EX	DE,HL		; transfer next address to HL.
-		JR	L08F9		; loop back to ME-OLD-VP
+		JR	ME_OLD_VP	; loop back to ME_OLD_VP
 
 ; --- 
 ; the branch was here when first characters of name matched. 
 
-;; ME-OLD-V2
-L0909	AND	$E0		; keep bits 11100000
-		CP	$A0		; compare	10100000 - a long-named variable.
+;; $0909
+ME_OLD_V2:	AND	$E0		; keep bits 11100000
+		CP	$A0		; compare   10100000 - a long-named variable.
 
-		JR	NZ,L0921		; forward to ME-VAR-L1 if just one-character.
+		JR	NZ,ME_VAR_L1	; forward to ME_VAR_L1 if just one-character.
 
-; but long-named variables have to be matched character by character.
+					; but long-named variables have to be matched character by character.
 
 		POP	DE		; fetch workspace 1st character pointer
 		PUSH	DE		; and save it on the stack again.
 		PUSH	HL		; save variables area pointer on stack.
 
-;; ME-OLD-V3
-L0912	INC	HL		; address next character in vars area.
+;; $0912
+ME_OLD_V3:	INC	HL		; address next character in vars area.
 		INC	DE		; address next character in workspace area.
 		LD	A,(DE)		; fetch workspace character.
 		CP	(HL)		; compare to variables character.
-		JR	NZ,L091E		; forward to ME-OLD-V4 with a mismatch.
+		JR	NZ,ME_OLD_V4	; forward to ME_OLD_V4 with a mismatch.
 
 		RLA			; test if the terminal inverted character.
-		JR	NC,L0912		; loop back to ME-OLD-V3 if more to test.
+		JR	NC,ME_OLD_V3	; loop back to ME_OLD_V3 if more to test.
 
-; otherwise the long name matches in it's entirety.
+					; otherwise the long name matches in it's entirety.
 
 		POP	HL		; restore pointer to first character of variable
-		JR	L0921		; forward to ME-VAR-L1
+		JR	ME_VAR_L1	; forward to ME_VAR_L1
 
 ; ---
 ; the branch is here when two characters don't match
 
-;; ME-OLD-V4
-L091E	POP	HL		; restore the prog/vars pointer.
-		JR	L0901		; back to ME-OLD-V1 to resume search.
+;; $091E
+ME_OLD_V4:	POP	HL		; restore the prog/vars pointer.
+		JR	ME_OLD_V1	; back to ME_OLD_V1 to resume search.
 
 ; ---
 ; branch here when variable is to replace an existing one
 
-;; ME-VAR-L1
-L0921	LD	A,$FF		; indicate a replacement.
+;; $0921
+ME_VAR_L1:	LD	A,$FF		; indicate a replacement.
 
-; this entry point is when A holds $80 indicating a new variable.
+					; this entry point is when A holds $80 indicating a new variable.
 
-;; ME-VAR-L2
-L0923	POP	DE		; pop workspace pointer.
+;; $0923
+ME_VAR_L2:	POP	DE		; pop workspace pointer.
 		EX	DE,HL		; now make HL workspace pointer, DE vars pointer
 		INC	A		; zero flag set if replacement.
 		SCF			; set carry flag indicating a variable not a
 					; program line.
-		CALL	L092C		; routine ME-ENTER copies variable in.
-		JR	L08F0		; loop back to ME-VAR-LP
+		CALL	ME_ENTER	; routine ME_ENTER copies variable in.
+		JR	ME_VAR_LP	; loop back to ME_VAR_LP
 
 ;-------------------------
 ; Merge a Line or Variable
@@ -2664,10 +2660,10 @@ L0923	POP	DE		; pop workspace pointer.
 ; A Basic line or variable is inserted at the current point. If the line numbers
 ; or variable names match (zero flag set) then a replacement takes place.
 
-;; ME-ENTER
-L092C	JR	NZ,L093E		; forward to ME-ENT-1 for insertion only.
+;; $092C
+ME_ENTER:	JR	NZ,ME_ENT_1	; forward to ME_ENT_1 for insertion only.
 
-; but the program line or variable matches so old one is reclaimed.
+					; but the program line or variable matches so old one is reclaimed.
 
 		EX	AF,AF'		; save flag??
 		LD	(X_PTR),HL	; preserve workspace pointer in dynamic X_PTR
@@ -2679,37 +2675,37 @@ L092C	JR	NZ,L093E		; forward to ME-ENT-1 for insertion only.
 		LD	HL,(X_PTR)	; fetch adjusted workspace pointer from X_PTR
 		EX	AF,AF'		; restore flags.
 
-; now the new line or variable is entered.
+					; now the new line or variable is entered.
 
-;; ME-ENT-1
-L093E	EX	AF,AF'		; save or re-save flags.
+;; $093E
+ME_ENT_1:	EX	AF,AF'		; save or re-save flags.
 		PUSH	DE		; save dest pointer in prog/vars area.
 		CALL	L19B8		; routine NEXT-ONE finds next in workspace.
 					; gets next in DE, difference in BC.
 					; prev addr in HL
 		LD	(X_PTR),HL	; store pointer in X_PTR
-		LD	HL,($5C53)	; load HL from system variable PROG
+		LD	HL,(PROG)	; load HL from system variable PROG
 		EX	(SP),HL		; swap with prog/vars pointer on stack. 
 		PUSH	BC		; ** save length of new program line/variable.
 		EX	AF,AF'		; fetch flags back.
-		JR	C,L0955		; skip to ME-ENT-2 if variable
+		JR	C,ME_ENT_2	; skip to ME_ENT_2 if variable
 
 
 		DEC	HL		; address location before pointer
 		CALL	L1655		; routine MAKE-ROOM creates room for basic line
 		INC	HL		; address next.
-		JR	L0958		; forward to ME-ENT-3
+		JR	ME_ENT_3	; forward to ME_ENT_3
 
-;; ME-ENT-2
-L0955	CALL	L1655		; routine MAKE-ROOM creates room for variable.
+;; $0955
+ME_ENT_2:	CALL	L1655		; routine MAKE-ROOM creates room for variable.
 
-;; ME-ENT-3
-L0958	INC	HL		; address next?
+;; $0958
+ME_ENT_3:	INC	HL		; address next?
 
 		POP	BC		; ** pop length
 		POP	DE		; * pop value for PROG which may have been 
 					; altered by POINTERS if first line.
-		LD	($5C53),DE	; set PROG to original value.
+		LD	(PROG),DE	; set PROG to original value.
 		LD	DE,(X_PTR)	; fetch adjusted workspace pointer from X_PTR
 		PUSH	BC		; save length
 		PUSH	DE		; and workspace pointer
@@ -2735,14 +2731,14 @@ L0958	INC	HL		; address next?
 ; HL points to start of data.
 ; IX points to start of descriptor.
 
-;; SA-CONTRL
-L0970	PUSH	HL		; save start of data
+;; $0970
+SA_CONTRL:	PUSH	HL		; save start of data
 
 		LD	A,$FD		; select system channel 'S'
 		CALL	L1601		; routine CHAN-OPEN
 
 		XOR	A		; clear to address table directly
-		LD	DE,L09A1		; address: tape-msgs
+		LD	DE,TAPE_MSGS	; address: TAPE_MSGS
 		CALL	L0C0A		; routine PO-MSG -
 					; 'Start tape then press any key.'
 
@@ -2751,17 +2747,17 @@ L0970	PUSH	HL		; save start of data
 		CALL	L15D4		; routine WAIT-KEY
 
 		PUSH	IX		; save pointer to descriptor.
-		LD	DE,$0011		; there are seventeen bytes.
+		LD	DE,$0011	; there are seventeen bytes.
 		XOR	A		; signal a header.
-		CALL	SA_BYTES		; routine SA_BYTES
+		CALL	SA_BYTES	; routine SA_BYTES
 
 		POP	IX		; restore descriptor pointer.
 
 		LD	B,$32		; wait for a second - 50 interrupts.
 
-;; SA-1-SEC
-L0991	HALT			; wait for interrupt
-		DJNZ	L0991		; back to SA-1-SEC until pause complete.
+;; $0991
+SA_1_SEC:	HALT			; wait for interrupt
+		DJNZ	SA_1_SEC	; back to SA_1_SEC until pause complete.
 
 		LD	E,(IX+$0B)	; fetch length of bytes from the
 		LD	D,(IX+$0C)	; descriptor.
@@ -2776,26 +2772,26 @@ L0991	HALT			; wait for interrupt
 ; Originally IX addresses first location and only one header is required
 ; when saving.
 ;
-;	OLD	NEW		PROG	DATA  DATA  CODE 
-;	HEADER  HEADER		num	chr		NOTES.
-;	------  ------	----	----  ----  ----	-----------------------------
-;	IX-$11  IX+$00	0	1	2	3	Type.
-;	IX-$10  IX+$01	x	x	x	x	F  ($FF if filename is null).
-;	IX-$0F  IX+$02	x	x	x	x	i
-;	IX-$0E  IX+$03	x	x	x	x	l
-;	IX-$0D  IX+$04	x	x	x	x	e
-;	IX-$0C  IX+$05	x	x	x	x	n
-;	IX-$0B  IX+$06	x	x	x	x	a
-;	IX-$0A  IX+$07	x	x	x	x	m
-;	IX-$09  IX+$08	x	x	x	x	e
-;	IX-$08  IX+$09	x	x	x	x	.
-;	IX-$07  IX+$0A	x	x	x	x	(terminal spaces).
-;	IX-$06  IX+$0B	lo	lo	lo	lo	Total  
-;	IX-$05  IX+$0C	hi	hi	hi	hi	Length of datablock.
-;	IX-$04  IX+$0D	Auto	-	-	Start  Various
-;	IX-$03  IX+$0E	Start  a-z	a-z	addr	($80 if no autostart).
-;	IX-$02  IX+$0F	lo	-	-	-	Length of Program 
-;	IX-$01  IX+$10	hi	-	-	-	only i.e. without variables.
+;   OLD     NEW         PROG   DATA  DATA  CODE 
+;   HEADER  HEADER             num   chr          NOTES.
+;   ------  ------      ----   ----  ----  ----   -----------------------------
+;   IX-$11  IX+$00      0      1     2     3      Type.
+;   IX-$10  IX+$01      x      x     x     x      F  ($FF if filename is null).
+;   IX-$0F  IX+$02      x      x     x     x      i
+;   IX-$0E  IX+$03      x      x     x     x      l
+;   IX-$0D  IX+$04      x      x     x     x      e
+;   IX-$0C  IX+$05      x      x     x     x      n
+;   IX-$0B  IX+$06      x      x     x     x      a
+;   IX-$0A  IX+$07      x      x     x     x      m
+;   IX-$09  IX+$08      x      x     x     x      e
+;   IX-$08  IX+$09      x      x     x     x      .
+;   IX-$07  IX+$0A      x      x     x     x      (terminal spaces).
+;   IX-$06  IX+$0B      lo     lo    lo    lo     Total  
+;   IX-$05  IX+$0C      hi     hi    hi    hi     Length of datablock.
+;   IX-$04  IX+$0D      Auto   -     -     Start  Various
+;   IX-$03  IX+$0E      Start  a-z   a-z   addr   ($80 if no autostart).
+;   IX-$02  IX+$0F      lo     -     -     -      Length of Program 
+;   IX-$01  IX+$10      hi     -     -     -      only i.e. without variables.
 ;
 
 
@@ -2805,10 +2801,10 @@ L0991	HALT			; wait for interrupt
 ; The last-character-inverted Cassette messages.
 ; Starts with normal initial step-over byte.
 
-;; tape-msgs
-L09A1	DEFB	$80
+;; $09A1
+TAPE_MSGS:	DEFB	$80
 		DEFB	"Start tape, then press any key"
-L09C0	DEFB	'.'+$80
+TAPE_MSGS2:	DEFB	'.'+$80
 		DEFB	$0D
 		DEFB	"Program:",' '+$80
 		DEFB	$0D
@@ -4462,7 +4458,7 @@ L0FA9	LD	HL,($5C49)	; fetch E_PPC the last line number entered.
 		CALL	L1855		; routine OUT-LINE outputs the BASIC line
 					; to the editing area.
 		INC	(IY+$0F)		; restore E_PPC_lo to the previous value.
-		LD	HL,($5C59)	; address E_LINE in editing area.
+		LD	HL,(E_LINE)	; address E_LINE in editing area.
 		INC	HL		; advance
 		INC	HL		; past space
 		INC	HL		; and digit characters
@@ -4988,7 +4984,7 @@ L1190	LD	HL,(WORKSP)	; fetch WORKSP to HL.
 ; this routine is called with carry set and exits at a conditional return.
 
 ;; SET-DE
-L1195	LD	DE,($5C59)	; fetch E_LINE to DE
+L1195	LD	DE,(E_LINE)	; fetch E_LINE to DE
 		BIT	5,(IY+$37)	; test FLAGX  - Input Mode ?
 		RET	Z		; return now if in editing mode
 
@@ -5206,11 +5202,11 @@ L1219	LD	($5CB2),HL	; set system variable RAMTOP to HL.
 		LD	($5C57),HL	; set DATADD to location before program area.
 		INC	HL		; increment again.
 
-		LD	($5C53),HL	; set PROG the location where BASIC starts.
-		LD	($5C4B),HL	; set VARS to same location with a
+		LD	(PROG),HL	; set PROG the location where BASIC starts.
+		LD	(VARS),HL	; set VARS to same location with a
 		LD	(HL),$80		; variables end-marker.
 		INC	HL		; advance address.
-		LD	($5C59),HL	; set E_LINE, where the edit line
+		LD	(E_LINE),HL	; set E_LINE, where the edit line
 					; will be created.
 					; Note. it is not strictly necessary to
 					; execute the next fifteen bytes of code
@@ -5296,7 +5292,7 @@ L12AC	LD	A,$00		; select channel 'K' the keyboard
 
 ;
 
-		LD	HL,($5C59)	; an editing error so address E_LINE.
+		LD	HL,(E_LINE)	; an editing error so address E_LINE.
 		CALL	L11A7		; routine REMOVE-FP removes the hidden
 					; floating-point forms.
 		LD	(IY+$00),$FF	; system variable ERR_NR is reset to 'OK'.
@@ -5307,7 +5303,7 @@ L12AC	LD	A,$00		; select channel 'K' the keyboard
 ; the branch was here if syntax has passed test.
 
 ;; MAIN-3
-L12CF	LD	HL,($5C59)	; fetch the edit line address from E_LINE.
+L12CF	LD	HL,(E_LINE)	; fetch the edit line address from E_LINE.
 		LD	(CH_ADD),HL	; system variable CH_ADD is set to first
 					; character of edit line.
 					; Note. the above two instructions are a little
@@ -5568,12 +5564,12 @@ L157D	POP	BC		; retrieve the length of the new line.
 		INC	BC		; (two bytes).
 		DEC	HL		; HL points to location before the destination
 
-		LD	DE,($5C53)	; fetch the address of PROG
+		LD	DE,(PROG)	; fetch the address of PROG
 		PUSH	DE		; and save it on the stack
 		CALL	L1655		; routine MAKE-ROOM creates BC spaces in
 					; program area and updates pointers.
 		POP	HL		; restore old program pointer.
-		LD	($5C53),HL	; and put back in PROG as it may have been
+		LD	(PROG),HL	; and put back in PROG as it may have been
 					; altered by the POINTERS routine.
 
 		POP	BC		; retrieve BASIC length
@@ -5898,7 +5894,7 @@ L1655	PUSH	HL		; save the address pointer.
 ;; POINTERS
 L1664	PUSH	AF		; preserve accumulator.
 		PUSH	HL		; put pos pointer on stack.
-		LD	HL,$5C4B		; address VARS the first of the
+		LD	HL,VARS		; address VARS the first of the
 		LD	A,$0E		; fourteen variables to consider.
 
 ;; PTR-NEXT
@@ -6007,7 +6003,7 @@ L169E	LD	HL,($5C63)	; STKBOT first location of calculator stack
 ; displaying an error.
 
 ;; SET-MIN
-L16B0	LD	HL,($5C59)	; fetch E_LINE
+L16B0	LD	HL,(E_LINE)	; fetch E_LINE
 		LD	(HL),$0D		; insert carriage return
 		LD	($5C5B),HL	; make K_CUR keyboard cursor point there.
 		INC	HL		; next location
@@ -6046,7 +6042,7 @@ L16C5	LD	HL,($5C63)	; fetch STKBOT value
 ; On entry, HL must point to the end of the something to be deleted.
 
 ;; REC-EDIT
-L16D4	LD	DE,($5C59)	; fetch start of edit line from E_LINE.
+L16D4	LD	DE,(E_LINE)	; fetch start of edit line from E_LINE.
 		JP	L19E5		; jump forward to RECLAIM-1.
 
 ;---------------------------
@@ -6990,7 +6986,7 @@ L196C	RST	10H		; PRINT_A vectors the character to
 
 ;; LINE-ADDR
 L196E	PUSH	HL		; save line number in HL register
-		LD	HL,($5C53)	; fetch start of program from PROG
+		LD	HL,(PROG)	; fetch start of program from PROG
 		LD	D,H		; transfer address to
 		LD	E,L		; the DE register pair.
 
@@ -7247,7 +7243,7 @@ L19E8	PUSH	BC		;
 ; arises whereby the Spectrum becomes locked with no means of reclaiming space.
 
 ;; E-LINE-NO
-L19FB	LD	HL,($5C59)	; load HL from system variable E_LINE.
+L19FB	LD	HL,(E_LINE)	; load HL from system variable E_LINE.
 
 		DEC	HL		; decrease so that NEXT_CHAR can be used
 					; without skipping the first digit.
@@ -7853,7 +7849,7 @@ L1B8A	LD	HL,$FFFE		; The dummy value minus two
 		LD	($5C45),HL	; is set/reset as line number in PPC.
 		LD	HL,(WORKSP)	; point to end of line + 1 - WORKSP.
 		DEC	HL		; now point to $80 end-marker.
-		LD	DE,($5C59)	; address the start of line E_LINE.
+		LD	DE,(E_LINE)	; address the start of line E_LINE.
 		DEC	DE		; now location before - for GET_CHAR.
 		LD	A,($5C44)	; load statement to A from NSPPC.
 		JR	L1BD1		; forward to NEXT-LINE.
@@ -8969,8 +8965,8 @@ L1EAF	LD	A,B		; test for
 ;; CLEAR-1
 L1EB7	PUSH	BC		; save ramtop value.
 
-		LD	DE,($5C4B)	; fetch VARS
-		LD	HL,($5C59)	; fetch E_LINE
+		LD	DE,(VARS)	; fetch VARS
+		LD	HL,(E_LINE)	; fetch E_LINE
 		DEC	HL		; adjust to point at variables end-marker.
 		CALL	L19E5		; routine RECLAIM-1 reclaims the space used by
 					; the variables.
@@ -11891,7 +11887,7 @@ L27F7	RST	20H		; NEXT_CHAR fetches name
 ;; SF-ARGMT1
 L2802	RST	20H		; NEXT_CHAR advances to start of argument
 		PUSH	HL		; save address
-		LD	HL,($5C53)	; fetch start of program area from PROG
+		LD	HL,(PROG)	; fetch start of program area from PROG
 		DEC	HL		; the search starting point is the previous
 					; location.
 
@@ -12167,7 +12163,7 @@ L28EF	LD	B,C		; save flags in B
 ; but in runtime search for the variable.
 
 ;; V-RUN
-L28FD	LD	HL,($5C4B)	; set HL to start of variables from VARS
+L28FD	LD	HL,(VARS)	; set HL to start of variables from VARS
 
 ;; V-EACH
 L2900	LD	A,(HL)		; get first character
@@ -12993,7 +12989,7 @@ L2B1F	CALL	L2C88		; routine ALPHANUM sets carry if alphanumeric
 
 ;; L-SPACES
 L2B29	LD	A,C		; save length lo in A.
-		LD	HL,($5C59)	; fetch E_LINE to HL.
+		LD	HL,(E_LINE)	; fetch E_LINE to HL.
 		DEC	HL		; point to location before, the variables
 					; end-marker.
 		CALL	L1655		; routine MAKE-ROOM creates BC spaces
@@ -13196,7 +13192,7 @@ L2BC6	PUSH	AF		; save first character and mask.
 		INC	BC		; extra byte for letter.
 		INC	BC		; two bytes
 		INC	BC		; for the length of string.
-		LD	HL,($5C59)	; address E_LINE.
+		LD	HL,(E_LINE)	; address E_LINE.
 		DEC	HL		; now end of VARS area.
 		CALL	L1655		; routine MAKE-ROOM makes room for string.
 					; updating pointers including DEST.
@@ -13216,7 +13212,7 @@ L2BC6	PUSH	AF		; save first character and mask.
 ;; L-FIRST
 L2BEA	DEC	HL		; address variable name
 		LD	(HL),A		; and insert character.
-		LD	HL,($5C59)	; load HL with E_LINE.
+		LD	HL,(E_LINE)	; load HL with E_LINE.
 		DEC	HL		; now end of VARS area.
 		RET			; return
 
@@ -13354,7 +13350,7 @@ L2C2E	RST	20H		; NEXT_CHAR
 		PUSH	HL		; save total space
 		LD	B,H		; total space
 		LD	C,L		; to BC
-		LD	HL,($5C59)	; address E_LINE - first location after
+		LD	HL,(E_LINE)	; address E_LINE - first location after
 					; variables area
 		DEC	HL		; point to location before - the $80 end-marker
 		CALL	L1655		; routine MAKE-ROOM creates the space if
