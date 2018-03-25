@@ -1892,10 +1892,10 @@ SA_BLANK:	LD	(DE),A		; set workspace location to space.
 		AND	A		; test for zero - SAVE.
 		JR	NZ,SA_NULL	; forward to SA_NULL if not the SAVE command.
 
-; but no more than ten characters are allowed for SAVE.
-; The first ten characters of any other command parameter are acceptable.
-; Weird, but necessary, if saving to sectors.
-; Note. the golden rule that there are no restriction on anything is broken.
+					; but no more than ten characters are allowed for SAVE.
+					; The first ten characters of any other command parameter are acceptable.
+					; Weird, but necessary, if saving to sectors.
+					; Note. the golden rule that there are no restriction on anything is broken.
 
 ;; $0642
 REPORT_FA:	RST	08H		; ERROR_1
@@ -2220,7 +2220,7 @@ LD_TYPE:	CP	$04		; check if type in acceptable range 0 - 3.
 
 		LD	DE,TAPE_MSGS2	; address base of last 4 tape messages
 		PUSH	BC		; save BC
-		CALL	L0C0A		; routine PO-MSG outputs relevant message.
+		CALL	PO_MSG		; routine PO_MSG outputs relevant message.
 					; Note. all messages have a leading newline.
 		POP	BC		; restore BC
 
@@ -2235,16 +2235,16 @@ LD_TYPE:	CP	$04		; check if type in acceptable range 0 - 3.
 		INC	A		; value 255.
 		JR	NZ,LD_NAME	; forward to LD_NAME if not the wildcard.
 
-; but if it is the wildcard, then add ten to C which is minus ten for a type
-; match or -128 for a type mismatch. Although characters have to be counted
-; bit 7 of C will not alter from state set here.
+					; but if it is the wildcard, then add ten to C which is minus ten for a type
+					; match or -128 for a type mismatch. Although characters have to be counted
+					; bit 7 of C will not alter from state set here.
 
 		LD	A,C		; transfer $F6 or $80 to A
 		ADD	A,B		; add $0A
 		LD	C,A		; place result, zero or -118, in C.
 
-; At this point we have either a type mismatch, a wildcard match or ten
-; characters to be counted. The characters must be shown on the screen.
+					; At this point we have either a type mismatch, a wildcard match or ten
+					; characters to be counted. The characters must be shown on the screen.
 
 ;; $07A6
 LD_NAME:	INC	DE		; address next input character
@@ -2288,7 +2288,7 @@ LD_CH_PR:	RST	10H		; PRINT_A prints character
 		CP	$02		; was command MERGE ?
 		JP	Z,ME_CONTRL	; jump forward to ME_CONTRL if so.
 
-; else continue into VERIFY control routine to verify.
+					; else continue into VERIFY control routine to verify.
 
 ;----------------------
 ; Handle VERIFY control
@@ -2739,7 +2739,7 @@ SA_CONTRL:	PUSH	HL		; save start of data
 
 		XOR	A		; clear to address table directly
 		LD	DE,TAPE_MSGS	; address: TAPE_MSGS
-		CALL	L0C0A		; routine PO-MSG -
+		CALL	PO_MSG		; routine PO_MSG -
 					; 'Start tape then press any key.'
 
 		SET	5,(IY+$02)	; TV_FLAG  - Signal lower screen requires
@@ -2827,19 +2827,19 @@ TAPE_MSGS2:	DEFB	'.'+$80
 ; subroutine is on two occasions called directly when it is known that
 ; output will definitely be to the lower screen.
 
-;; PRINT-OUT
-L09F4	CALL	L0B03		; routine PO-FETCH fetches print position
+;; $09F4
+PRINT_OUT:	CALL	PO_FETCH	; routine PO_FETCH fetches print position
 					; to HL register pair.
 		CP	$20		; is character a space or higher ?
-		JP	NC,L0AD9		; jump forward to PO-ABLE if so.
+		JP	NC,PO_ABLE	; jump forward to PO_ABLE if so.
 
 		CP	$06		; is character in range 00-05 ?
-		JR	C,L0A69		; to PO-QUEST to print '?' if so.
+		JR	C,PO_QUEST		; to PO_QUEST to print '?' if so.
 
 		CP	$18		; is character in range 24d - 31d ?
-		JR	NC,L0A69		; to PO-QUEST to also print '?' if so.
+		JR	NC,PO_QUEST	; to PO_QUEST to also print '?' if so.
 
-		LD	HL,L0A11 - 6	; $ddress 0A0B - the base address of control
+		LD	HL,CTLCHRTAB - 6; address $0A0B - the base address of control
 					; character table - where zero would be.
 		LD	E,A		; control character 06 - 23d
 		LD	D,$00		; is transferred to DE.
@@ -2849,7 +2849,7 @@ L09F4	CALL	L0B03		; routine PO-FETCH fetches print position
 		LD	E,(HL)		; fetch the offset to routine.
 		ADD	HL,DE		; add to make HL the address.
 		PUSH	HL		; push the address.
-		JP	L0B03		; to PO-FETCH, as the screen/printer position
+		JP	PO_FETCH	; to PO_FETCH, as the screen/printer position
 					; has been disturbed, and indirectly to
 					; routine on stack.
 
@@ -2860,25 +2860,25 @@ L09F4	CALL	L0B03		; routine PO-FETCH fetches print position
 ; is indexed to provide an offset to the handling routine that
 ; follows the table.
 
-;; ctlchrtab
-L0A11	DEFB	L0A5F - $	; 06d offset $4E to Address: PO-COMMA
-		DEFB	L0A69 - $	; 07d offset $57 to Address: PO-QUEST
-		DEFB	L0A23 - $	; 08d offset $10 to Address: PO-BACK-1
-		DEFB	L0A3D - $	; 09d offset $29 to Address: PO-RIGHT
-		DEFB	L0A69 - $	; 10d offset $54 to Address: PO-QUEST
-		DEFB	L0A69 - $	; 11d offset $53 to Address: PO-QUEST
-		DEFB	L0A69 - $	; 12d offset $52 to Address: PO-QUEST
-		DEFB	L0A4F - $	; 13d offset $37 to Address: PO-ENTER
-		DEFB	L0A69 - $	; 14d offset $50 to Address: PO-QUEST
-		DEFB	L0A69 - $	; 15d offset $4F to Address: PO-QUEST
-		DEFB	L0A7A - $	; 16d offset $5F to Address: PO-1-OPER
-		DEFB	L0A7A - $	; 17d offset $5E to Address: PO-1-OPER
-		DEFB	L0A7A - $	; 18d offset $5D to Address: PO-1-OPER
-		DEFB	L0A7A - $	; 19d offset $5C to Address: PO-1-OPER
-		DEFB	L0A7A - $	; 20d offset $5B to Address: PO-1-OPER
-		DEFB	L0A7A - $	; 21d offset $5A to Address: PO-1-OPER
-		DEFB	L0A75 - $	; 22d offset $54 to Address: PO-2-OPER
-		DEFB	L0A75 - $	; 23d offset $53 to Address: PO-2-OPER
+;; CTLCHRTAB
+CTLCHRTAB:	DEFB	PO_COMMA - $	; 06d offset $4E to Address: PO_COMMA
+		DEFB	PO_QUEST - $	; 07d offset $57 to Address: PO_QUEST
+		DEFB	PO_BACK_1 - $	; 08d offset $10 to Address: PO_BACK_1
+		DEFB	PO_RIGHT - $	; 09d offset $29 to Address: PO_RIGHT
+		DEFB	PO_QUEST - $	; 10d offset $54 to Address: PO_QUEST
+		DEFB	PO_QUEST - $	; 11d offset $53 to Address: PO_QUEST
+		DEFB	PO_QUEST - $	; 12d offset $52 to Address: PO_QUEST
+		DEFB	PO_ENTER - $	; 13d offset $37 to Address: PO_ENTER
+		DEFB	PO_QUEST - $	; 14d offset $50 to Address: PO_QUEST
+		DEFB	PO_QUEST - $	; 15d offset $4F to Address: PO_QUEST
+		DEFB	PO_1_OPER - $	; 16d offset $5F to Address: PO_1_OPER
+		DEFB	PO_1_OPER - $	; 17d offset $5E to Address: PO_1_OPER
+		DEFB	PO_1_OPER - $	; 18d offset $5D to Address: PO_1_OPER
+		DEFB	PO_1_OPER - $	; 19d offset $5C to Address: PO_1_OPER
+		DEFB	PO_1_OPER - $	; 20d offset $5B to Address: PO_1_OPER
+		DEFB	PO_1_OPER - $	; 21d offset $5A to Address: PO_1_OPER
+		DEFB	PO_2_OPER - $	; 22d offset $54 to Address: PO_2_OPER
+		DEFB	PO_2_OPER - $	; 23d offset $53 to Address: PO_2_OPER
 
 
 ;--------------------
@@ -2887,14 +2887,14 @@ L0A11	DEFB	L0A5F - $	; 06d offset $4E to Address: PO-COMMA
 ; Backspace and up a line if that action is from the left of screen.
 ; For ZX printer backspace up to first column but not beyond.
 
-;; PO-BACK-1
-L0A23	INC	C		; move left one column.
+;; $0A23
+PO_BACK_1:	INC	C		; move left one column.
 		LD	A,$22		; value $21 is leftmost column.
 		CP	C		; have we passed ?
-		JR	NZ,L0A3A		; to PO-BACK-3 if not and store new position.
+		JR	NZ,PO_BACK_3	; to PO_BACK_3 if not and store new position.
 
 		BIT	1,(IY+$01)	; test FLAGS  - is printer in use ?
-		JR	NZ,L0A38		; to PO-BACK-2 if so, as we are unable to
+		JR	NZ,PO_BACK_2	; to PO_BACK_2 if so, as we are unable to
 					; backspace from the leftmost position.
 
 
@@ -2904,15 +2904,15 @@ L0A23	INC	C		; move left one column.
 					; credit. Dr. Frank O'Hara, 1982
 
 		CP	B		; has position moved past top of screen ?
-		JR	NZ,L0A3A		; to PO-BACK-3 if not and store new position.
+		JR	NZ,PO_BACK_3	; to PO_BACK_3 if not and store new position.
 
 		DEC	B		; else back to $18.
 
-;; PO-BACK-2
-L0A38	LD	C,$21		; the leftmost column position.
+;; $0A38
+PO_BACK_2:	LD	C,$21		; the leftmost column position.
 
-;; PO-BACK-3
-L0A3A	JP	L0DD9		; to CL-SET and PO-STORE to save new
+;; $0A3A
+PO_BACK_3:	JP	L0DD9		; to CL-SET and PO_STORE to save new
 					; position in system variables.
 
 ;---------------------
@@ -2923,22 +2923,22 @@ L0A3A	JP	L0DD9		; to CL-SET and PO-STORE to save new
 ; "However the programmer has failed to store the new print position
 ;  so CHR$ 9 will only work if the next print position is at a newly
 ;  defined place.
-;	e.g. PRINT PAPER 2; CHR$ 9; AT 4,0;
+;   e.g. PRINT PAPER 2; CHR$ 9; AT 4,0;
 ;  does work but is not very helpful"
 ; - Dr. Ian Logan, Understanding Your Spectrum, 1982.
 
-;; PO-RIGHT
-L0A3D	LD	A,($5C91)	; fetch P_FLAG value
+;; $0A3D
+PO_RIGHT:	LD	A,(P_FLAG)	; fetch P_FLAG value
 		PUSH	AF		; and save it on stack.
 
 		LD	(IY+$57),$01	; temporarily set P_FLAG 'OVER 1'.
 		LD	A,$20		; prepare a space.
-		CALL	L0B65		; routine PO-CHAR to print it.
-					; Note. could be PO-ABLE which would update
+		CALL	PO_CHAR		; routine PO_CHAR to print it.
+					; Note. could be PO_ABLE which would update
 					; the column position.
 
 		POP	AF		; restore the permanent flag.
-		LD	($5C91),A	; and restore system variable P_FLAG
+		LD	(P_FLAG),A	; and restore system variable P_FLAG
 
 		RET			; return without updating column position
 
@@ -2947,13 +2947,13 @@ L0A3D	LD	A,($5C91)	; fetch P_FLAG value
 ;------------------------
 ; A carriage return is 'printed' to screen or printer buffer.
 
-;; PO-ENTER
-L0A4F	BIT	1,(IY+$01)	; test FLAGS  - is printer in use ?
-		JP	NZ,L0ECD		; to COPY-BUFF if so, to flush buffer and reset
+;; $0A4F
+PO_ENTER:	BIT	1,(IY+$01)	; test FLAGS  - is printer in use ?
+		JP	NZ,L0ECD	; to COPY-BUFF if so, to flush buffer and reset
 					; the print position.
 
 		LD	C,$21		; the leftmost column position.
-		CALL	L0C55		; routine PO-SCR handles any scrolling required.
+		CALL	PO_SCR		; routine PO_SCR handles any scrolling required.
 		DEC	B		; to next screen line.
 		JP	L0DD9		; jump forward to CL-SET to store new position.
 
@@ -2963,14 +2963,14 @@ L0A4F	BIT	1,(IY+$01)	; test FLAGS  - is printer in use ?
 ; The comma control character. The 32 column screen has two 16 character
 ; tabstops.  The routine is only reached via the control character table.
 
-;; PO-COMMA
-L0A5F	CALL	L0B03		; routine PO-FETCH - seems unnecessary.
+;; $0A5F
+PO_COMMA:	CALL	PO_FETCH	; routine PO_FETCH - seems unnecessary.
 
 		LD	A,C		; the column position. $21-$01
 		DEC	A		; move right. $20-$00
-		DEC	A		; and again	$1F-$00 or $FF if trailing
+		DEC	A		; and again   $1F-$00 or $FF if trailing
 		AND	$10		; will be $00 or $10.
-		JR	L0AC3		; forward to PO-FILL
+		JR	PO_FILL		; forward to PO_FILL
 
 ;--------------------
 ; Print question mark
@@ -2979,103 +2979,103 @@ L0A5F	CALL	L0B03		; routine PO-FETCH - seems unnecessary.
 ; used to print an unassigned control character in range 0-31d.
 ; there are a surprising number yet to be assigned.
 
-;; PO-QUEST
-L0A69	LD	A,$3F		; prepare the character '?'.
-		JR	L0AD9		; forward to PO-ABLE.
+;; $0A69
+PO_QUEST:	LD	A,$3F		; prepare the character '?'.
+		JR	PO_ABLE		; forward to PO_ABLE.
 
 ;---------------------------------
 ; Control characters with operands
 ;---------------------------------
 ; Certain control characters are followed by 1 or 2 operands.
-; The entry points from control character table are PO-2-OPER and PO-1-OPER.
+; The entry points from control character table are PO_2_OPER and PO_1_OPER.
 ; The routines alter the output address of the current channel so that
 ; subsequent RST $10 instructions take the appropriate action
-; before finally resetting the output address back to PRINT-OUT.
+; before finally resetting the output address back to PRINT_OUT.
 
-;; PO-TV-2
-L0A6D	LD	DE,L0A87		; address: PO-CONT will be next output routine
-		LD	($5C0F),A	; store first operand in TVDATA-hi
-		JR	L0A80		; forward to PO-CHANGE >>
+;; $0A6D
+PO_TV_2:	LD	DE,PO_CONT	; address: PO_CONT will be next output routine
+		LD	(TVDATA_HI),A	; store first operand in TVDATA_HI
+		JR	PO_CHANGE	; forward to PO_CHANGE >>
 
-; -> This initial entry point deals with two operands - AT or TAB.
+					; -> This initial entry point deals with two operands - AT or TAB.
 
-;; PO-2-OPER
-L0A75	LD	DE,L0A6D		; address: PO-TV-2 will be next output routine
-		JR	L0A7D		; forward to PO-TV-1
+;; $0A75
+PO_2_OPER:	LD	DE,PO_TV_2	; address: PO_TV_2 will be next output routine
+		JR	PO_TV_1		; forward to PO_TV_1
 
-; -> This initial entry point deals with one operand INK to OVER.
+					; -> This initial entry point deals with one operand INK to OVER.
 
-;; PO-1-OPER
-L0A7A	LD	DE,L0A87		; address: PO-CONT will be next output routine
+;; $0A7A
+PO_1_OPER:	LD	DE,PO_CONT	; address: PO_CONT will be next output routine
 
-;; PO-TV-1
-L0A7D	LD	($5C0E),A	; store control code in TVDATA-lo
+;; $0A7D
+PO_TV_1:	LD	(TVDATA_LO),A	; store control code in TVDATA_LO
 
-;; PO-CHANGE
-L0A80	LD	HL,($5C51)	; use CURCHL to find current output channel.
+;; $0A80
+PO_CHANGE:	LD	HL,(CURCHL)	; use CURCHL to find current output channel.
 		LD	(HL),E		; make it
 		INC	HL		; the supplied
 		LD	(HL),D		; address from DE.
 		RET			; Note. should clear carry before returning
 
-;; PO-CONT
-L0A87	LD	DE,L09F4		; Address: PRINT-OUT
-		CALL	L0A80		; routine PO-CHANGE to restore normal channel.
-		LD	HL,($5C0E)	; TVDATA gives control code and possible
+;; $0A87
+PO_CONT:	LD	DE,PRINT_OUT	; Address: PRINT_OUT
+		CALL	PO_CHANGE	; routine PO_CHANGE to restore normal channel.
+		LD	HL,(TVDATA_LO)	; TVDATA gives control code and possible
 					; subsequent character
 		LD	D,A		; save current character
 		LD	A,L		; the stored control code
 		CP	$16		; was it INK to OVER (1 operand) ?
 		JP	C,L2211		; to CO-TEMP-5
 
-		JR	NZ,L0AC2		; to PO-TAB if not 22d i.e. 23d TAB.
+		JR	NZ,PO_TAB	; to PO_TAB if not 22d i.e. 23d TAB.
 
 					; else must have been 22d AT.
-		LD	B,H		; line to H	(0-23d)
+		LD	B,H		; line to   H (0-23d)
 		LD	C,D		; column to C (0-31d)
 		LD	A,$1F		; the value 31d
 		SUB	C		; reverse the column number.
-		JR	C,L0AAC		; to PO-AT-ERR if C was greater than 31d.
+		JR	C,PO_AT_ERR	; to PO_AT_ERR if C was greater than 31d.
 
 		ADD	A,$02		; transform to system range $02-$21
 		LD	C,A		; and place in column register.
 
 		BIT	1,(IY+$01)	; test FLAGS  - is printer in use ?
-		JR	NZ,L0ABF		; to PO-AT-SET as line can be ignored.
+		JR	NZ,PO_AT_SET	; to PO_AT_SET as line can be ignored.
 
 		LD	A,$16		; 22 decimal
 		SUB	B		; subtract line number to reverse
 					; 0 - 22 becomes 22 - 0.
 
-;; PO-AT-ERR
-L0AAC	JP	C,L1E9F		; to REPORT_B if higher than 22 decimal
+;; $0AAC
+PO_AT_ERR:	JP	C,L1E9F		; to REPORT_B if higher than 22 decimal
 					; Integer out of range.
 
 		INC	A		; adjust for system range $01-$17
 		LD	B,A		; place in line register
 		INC	B		; adjust to system range  $02-$18
 		BIT	0,(IY+$02)	; TV_FLAG  - Lower screen in use ?
-		JP	NZ,L0C55		; exit to PO-SCR to test for scrolling
+		JP	NZ,PO_SCR	; exit to PO_SCR to test for scrolling
 
-		CP	(IY+$31)		; Compare against DF_SZ
-		JP	C,L0C86		; to REPORT-5 if too low
+		CP	(IY+$31)	; Compare against DF_SZ
+		JP	C,REPORT_5	; to REPORT_5 if too low
 					; Out of screen.
 
-;; PO-AT-SET
-L0ABF	JP	L0DD9		; print position is valid so exit via CL-SET
+;; $0ABF
+PO_AT_SET:	JP	L0DD9		; print position is valid so exit via CL-SET
 
-; Continue here when dealing with TAB.
-; Note. In basic TAB is followed by a 16-bit number and was initially
-; designed to work with any output device.
+					; Continue here when dealing with TAB.
+					; Note. In basic TAB is followed by a 16-bit number and was initially
+					; designed to work with any output device.
 
-;; PO-TAB
-L0AC2	LD	A,H		; transfer parameter to A
+;; $0AC2
+PO_TAB:		LD	A,H		; transfer parameter to A
 					; Losing current character -
 					; High byte of TAB parameter.
 
 
-;; PO-FILL
-L0AC3	CALL	L0B03		; routine PO-FETCH, HL-addr, BC=line/column.
+;; $0AC3
+PO_FILL:	CALL	PO_FETCH	; routine PO_FETCH, HL-addr, BC=line/column.
 					; column 1 (right), $21 (left)
 		ADD	A,C		; add operand to current column
 		DEC	A		; range 0 - 31+
@@ -3085,12 +3085,12 @@ L0AC3	CALL	L0B03		; routine PO-FETCH, HL-addr, BC=line/column.
 		LD	D,A		; Counter to D
 		SET	0,(IY+$01)	; update FLAGS  - signal suppress leading space.
 
-;; PO-SPACE
-L0AD0	LD	A,$20		; space character.
-		CALL	L0C3B		; routine PO-SAVE prints the character
+;; $0AD0
+PO_SPACE:	LD	A,$20		; space character.
+		CALL	PO_SAVE		; routine PO_SAVE prints the character
 					; using alternate set (normal output routine)
 		DEC	D		; decrement counter.
-		JR	NZ,L0AD0		; to PO-SPACE until done
+		JR	NZ,PO_SPACE	; to PO_SPACE until done
 
 		RET			; return
 
@@ -3100,8 +3100,8 @@ L0AD0	LD	A,$20		; space character.
 ; This routine prints printable characters and continues into
 ; the position store routine
 
-;; PO-ABLE
-L0AD9	CALL	L0B24		; routine PO-ANY
+;; $0AD9
+PO_ABLE:	CALL	PO_ANY		; routine PO_ANY
 					; and continue into position store routine.
 
 ;--------------------------------------
@@ -3110,26 +3110,26 @@ L0AD9	CALL	L0B24		; routine PO-ANY
 ; This routine updates the system variables associated with
 ; The main screen, lower screen/input buffer or ZX printer.
 
-;; PO-STORE
-L0ADC	BIT	1,(IY+$01)	; test FLAGS  - Is printer in use ?
-		JR	NZ,L0AFC		; to PO-ST-PR if so
+;; $0ADC
+PO_STORE:	BIT	1,(IY+$01)	; test FLAGS  - Is printer in use ?
+		JR	NZ,PO_ST_PR	; to PO_ST_PR if so
 
 		BIT	0,(IY+$02)	; TV_FLAG  - Lower screen in use ?
-		JR	NZ,L0AF0		; to PO-ST-E if so
+		JR	NZ,PO_ST_E	; to PO_ST_E if so
 
-		LD	($5C88),BC	; S_POSN line/column upper screen
-		LD	($5C84),HL	; DF_CC  display file address
+		LD	(S_POSN),BC	; S_POSN line/column upper screen
+		LD	(DF_CC),HL	; DF_CC  display file address
 		RET			;
 
-;; PO-ST-E
-L0AF0	LD	($5C8A),BC	; SPOSNL line/column lower screen
-		LD	($5C82),BC	; ECHO_E line/column input buffer
-		LD	($5C86),HL	; DFCCL  lower screen memory address
+;; $0AF0:
+PO_ST_E:	LD	(SPOSNL),BC	; SPOSNL line/column lower screen
+		LD	(ECHO_E),BC	; ECHO_E line/column input buffer
+		LD	(DFCCL),HL	; DFCCL  lower screen memory address
 		RET			;
 
-;; PO-ST-PR
-L0AFC	LD	(IY+$45),C	; P_POSN column position printer
-		LD	($5C80),HL	; PR_CC  full printer buffer memory address
+;; $0AFC
+PO_ST_PR:	LD	(IY+$45),C	; P_POSN column position printer
+		LD	(PR_CC),HL	; PR_CC  full printer buffer memory address
 		RET			;
 
 ;--------------------------
@@ -3143,59 +3143,59 @@ L0AFC	LD	(IY+$45),C	; P_POSN column position printer
 ; location has been used for other purposes, then subsequent output
 ; to the printer buffer could corrupt a 256-byte section of memory.
 
-;; PO-FETCH
-L0B03	BIT	1,(IY+$01)	; test FLAGS  - Is printer in use
-		JR	NZ,L0B1D		; to PO-F-PR if so
+;; $0B03
+PO_FETCH:	BIT	1,(IY+$01)	; test FLAGS  - Is printer in use
+		JR	NZ,PO_F_PR	; to PO_F_PR if so
 
 					; assume upper screen
-		LD	BC,($5C88)	; S_POSN
-		LD	HL,($5C84)	; DF_CC display file address
+		LD	BC,(S_POSN)	; S_POSN
+		LD	HL,(DF_CC)	; DF_CC display file address
 		BIT	0,(IY+$02)	; TV_FLAG  - Lower screen in use ?
 		RET	Z		; return if upper screen
 
 					; ah well, was lower screen
-		LD	BC,($5C8A)	; SPOSNL
-		LD	HL,($5C86)	; DFCCL
+		LD	BC,(SPOSNL)	; SPOSNL
+		LD	HL,(DFCCL)	; DFCCL
 		RET			; return
 
-;; PO-F-PR
-L0B1D	LD	C,(IY+$45)	; P_POSN column only
-		LD	HL,($5C80)	; PR_CC printer buffer address
+;; $0B1D
+PO_F_PR:	LD	C,(IY+$45)	; P_POSN column only
+		LD	HL,(PR_CC)	; PR_CC printer buffer address
 		RET			; return
 
 ;--------------------
 ; Print any character
 ;--------------------
 ; This routine is used to print any character in range 32d - 255d
-; It is only called from PO-ABLE and continues into PO-STORE
+; It is only called from PO_ABLE and continues into PO_STORE
 
-;; PO-ANY
-L0B24	CP	$80		; ascii ?
-		JR	C,L0B65		; to PO-CHAR is so.
+;; $0B24
+PO_ANY:		CP	$80		; ascii ?
+		JR	C,PO_CHAR	; to PO_CHAR is so.
 
 		CP	$90		; test if a block graphic character.
-		JR	NC,L0B52		; to PO-T&UDG to print tokens and udg's
+		JR	NC,PO_T_UDG	; to PO_T_UDG to print tokens and udg's
 
-; The 16 2*2 mosaic characters 128-143 decimal are formed from
-; bits 0-3 of the character.
+					; The 16 2*2 mosaic characters 128-143 decimal are formed from
+					; bits 0-3 of the character.
 
 		LD	B,A		; save character
-		CALL	L0B38		; routine PO-GR-1 to construct top half
+		CALL	PO_GR_1		; routine PO_GR_1 to construct top half
 					; then bottom half.
-		CALL	L0B03		; routine PO-FETCH fetches print position.
-		LD	DE,MEM_0		; MEM_0 is location of 8 bytes of character
-		JR	L0B7F		; to PR-ALL to print to screen or printer
+		CALL	PO_FETCH	; routine PO_FETCH fetches print position.
+		LD	DE,MEM_0	; MEM_0 is location of 8 bytes of character
+		JR	PR_ALL		; to PR_ALL to print to screen or printer
 
-;; PO-GR-1
-L0B38	LD	HL,MEM_0		; address MEM_0 - a temporary buffer in
+;; $0B38
+PO_GR_1:	LD	HL,MEM_0	; address MEM_0 - a temporary buffer in
 					; systems variables which is normally used
 					; by the calculator.
-		CALL	L0B3E		; routine PO-GR-2 to construct top half
+		CALL	PO_GR_2		; routine PO_GR_2 to construct top half
 					; and continue into routine to construct
 					; bottom half.
 
-;; PO-GR-2
-L0B3E	RR	B		; rotate bit 0/2 to carry
+;; $0B3E
+PO_GR_2:	RR	B		; rotate bit 0/2 to carry
 		SBC	A,A		; result $00 or $FF
 		AND	$0F		; mask off right hand side
 		LD	C,A		; store part in C
@@ -3205,50 +3205,50 @@ L0B3E	RR	B		; rotate bit 0/2 to carry
 		OR	C		; combine with stored pattern
 		LD	C,$04		; four bytes for top/bottom half
 
-;; PO-GR-3
-L0B4C	LD	(HL),A		; store bit patterns in temporary buffer
+;; $0B4C
+PO_GR_3:	LD	(HL),A		; store bit patterns in temporary buffer
 		INC	HL		; next address
 		DEC	C		; jump back to
-		JR	NZ,L0B4C		; to PO-GR-3 until byte is stored 4 times
+		JR	NZ,PO_GR_3	; to PO_GR_3 until byte is stored 4 times
 
 		RET			; return
 
-; Tokens and User defined graphics are now separated.
+					; Tokens and User defined graphics are now separated.
 
-;; PO-T&UDG
-L0B52	SUB	$A5		; the 'RND' character
-		JR	NC,L0B5F		; to PO-T to print tokens
+;; $0B52
+PO_T_UDG:	SUB	$A5		; the 'RND' character
+		JR	NC,PO_T		; to PO_T to print tokens
 
 		ADD	A,$15		; add 21d to restore to 0 - 20
 		PUSH	BC		; save current print position
-		LD	BC,($5C7B)	; fetch UDG to address bit patterns
-		JR	L0B6A		; to PO-CHAR-2 - common code to lay down
+		LD	BC,(UDG)	; fetch UDG to address bit patterns
+		JR	PO_CHAR_2	; to PO_CHAR_2 - common code to lay down
 					; a bit patterned character
 
-;; PO-T
-L0B5F	CALL	L0C10		; routine PO-TOKENS prints tokens
-		JP	L0B03		; exit via PO-FETCH as this routine must
-					; continue into PO-STORE
+;; $0B5F
+PO_T:		CALL	PO_TOKENS	; routine PO_TOKENS prints tokens
+		JP	PO_FETCH	; exit via PO_FETCH as this routine must
+					; continue into PO_STORE
 
-; This point is used to print ascii characters  32d - 127d.
+					; This point is used to print ascii characters  32d - 127d.
 
-;; PO-CHAR
-L0B65	PUSH	BC		; save print position
-		LD	BC,($5C36)	; address CHARS
+;; $0B65
+PO_CHAR:	PUSH	BC		; save print position
+		LD	BC,(CHARS)	; address CHARS
 
-; This common code is used to transfer the character bytes to memory.
+					; This common code is used to transfer the character bytes to memory.
 
-;; PO-CHAR-2
-L0B6A	EX	DE,HL		; transfer destination address to DE
-		LD	HL,FLAGS		; point to FLAGS
+;; $0B6A
+PO_CHAR_2:	EX	DE,HL		; transfer destination address to DE
+		LD	HL,FLAGS	; point to FLAGS
 		RES	0,(HL)		; allow for leading space
 		CP	$20		; is it a space ?
-		JR	NZ,L0B76		; to PO-CHAR-3 if not
+		JR	NZ,PO_CHAR_3	; to PO_CHAR_3 if not
 
 		SET	0,(HL)		; signal no leading space to FLAGS
 
-;; PO-CHAR-3
-L0B76	LD	H,$00		; set high byte to 0
+;; $0B76
+PO_CHAR_3:	LD	H,$00		; set high byte to 0
 		LD	L,A		; character to A
 					; 0-21 UDG or 32-127 ascii.
 		ADD	HL,HL		; multiply
@@ -3267,92 +3267,92 @@ L0B76	LD	H,$00		; set high byte to 0
 ; DE=character source
 ; BC=line/column
 
-;; PR-ALL
-L0B7F	LD	A,C		; column to A
+;; $0B7F
+PR_ALL:		LD	A,C		; column to A
 		DEC	A		; move right
 		LD	A,$21		; pre-load with leftmost position
-		JR	NZ,L0B93		; but if not zero to PR-ALL-1
+		JR	NZ,PR_ALL_1	; but if not zero to PR_ALL_1
 
 		DEC	B		; down one line
 		LD	C,A		; load C with $21
 		BIT	1,(IY+$01)	; test FLAGS  - Is printer in use
-		JR	Z,L0B93		; to PR-ALL-1 if not
+		JR	Z,PR_ALL_1	; to PR_ALL_1 if not
 
 		PUSH	DE		; save source address
 		CALL	L0ECD		; routine COPY-BUFF outputs line to printer
 		POP	DE		; restore character source address
 		LD	A,C		; the new column number ($21) to C
 
-;; PR-ALL-1
-L0B93	CP	C		; this test is really for screen - new line ?
+;; $0B93
+PR_ALL_1:	CP	C		; this test is really for screen - new line ?
 		PUSH	DE		; save source
-		CALL	Z,L0C55		; routine PO-SCR considers scrolling
+		CALL	Z,PO_SCR	; routine PO_SCR considers scrolling
 		POP	DE		; restore source
 		PUSH	BC		; save line/column
 		PUSH	HL		; and destination
-		LD	A,($5C91)	; fetch P_FLAG to accumulator
+		LD	A,(P_FLAG)	; fetch P_FLAG to accumulator
 		LD	B,$FF		; prepare OVER mask in B.
 		RRA			; bit 0 set if OVER 1
-		JR	C,L0BA4		; to PR-ALL-2
+		JR	C,PR_ALL_2	; to PR_ALL_2
 
 		INC	B		; set OVER mask to 0
 
-;; PR-ALL-2
-L0BA4	RRA			; skip bit 1 of P_FLAG
+;; $0BA4
+PR_ALL_2:	RRA			; skip bit 1 of P_FLAG
 		RRA			; bit 2 is INVERSE
 		SBC	A,A		; will be FF for INVERSE 1 else zero
 		LD	C,A		; transfer INVERSE mask to C
 		LD	A,$08		; prepare to count 8 bytes
 		AND	A		; clear carry to signal screen
 		BIT	1,(IY+$01)	; test FLAGS  - Is printer in use ?
-		JR	Z,L0BB6		; to PR-ALL-3 if screen
+		JR	Z,PR_ALL_3	; to PR_ALL_3 if screen
 
 		SET	1,(IY+$30)	; update FLAGS2  - Signal printer buffer has 
 					; been used.
 		SCF			; set carry flag to signal printer.
 
-;; PR-ALL-3
-L0BB6	EX	DE,HL		; now HL=source, DE=destination
+;; $0BB6
+PR_ALL_3:	EX	DE,HL		; now HL=source, DE=destination
 
-;; PR-ALL-4
-L0BB7	EX	AF,AF'		; save printer/screen flag
+;; $0BB7
+PR_ALL_4:	EX	AF,AF'		; save printer/screen flag
 		LD	A,(DE)		; fetch existing destination byte
 		AND	B		; consider OVER
 		XOR	(HL)		; now XOR with source
 		XOR	C		; now with INVERSE MASK
 		LD	(DE),A		; update screen/printer
 		EX	AF,AF'		; restore flag
-		JR	C,L0BD3		; to PR-ALL-6 - printer address update
+		JR	C,PR_ALL_6	; to PR_ALL_6 - printer address update
 
 		INC	D		; gives next pixel line down screen
 
-;; PR-ALL-5
-L0BC1	INC	HL		; address next character byte
+;; $0BC1
+PR_ALL_5:	INC	HL		; address next character byte
 		DEC	A		; the byte count is decremented
-		JR	NZ,L0BB7		; back to PR-ALL-4 for all 8 bytes
+		JR	NZ,PR_ALL_4	; back to PR_ALL_4 for all 8 bytes
 
 		EX	DE,HL		; destination to HL
 		DEC	H		; bring back to last updated screen position
 		BIT	1,(IY+$01)	; test FLAGS  - is printer in use ?
-		CALL	Z,L0BDB		; if not, call routine PO-ATTR to update
+		CALL	Z,PO_ATTR	; if not, call routine PO_ATTR to update
 					; corresponding colour attribute.
 		POP	HL		; restore original screen/printer position
 		POP	BC		; and line column
 		DEC	C		; move column to right
 		INC	HL		; increase screen/printer position
-		RET			; return and continue into PO-STORE
-					; within PO-ABLE
+		RET			; return and continue into PO_STORE
+					; within PO_ABLE
 
-; This branch is used to update the printer position by 32 places
-; Note. The high byte of the address D remains constant (which it should).
+					; This branch is used to update the printer position by 32 places
+					; Note. The high byte of the address D remains constant (which it should).
 
-;; PR-ALL-6
-L0BD3	EX	AF,AF'		; save the flag
+;; $0BD3
+PR_ALL_6:	EX	AF,AF'		; save the flag
 		LD	A,$20		; load A with 32 decimal
 		ADD	A,E		; add this to E
 		LD	E,A		; and store result in E
 		EX	AF,AF'		; fetch the flag
-		JR	L0BC1		; back to PR-ALL-5
+		JR	PR_ALL_5	; back to PR_ALL_5
 
 ;--------------
 ; Set attribute
@@ -3363,40 +3363,40 @@ L0BD3	EX	AF,AF'		; save the flag
 ; the correct value for the attribute file and it is only necessary
 ; to manipulate H to form the correct colour attribute address.
 
-;; PO-ATTR
-L0BDB	LD	A,H		; fetch high byte $40 - $57
+;; $0BDB
+PO_ATTR:	LD	A,H		; fetch high byte $40 - $57
 		RRCA			; shift
 		RRCA			; bits 3 and 4
 		RRCA			; to right.
 		AND	$03		; range is now 0 - 2
 		OR	$58		; form correct high byte for third of screen
 		LD	H,A		; HL is now correct
-		LD	DE,($5C8F)	; make D hold ATTR_T, E hold MASK-T
+		LD	DE,(ATTRT_MASKT); make D hold ATTR_T, E hold MASK-T
 		LD	A,(HL)		; fetch existing attribute
 		XOR	E		; apply masks
 		AND	D		;
 		XOR	E		;
 		BIT	6,(IY+$57)	; test P_FLAG  - is this PAPER 9 ??
-		JR	Z,L0BFA		; skip to PO-ATTR-1 if not.
+		JR	Z,PO_ATTR_1	; skip to PO_ATTR_1 if not.
 
 		AND	$C7		; set paper
 		BIT	2,A		; to contrast with ink
-		JR	NZ,L0BFA		; skip to PO-ATTR-1
+		JR	NZ,PO_ATTR_1	; skip to PO_ATTR_1
 
 		XOR	$38		;
 
-;; PO-ATTR-1
-L0BFA	BIT	4,(IY+$57)	; test P_FLAG  - Is this INK 9 ??
-		JR	Z,L0C08		; skip to PO-ATTR-2 if not
+;; $0BFA
+PO_ATTR_1:	BIT	4,(IY+$57)	; test P_FLAG  - Is this INK 9 ??
+		JR	Z,PO_ATTR_2	; skip to PO_ATTR_2 if not
 
 		AND	$F8		; make ink
 		BIT	5,A		; contrast with paper.
-		JR	NZ,L0C08		; to PO-ATTR-2
+		JR	NZ,PO_ATTR_2	; to PO_ATTR_2
 
 		XOR	$07		;
 
-;; PO-ATTR-2
-L0C08	LD	(HL),A		; save the new attribute.
+;; $0C08
+PO_ATTR_2:	LD	(HL),A		; save the new attribute.
 		RET			; return.
 
 ;-----------------
@@ -3408,52 +3408,52 @@ L0C08	LD	(HL),A		; save the new attribute.
 ; A contains the message number, often zero to print first message.
 ; (HL has nothing important usually P_FLAG)
 
-;; PO-MSG
-L0C0A	PUSH	HL		; put hi-byte zero on stack to suppress
+;; $0C0A
+PO_MSG:		PUSH	HL		; put hi-byte zero on stack to suppress
 		LD	H,$00		; trailing spaces
 		EX	(SP),HL		; ld h,0; push hl would have done ?.
-		JR	L0C14		; forward to PO-TABLE.
+		JR	PO_TABLE	; forward to PO_TABLE.
 
-; This entry point prints the basic keywords, '<>' etc. from alt set
+					; This entry point prints the basic keywords, '<>' etc. from alt set
 
-;; PO-TOKENS
-L0C10	LD	DE,TKN_TABLE		; address: TKN_TABLE
+;; $0C10
+PO_TOKENS:	LD	DE,TKN_TABLE	; address: TKN_TABLE
 		PUSH	AF		; save the token number to control
 					; trailing spaces - see later *
 
-;; PO-TABLE
-L0C14	CALL	L0C41		; routine PO-SEARCH will set carry for
+;; $0C14
+PO_TABLE:	CALL	PO_SEARCH	; routine PO_SEARCH will set carry for
 					; all messages and function words.
-		JR	C,L0C22		; forward to PO-EACH if not a command,
+		JR	C,PO_EACH	; forward to PO_EACH if not a command,
 					; '<>' etc.
 
 		LD	A,$20		; prepare leading space
 		BIT	0,(IY+$01)	; test FLAGS  - leading space if not set
-		CALL	Z,L0C3B		; routine PO-SAVE to print a space
+		CALL	Z,PO_SAVE	; routine PO_SAVE to print a space
 					; without disturbing registers
 
-;; PO-EACH
-L0C22	LD	A,(DE)		; fetch character
+;; $0C22
+PO_EACH:	LD	A,(DE)		; fetch character
 		AND	$7F		; remove any inverted bit
-		CALL	L0C3B		; routine PO-SAVE to print using alternate
+		CALL	PO_SAVE		; routine PO_SAVE to print using alternate
 					; set of registers.
 		LD	A,(DE)		; re-fetch character.
 		INC	DE		; address next
 		ADD	A,A		; was character inverted ?
 					; (this also doubles character)
-		JR	NC,L0C22		; back to PO-EACH if not
+		JR	NC,PO_EACH	; back to PO_EACH if not
 
 		POP	DE		; * re-fetch trailing space flag to D (was A)
 		CP	$48		; was last character '$' ($24*2)
-		JR	Z,L0C35		; forward to PO-TR-SP to consider trailing
+		JR	Z,PO_TR_SP	; forward to PO_TR_SP to consider trailing
 					; space if so.
 
 		CP	$82		; was it < 'A' i.e. '#','>','=' from tokens
 					; or ' ','.' (from tape) or '?' from scroll
 		RET	C		; no trailing space
 
-;; PO-TR-SP
-L0C35	LD	A,D		; the trailing space flag (zero if an error msg)
+;; $0C35
+PO_TR_SP:	LD	A,D		; the trailing space flag (zero if an error msg)
 		CP	$03		; test against RND, INKEY$ and PI
 					; which have no parameters and
 		RET	C		; therefore no trailing space so return.
@@ -3463,11 +3463,11 @@ L0C35	LD	A,D		; the trailing space flag (zero if an error msg)
 ;--------------------------
 ; Handle recursive printing
 ;--------------------------
-; This routine which is part of PRINT-OUT allows RST $10 to be
+; This routine which is part of PRINT_OUT allows RST $10 to be
 ; used recursively to print tokens and the spaces associated with them.
 
-;; PO-SAVE
-L0C3B	PUSH	DE		; save DE as CALL-SUB doesn't.
+;; $0C3B
+PO_SAVE:	PUSH	DE		; save DE as CALL-SUB doesn't.
 		EXX			; switch in main set
 
 		RST	10H		; PRINT_A prints using this alternate set.
@@ -3482,18 +3482,18 @@ L0C3B	PUSH	DE		; save DE as CALL-SUB doesn't.
 ; This subroutine searches a message or the token table for the
 ; message number held in A. DE holds the address of the table.
 
-;; PO-SEARCH
-L0C41	PUSH	AF		; save the message/token number
+;; $0C41
+PO_SEARCH:	PUSH	AF		; save the message/token number
 		EX	DE,HL		; transfer DE to HL
 		INC	A		; adjust for initial step-over byte
 
-;; PO-STEP
-L0C44	BIT	7,(HL)		; is character inverted ?
+;; $0C44
+PO_STEP:	BIT	7,(HL)		; is character inverted ?
 		INC	HL		; address next
-		JR	Z,L0C44		; back to PO-STEP if not inverted.
+		JR	Z,PO_STEP	; back to PO-STEP if not inverted.
 
 		DEC	A		; decrease counter
-		JR	NZ,L0C44		; back to PO-STEP if not zero
+		JR	NZ,PO_STEP	; back to PO-STEP if not zero
 
 		EX	DE,HL		; transfer address to DE
 		POP	AF		; restore message/token number
@@ -3514,33 +3514,33 @@ L0C44	BIT	7,(HL)		; is character inverted ?
 ; This is therefore using the alternate set.
 ; The B register holds the current line.
 
-;; PO-SCR
-L0C55	BIT	1,(IY+$01)	; test FLAGS  - is printer in use ?
+;; $0C55
+PO_SCR:		BIT	1,(IY+$01)	; test FLAGS  - is printer in use ?
 		RET	NZ		; return immediately if so.
 
-		LD	DE,L0DD9		; set DE to address: CL-SET
+		LD	DE,L0DD9	; set DE to address: CL-SET
 		PUSH	DE		; and push for return address.
 		LD	A,B		; transfer the line to A.
 		BIT	0,(IY+$02)	; test TV_FLAG  - Lower screen in use ?
-		JP	NZ,L0D02		; jump forward to PO-SCR-4 if so.
+		JP	NZ,PO_SCR_4	; jump forward to PO_SCR_4 if so.
 
-		CP	(IY+$31)		; greater than DF_SZ display file size ?
-		JR	C,L0C86		; forward to REPORT-5 if less.
+		CP	(IY+$31)	; greater than DF_SZ display file size ?
+		JR	C,REPORT_5	; forward to REPORT_5 if less.
 					; 'Out of screen'
 
 		RET	NZ		; return (via CL-SET) if greater
 
 		BIT	4,(IY+$02)	; test TV_FLAG  - Automatic listing ?
-		JR	Z,L0C88		; forward to PO-SCR-2 if not.
+		JR	Z,PO_SCR_2	; forward to PO_SCR_2 if not.
 
 		LD	E,(IY+$2D)	; fetch BREG - the count of scroll lines to E.
 		DEC	E		; decrease and jump
-		JR	Z,L0CD2		; to PO-SCR-3 if zero and scrolling required.
+		JR	Z,PO_SCR_3	; to PO_SCR_3 if zero and scrolling required.
 
 		LD	A,$00		; explicit - select channel zero.
 		CALL	L1601		; routine CHAN-OPEN opens it.
 
-		LD	SP,($5C3F)	; set stack pointer to LIST_SP
+		LD	SP,(LIST_SP)	; set stack pointer to LIST_SP
 
 		RES	4,(IY+$02)	; reset TV_FLAG  - signal auto listing finished.
 		RET			; return ignoring pushed value, CL-SET
@@ -3548,35 +3548,35 @@ L0C55	BIT	1,(IY+$01)	; test FLAGS  - is printer in use ?
 					; print position			->
 
 
-;; REPORT-5
-L0C86	RST	08H		; ERROR_1
+;; $0C86
+REPORT_5:	RST	08H		; ERROR_1
 		DEFB	$04		; Error Report: Out of screen
 
-; continue here if not an automatic listing.
+					; continue here if not an automatic listing.
 
-;; PO-SCR-2
-L0C88	DEC	(IY+$52)		; decrease SCR_CT
-		JR	NZ,L0CD2		; forward to PO-SCR-3 to scroll display if
+;; $0C88
+PO_SCR_2:	DEC	(IY+$52)	; decrease SCR_CT
+		JR	NZ,PO_SCR_3	; forward to PO_SCR_3 to scroll display if
 					; result not zero.
 
-; now produce prompt.
+					; now produce prompt.
 
 		LD	A,$18		; reset
 		SUB	B		; the
-		LD	($5C8C),A	; SCR_CT scroll count
-		LD	HL,($5C8F)	; L=ATTR_T, H=MASK_T
+		LD	(SCR_CT),A	; SCR_CT scroll count
+		LD	HL,(ATTRT_MASKT); L=ATTR_T, H=MASK_T
 		PUSH	HL		; save on stack
-		LD	A,($5C91)	; P_FLAG
+		LD	A,(P_FLAG)	; P_FLAG
 		PUSH	AF		; save on stack to prevent lower screen
 					; attributes (BORDCR etc.) being applied.
 		LD	A,$FD		; select system channel 'K'
 		CALL	L1601		; routine CHAN-OPEN opens it
 		XOR	A		; clear to address message directly
-		LD	DE,L0CF8		; make DE address: scrl-mssg
-		CALL	L0C0A		; routine PO-MSG prints to lower screen
+		LD	DE,SCRL_MSSG	; make DE address: SCRL_MSSG
+		CALL	PO_MSG		; routine PO_MSG prints to lower screen
 		SET	5,(IY+$02)	; set TV_FLAG  - signal lower screen requires
 					; clearing
-		LD	HL,FLAGS		; make HL address FLAGS
+		LD	HL,FLAGS	; make HL address FLAGS
 		SET	3,(HL)		; signal 'L' mode.
 		RES	5,(HL)		; signal 'no new key'.
 		EXX			; switch to main set.
@@ -3588,26 +3588,26 @@ L0C88	DEC	(IY+$52)		; decrease SCR_CT
 
 		EXX			; switch back to alternate set.
 		CP	$20		; space is considered as BREAK
-		JR	Z,L0D00		; forward to REPORT-D if so
+		JR	Z,REPORT_D	; forward to REPORT_D if so
 					; 'BREAK - CONT repeats'
 
 		CP	$E2		; is character 'STOP' ?
-		JR	Z,L0D00		; forward to REPORT-D if so
+		JR	Z,REPORT_D	; forward to REPORT_D if so
 
 		OR	$20		; convert to lower-case
 		CP	$6E		; is character 'n' ?
-		JR	Z,L0D00		; forward to REPORT-D if so else scroll.
+		JR	Z,REPORT_D	; forward to REPORT_D if so else scroll.
 
 		LD	A,$FE		; select system channel 'S'
 		CALL	L1601		; routine CHAN-OPEN
 		POP	AF		; restore original P_FLAG
-		LD	($5C91),A	; and save in P_FLAG.
+		LD	(P_FLAG),A	; and save in P_FLAG.
 		POP	HL		; restore original ATTR_T, MASK_T
-		LD	($5C8F),HL	; and reset ATTR_T, MASK-T as 'scroll?' has
+		LD	(ATTRT_MASKT),HL; and reset ATTR_T, MASK-T as 'scroll?' has
 					; been printed.
 
-;; PO-SCR-3
-L0CD2	CALL	L0DFE		; routine CL-SC-ALL to scroll whole display
+;; $0CD2
+PO_SCR_3:	CALL	L0DFE		; routine CL-SC-ALL to scroll whole display
 		LD	B,(IY+$31)	; fetch DF_SZ to B
 		INC	B		; increase to address last line of display
 		LD	C,$21		; set C to $21 (was $21 from above routine)
@@ -3623,38 +3623,38 @@ L0CD2	CALL	L0DFE		; routine CL-SC-ALL to scroll whole display
 		OR	$58		;
 		LD	H,A		;
 
-		LD	DE,$5AE0		; start of last 'line' of attribute area
+		LD	DE,$5AE0	; start of last 'line' of attribute area
 		LD	A,(DE)		; get attribute for last line
 		LD	C,(HL)		; transfer to base line of upper part
 		LD	B,$20		; there are thirty two bytes
 		EX	DE,HL		; swap the pointers.
 
-;; PO-SCR-3A
-L0CF0	LD	(DE),A		; transfer
+;; $0CF0
+PO_SCR_3A:	LD	(DE),A		; transfer
 		LD	(HL),C		; attributes.
 		INC	DE		; address next.
 		INC	HL		; address next.
-		DJNZ	L0CF0		; loop back to PO-SCR-3A for all adjacent
+		DJNZ	PO_SCR_3A	; loop back to PO_SCR_3A for all adjacent
 					; attribute lines.
 
 		POP	BC		; restore the line/column.
 		RET			; return via CL-SET (was pushed on stack).
 
-; The message 'scroll?' appears here with last byte inverted.
+					; The message 'scroll?' appears here with last byte inverted.
 
-;; scrl-mssg
-L0CF8	DEFB	$80		; initial step-over byte.
+;; $0CF8
+SCRL_MSSG:	DEFB	$80		; initial step-over byte.
 		DEFB	"scroll",'?'+$80
 
-;; REPORT-D
-L0D00	RST	08H		; ERROR_1
+;; $0D00
+REPORT_D:	RST	08H		; ERROR_1
 		DEFB	$0C		; Error Report: BREAK - CONT repeats
 
-; continue here if using lower display - A holds line number.
+					; continue here if using lower display - A holds line number.
 
-;; PO-SCR-4
-L0D02	CP	$02		; is line number less than 2 ?
-		JR	C,L0C86		; to REPORT-5 if so
+;; $0D02
+PO_SCR_4:	CP	$02		; is line number less than 2 ?
+		JR	C,REPORT_5	; to REPORT_5 if so
 					; 'Out of Screen'.
 
 		ADD	A,(IY+$31)	; add DF_SZ
@@ -3664,45 +3664,45 @@ L0D02	CP	$02		; is line number less than 2 ?
 		NEG			; Negate to give number of scrolls required.
 		PUSH	BC		; save line/column
 		LD	B,A		; count to B
-		LD	HL,($5C8F)	; fetch current ATTR_T, MASK_T to HL.
+		LD	HL,(ATTRT_MASKT); fetch current ATTR_T, MASK_T to HL.
 		PUSH	HL		; and save
-		LD	HL,($5C91)	; fetch P_FLAG
+		LD	HL,(P_FLAG)	; fetch P_FLAG
 		PUSH	HL		; and save.
 					; to prevent corruption by input AT
 
-		CALL	L0D4D		; routine TEMPS sets to BORDCR etc
+		CALL	TEMPS		; routine TEMPS sets to BORDCR etc
 		LD	A,B		; transfer scroll number to A.
 
-;; PO-SCR-4A
-L0D1C	PUSH	AF		; save scroll number.
-		LD	HL,$5C6B		; address DF_SZ
+;; $0D1C
+PO_SCR_4A:	PUSH	AF		; save scroll number.
+		LD	HL,DF_SZ	; address DF_SZ
 		LD	B,(HL)		; fetch old value
 		LD	A,B		; transfer to A
 		INC	A		; and increment
 		LD	(HL),A		; then put back.
-		LD	HL,$5C89		; address S_POSN_hi - line
+		LD	HL,S_POSN_HI	; address S_POSN_HI - line
 		CP	(HL)		; compare
-		JR	C,L0D2D		; forward to PO-SCR-4B if scrolling required
+		JR	C,PO_SCR_4B	; forward to PO_SCR_4B if scrolling required
 
-		INC	(HL)		; else increment S_POSN_hi
+		INC	(HL)		; else increment S_POSN_HI
 		LD	B,$18		; set count to whole display ??
 					; Note. should be $17 and the top line
 					; will be scrolled into the ROM which
 					; is harmless on the standard set up.
 
-;; PO-SCR-4B
-L0D2D	CALL	L0E00		; routine CL-SCROLL scrolls B lines
+;; $0D2D
+PO_SCR_4B:	CALL	L0E00		; routine CL-SCROLL scrolls B lines
 		POP	AF		; restore scroll counter.
 		DEC	A		; decrease
-		JR	NZ,L0D1C		; back to to PO-SCR-4A until done
+		JR	NZ,PO_SCR_4A	; back to to PO_SCR_4A until done
 
 		POP	HL		; restore original P_FLAG.
 		LD	(IY+$57),L	; and overwrite system variable P_FLAG.
 
 		POP	HL		; restore original ATTR_T/MASK_T.
-		LD	($5C8F),HL	; and update system variables.
+		LD	(ATTRT_MASKT),HL; and update system variables.
 
-		LD	BC,($5C88)	; fetch S_POSN to BC.
+		LD	BC,(S_POSN)	; fetch S_POSN to BC.
 		RES	0,(IY+$02)	; signal to TV_FLAG  - main screen in use.
 		CALL	L0DD9		; call routine CL-SET for upper display.
 
@@ -3716,29 +3716,29 @@ L0D2D	CALL	L0E00		; routine CL-SCROLL scrolls B lines
 ; This subroutine is called 11 times to copy the permanent colour items
 ; to the temporary ones.
 
-;; TEMPS
-L0D4D	XOR	A		; clear the accumulator
-		LD	HL,($5C8D)	; fetch L=ATTR_P and H=MASK_P
+;; $0D4D
+TEMPS:		XOR	A		; clear the accumulator
+		LD	HL,(ATTRP_MASKP); fetch L=ATTR_P and H=MASK_P
 		BIT	0,(IY+$02)	; test TV_FLAG  - is lower screen in use ?
-		JR	Z,L0D5B		; skip to TEMPS-1 if not
+		JR	Z,TEMPS_1	; skip to TEMPS_1 if not
 
 		LD	H,A		; set H, MASK P, to 00000000.
 		LD	L,(IY+$0E)	; fetch BORDCR to L which is used for lower
 					; screen.
 
-;; TEMPS-1
-L0D5B	LD	($5C8F),HL	; transfer values to ATTR_T and MASK_T
+;; $0D5B
+TEMPS_1:	LD	(ATTRT_MASKT),HL; transfer values to ATTR_T and MASK_T
 
-; for the print flag the permanent values are odd bits, temporary even bits.
+					; for the print flag the permanent values are odd bits, temporary even bits.
 
-		LD	HL,$5C91		; address P_FLAG.
-		JR	NZ,L0D65		; skip to TEMPS-2 if lower screen using A=0.
+		LD	HL,P_FLAG	; address P_FLAG.
+		JR	NZ,TEMPS_2	; skip to TEMPS_2 if lower screen using A=0.
 
 		LD	A,(HL)		; else pick up flag bits.
 		RRCA			; rotate permanent bits to temporary bits.
 
-;; TEMPS-2
-L0D65	XOR	(HL)		;
+;; $0D65
+TEMPS_2:	XOR	(HL)
 		AND	$55		; BIN 01010101
 		XOR	(HL)		; permanent now as original
 		LD	(HL),A		; apply permanent bits to temporary bits.
@@ -3750,64 +3750,64 @@ L0D65	XOR	(HL)		;
 ; clears the display.
 ; if it's difficult to write it should be difficult to read.
 
-;; CLS
-L0D6B	CALL	L0DAF		; routine CL-ALL  clears display and
+;; $0D6B
+CLS:		CALL	L0DAF		; routine CL-ALL  clears display and
 					; resets attributes to permanent.
 					; re-attaches it to this computer.
 
-; this routine called from input, **
+					; this routine called from input, **
 
-;; CLS-LOWER
-L0D6E	LD	HL,$5C3C		; address TV_FLAG
+;; $0D6E
+CLS_LOWER:	LD	HL,TV_FLAG	; address TV_FLAG
 		RES	5,(HL)		; TV_FLAG - signal do not clear lower screen.
 		SET	0,(HL)		; TV_FLAG - signal lower screen in use.
-		CALL	L0D4D		; routine TEMPS picks up temporary colours.
+		CALL	TEMPS		; routine TEMPS picks up temporary colours.
 		LD	B,(IY+$31)	; fetch lower screen DF_SZ
 		CALL	L0E44		; routine CL-LINE clears lower part
 					; and sets permanent attributes.
 
-		LD	HL,$5AC0		; fetch attribute address leftmost cell,
+		LD	HL,$5AC0	; fetch attribute address leftmost cell,
 					; second line up.
-		LD	A,($5C8D)	; fetch permanent attribute from ATTR_P.
+		LD	A,(ATTRP_MASKP)	; fetch permanent attribute from ATTR_P.
 		DEC	B		; decrement lower screen display file size
-		JR	L0D8E		; forward to CLS-3 ->
+		JR	CLS_3		; forward to CLS_3 ->
 
-;; CLS-1
-L0D87	LD	C,$20		; set counter to 32 characters per line
+;; $0D87
+CLS_1:		LD	C,$20		; set counter to 32 characters per line
 
-;; CLS-2
-L0D89	DEC	HL		; decrease attribute address.
+;; $0D89
+CLS_2:		DEC	HL		; decrease attribute address.
 		LD	(HL),A		; and place attributes in next line up.
 		DEC	C		; decrease 32 counter.
-		JR	NZ,L0D89		; loop back to CLS-2 until all 32 done.
+		JR	NZ,CLS_2	; loop back to CLS_2 until all 32 done.
 
-;; CLS-3
-L0D8E	DJNZ	L0D87		; decrease B counter and back to CLS-1
+;; $0D
+CLS_3:		DJNZ	CLS_1		; decrease B counter and back to CLS_1
 					; if not zero.
 
 		LD	(IY+$31),$02	; set DF_SZ lower screen to 2
 
-; This entry point is called from CL-ALL below to
-; reset the system channel input and output addresses to normal.
+					; This entry point is called from CL-ALL below to
+					; reset the system channel input and output addresses to normal.
 
-;; CL-CHAN
-L0D94	LD	A,$FD		; select system channel 'K'
+;; $0D94
+CL_CHAN:	LD	A,$FD		; select system channel 'K'
 		CALL	L1601		; routine CHAN-OPEN opens it.
-		LD	HL,($5C51)	; fetch CURCHL to HL to address current channel
-		LD	DE,L09F4		; set address to PRINT-OUT for first pass.
+		LD	HL,(CURCHL)	; fetch CURCHL to HL to address current channel
+		LD	DE,PRINT_OUT	; set address to PRINT_OUT for first pass.
 		AND	A		; clear carry for first pass.
 
-;; CL-CHAN-A
-L0DA0	LD	(HL),E		; insert output address first pass.
+;; $0DA0
+CL_CHAN_A:	LD	(HL),E		; insert output address first pass.
 		INC	HL		; or input address on second pass.
 		LD	(HL),D		;
 		INC	HL		;
-		LD	DE,L10A8		; fetch address KEY-INPUT for second pass
+		LD	DE,L10A8	; fetch address KEY-INPUT for second pass
 		CCF			; complement carry flag - will set on pass 1.
 
-		JR	C,L0DA0		; back to CL-CHAN-A if first pass else done.
+		JR	C,CL_CHAN_A	; back to CL_CHAN_A if first pass else done.
 
-		LD	BC,$1721		; line 23 for lower screen
+		LD	BC,$1721	; line 23 for lower screen
 		JR	L0DD9		; exit via CL-SET to set column
 					; for lower display
 
@@ -3823,18 +3823,18 @@ L0DAF	LD	HL,$0000		; initialize plot coordinates.
 		LD	($5C7D),HL	; set COORDS to 0,0.
 		RES	0,(IY+$30)	; update FLAGS2  - signal main screen is clear.
 
-		CALL	L0D94		; routine CL-CHAN makes channel 'K' 'normal'.
+		CALL	CL_CHAN		; routine CL_CHAN makes channel 'K' 'normal'.
 
 		LD	A,$FE		; select system channel 'S'
 		CALL	L1601		; routine CHAN-OPEN opens it
-		CALL	L0D4D		; routine TEMPS picks up permanent values.
+		CALL	TEMPS		; routine TEMPS picks up permanent values.
 		LD	B,$18		; There are 24 lines.
 		CALL	L0E44		; routine CL-LINE clears 24 text lines
 					; (and sets BC to $1821)
 
-		LD	HL,($5C51)	; fetch CURCHL make HL address current
+		LD	HL,(CURCHL)	; fetch CURCHL make HL address current
 					; channel 'S'
-		LD	DE,L09F4		; address: PRINT-OUT
+		LD	DE,PRINT_OUT		; address: PRINT_OUT
 		LD	(HL),E		; is made
 		INC	HL		; the normal
 		LD	(HL),D		; output address.
@@ -3843,7 +3843,7 @@ L0DAF	LD	HL,$0000		; initialize plot coordinates.
 					; Note. BC already contains $1821.
 		LD	BC,$1821		; reset column and line to 0,0
 					; and continue into CL-SET, below, exiting
-					; via PO-STORE (for upper screen).
+					; via PO_STORE (for upper screen).
 
 ;----------------------------
 ; Set line and column numbers
@@ -3879,7 +3879,7 @@ L0DF4	LD	A,$21		; the column $1-$21 is reversed
 		LD	E,A		; now transfer to DE
 		LD	D,$00		; prepare for addition
 		ADD	HL,DE		; and add to base address
-		JP	L0ADC		; exit via PO-STORE to update relevant
+		JP	PO_STORE	; exit via PO_STORE to update relevant
 					; system variables.
 ;-----------------
 ; Handle scrolling
@@ -3952,7 +3952,7 @@ L0E19	EX	DE,HL		; save source in DE.
 ;----------------------------
 ; Clear text lines of display
 ;----------------------------
-; This subroutine, called from CL-ALL, CLS-LOWER and AUTO-LIST and above,
+; This subroutine, called from CL-ALL, CLS_LOWER and AUTO-LIST and above,
 ; clears text lines at bottom of display.
 ; The B register holds on entry the number of lines to be cleared 1-24.
 
@@ -4001,7 +4001,7 @@ L0E4D	AND	$07		; mask 0-7 to consider thirds at a time
 
 		INC	DE		; make DE point to next location.
 
-		LD	A,($5C8D)	; fetch ATTR_P - permanent attributes
+		LD	A,(ATTRP_MASKP)	; fetch ATTR_P - permanent attributes
 		BIT	0,(IY+$02)	; test TV_FLAG  - lower screen in use ?
 		JR	Z,L0E80		; skip to CL-LINE-3 if not.
 
@@ -4021,7 +4021,7 @@ L0E80	LD	(HL),A		; put attribute in first byte.
 ; This subroutine is called from CL-LINE or CL-SCROLL with the HL register
 ; pointing to the 'ninth' line and H needs to be decremented before or after
 ; the division. Had it been done first then either present code or that used
-; at the start of PO-ATTR could have been used.
+; at the start of PO_ATTR could have been used.
 ; The Spectrum screen arrangement leads to the L register holding already
 ; the correct value for the attribute file and it is only necessary
 ; to manipulate H to form the correct colour attribute address.
@@ -4180,7 +4180,7 @@ L0EE7	LD	(HL),A		; set addressed location to zero.
 
 		RES	1,(IY+$30)	; set FLAGS2 - signal printer buffer is clear.
 		LD	C,$21		; set the column position .
-		JP	L0DD9		; exit via CL-SET and then PO-STORE.
+		JP	L0DD9		; exit via CL-SET and then PO_STORE.
 
 ;------------------
 ; Copy line routine
@@ -4215,7 +4215,7 @@ L0EFD	CALL	L1F54		; call BREAK-KEY to read keyboard immediately.
 		CALL	L0EDF		; call routine CLEAR-PRB.
 					; Note. should not be cleared if COPY in use.
 
-;; REPORT-Dc
+;; REPORT_DC
 L0F0A	RST	08H		; ERROR_1
 		DEFB	$0C		; Error Report: BREAK - CONT repeats
 
@@ -4440,7 +4440,7 @@ L0FA9	LD	HL,($5C49)	; fetch E_PPC the last line number entered.
 		LD	C,L		; to BC register.
 		CALL	L1F05		; routine TEST-ROOM checks free memory.
 		CALL	L1097		; routine CLEAR-SP clears editing area.
-		LD	HL,($5C51)	; address CURCHL
+		LD	HL,(CURCHL)	; address CURCHL
 		EX	(SP),HL		; swap with line address on stack
 		PUSH	HL		; save line address underneath
 
@@ -4754,7 +4754,7 @@ L10A8	BIT	3,(IY+$02)	; test TV_FLAG  - has a key been pressed in
 		RES	5,(IY+$01)	; update FLAGS  - reset the new key flag.
 		PUSH	AF		; save the input character.
 		BIT	5,(IY+$02)	; test TV_FLAG  - clear lower screen ?
-		CALL	NZ,L0D6E		; routine CLS-LOWER if so.
+		CALL	NZ,CLS_LOWER	; routine CLS_LOWER if so.
 
 		POP	AF		; restore the character code.
 		CP	$20		; if space or higher then
@@ -4866,11 +4866,11 @@ L111B	SCF			; set carry flag to show a key has been found
 ; e.g. "1000 LET a = 1" is 12 characters.
 
 ;; ED-COPY
-L111D	CALL	L0D4D		; routine TEMPS sets temporary attributes.
+L111D	CALL	TEMPS		; routine TEMPS sets temporary attributes.
 		RES	3,(IY+$02)	; update TV_FLAG  - signal no change in mode
 		RES	5,(IY+$02)	; update TV_FLAG  - signal don't clear lower
 					; screen.
-		LD	HL,($5C8A)	; fetch SPOSNL
+		LD	HL,(SPOSNL)	; fetch SPOSNL
 		PUSH	HL		; and save on stack.
 
 		LD	HL,(ERR_SP)	; fetch ERR_SP
@@ -4879,7 +4879,7 @@ L111D	CALL	L0D4D		; routine TEMPS sets temporary attributes.
 		PUSH	HL		; is pushed as the error routine
 		LD	(ERR_SP),SP	; and ERR_SP made to point to it.
 
-		LD	HL,($5C82)	; fetch ECHO_E
+		LD	HL,(ECHO_E)	; fetch ECHO_E
 		PUSH	HL		; and push also
 
 		SCF			; set carry flag to control SET-DE
@@ -4895,10 +4895,10 @@ L111D	CALL	L0D4D		; routine TEMPS sets temporary attributes.
 		CALL	L18E1		; routine OUT-CURS considers a
 					; terminating cursor.
 
-		LD	HL,($5C8A)	; fetch updated SPOSNL
+		LD	HL,(SPOSNL)	; fetch updated SPOSNL
 		EX	(SP),HL		; exchange with ECHO_E on stack
 		EX	DE,HL		; transfer ECHO_E to DE
-		CALL	L0D4D		; routine TEMPS to re-set attributes
+		CALL	TEMPS		; routine TEMPS to re-set attributes
 					; if altered.
 
 ; the lower screen was not cleared, at the outset, so if deleting then old
@@ -4918,7 +4918,7 @@ L1150	LD	A,($5C8B)	; fetch SPOSNL_hi is current line
 ;; ED-SPACES
 L115E	LD	A,$20		; prepare a space.
 		PUSH	DE		; save old line/column.
-		CALL	L09F4		; routine PRINT-OUT prints a space over
+		CALL	PRINT_OUT		; routine PRINT_OUT prints a space over
 					; any text from previous print.
 					; Note. Since the blanking only occurs when
 					; using $09F4 to print to the lower screen,
@@ -4942,7 +4942,7 @@ L1167	LD	D,$00		; prepare to moan.
 		LD	HL,$1A90		; set duration.
 		CALL	BEEPER		; routine BEEPER.
 		LD	(IY+$00),$FF	; clear ERR_NR.
-		LD	DE,($5C8A)	; fetch SPOSNL.
+		LD	DE,(SPOSNL)	; fetch SPOSNL.
 		JR	L117E		; forward to ED-C-END
 
 ; -------
@@ -4960,10 +4960,10 @@ L117E	POP	HL		; restore the old value of ERR_SP.
 		LD	(ERR_SP),HL	; update the system variable ERR_SP
 		POP	BC		; old value of SPOSN_L
 		PUSH	DE		; save new value
-		CALL	L0DD9		; routine CL-SET and PO-STORE
+		CALL	L0DD9		; routine CL-SET and PO_STORE
 					; update ECHO_E and SPOSN_L from BC
 		POP	HL		; restore new value
-		LD	($5C82),HL	; and update ECHO_E
+		LD	(ECHO_E),HL	; and update ECHO_E
 		LD	(IY+$26),$00	; make error pointer X_PTR_hi out of bounds
 		RET			; return
 
@@ -5068,7 +5068,7 @@ L11B7	DI			; disable interrupts - machine stack will be
 		EXX			; switch in alternate set.
 		LD	BC,($5CB4)	; fetch P-RAMT differs on 16K/48K machines.
 		LD	DE,($5C38)	; fetch RASP/PIP.
-		LD	HL,($5C7B)	; fetch UDG	differs on 16K/48K machines.
+		LD	HL,(UDG)	; fetch UDG	differs on 16K/48K machines.
 		EXX			; switch back to main set and continue into...
 
 ;----------------------------
@@ -5134,7 +5134,7 @@ L11EF	DEC	HL		; step back to last valid location.
 					; stored system variables in case from NEW.
 		LD	($5CB4),BC	; insert P-RAMT.
 		LD	($5C38),DE	; insert RASP/PIP.
-		LD	($5C7B),HL	; insert UDG.
+		LD	(UDG),HL	; insert UDG.
 		EXX			; switch in main set.
 		INC	B		; now test if we arrived here from NEW.
 		JR	Z,L1219		; forward to RAM-SET if we did.
@@ -5149,7 +5149,7 @@ L11EF	DEC	HL		; step back to last valid location.
 		LDDR			; copy of the standard characters A - U.
 		EX	DE,HL		; switch the pointer to HL.
 		INC	HL		; update to start of 'A' in RAM.
-		LD	($5C7B),HL	; make UDG system variable address the first
+		LD	(UDG),HL	; make UDG system variable address the first
 					; bitmap.
 		DEC	HL		; point at RAMTOP again.
 
@@ -5162,7 +5162,7 @@ L11EF	DEC	HL		; step back to last valid location.
 L1219	LD	($5CB2),HL	; set system variable RAMTOP to HL.
 
 		LD	HL,$3C00		; a strange place to set the pointer to the 
-		LD	($5C36),HL	; character set, CHARS - as no printing yet.
+		LD	(CHARS),HL	; character set, CHARS - as no printing yet.
 
 		LD	HL,($5CB2)	; fetch RAMTOP to HL again as we've lost it.
 
@@ -5222,21 +5222,21 @@ L1219	LD	($5CB2),HL	; set system variable RAMTOP to HL.
 					; --
 		LD	A,$38		; the colour system is set to white paper,
 					; black ink, no flash or bright.
-		LD	($5C8D),A	; set ATTR_P permanent colour attributes.
-		LD	($5C8F),A	; set ATTR_T temporary colour attributes.
+		LD	(ATTRP_MASKP),A	; set ATTR_P permanent colour attributes.
+		LD	(ATTRT_MASKT),A	; set ATTR_T temporary colour attributes.
 		LD	(BORDCR),A	; set BORDCR the border colour/lower screen
 					; attributes.
 
-		LD	HL,$0523		; The keyboard repeat and delay values
+		LD	HL,$0523	; The keyboard repeat and delay values
 		LD	(REPDEL),HL	; are loaded to REPDEL and REPPER.
 
-		DEC	(IY-$3A)		; set KSTATE_0 to $FF.
-		DEC	(IY-$36)		; set KSTATE_4 to $FF.
+		DEC	(IY-$3A)	; set KSTATE_0 to $FF.
+		DEC	(IY-$36)	; set KSTATE_4 to $FF.
 					; thereby marking both available.
 
-		LD	HL,L15C6		; set source to ROM Address: init-strm
-		LD	DE,$5C10		; set destination to system variable STRMS-FD
-		LD	BC,$000E		; copy the 14 bytes of initial 7 streams data
+		LD	HL,L15C6	; set source to ROM Address: init-strm
+		LD	DE,$5C10	; set destination to system variable STRMS-FD
+		LD	BC,$000E	; copy the 14 bytes of initial 7 streams data
 		LDIR			; from ROM to RAM.
 
 		SET	1,(IY+$01)	; update FLAGS  - signal printer in use.
@@ -5245,12 +5245,12 @@ L1219	LD	($5CB2),HL	; set system variable RAMTOP to HL.
 
 		LD	(IY+$31),$02	; set DF_SZ the lower screen display size to
 					; two lines
-		CALL	L0D6B		; call routine CLS to set up system
+		CALL	CLS		; call routine CLS to set up system
 					; variables associated with screen and clear
 					; the screen and set attributes.
 		XOR	A		; clear accumulator so that we can address
 		LD	DE,L1539 - 1	; the message table directly.
-		CALL	L0C0A		; routine PO-MSG puts
+		CALL	PO_MSG		; routine PO_MSG puts
 					; '(c) 1982 Sinclair Research Ltd'
 					; at bottom of display.
 		SET	5,(IY+$02)	; update TV_FLAG  - signal lower screen will
@@ -5330,11 +5330,11 @@ L12CF	LD	HL,(E_LINE)	; fetch the edit line address from E_LINE.
 ; this must be a direct command.
 
 		BIT	0,(IY+$30)	; test FLAGS2 - clear the main screen ?
-		CALL	NZ,L0DAF		; routine CL-ALL, if so, e.g. after listing.
-		CALL	L0D6E		; routine CLS-LOWER anyway.
+		CALL	NZ,L0DAF	; routine CL-ALL, if so, e.g. after listing.
+		CALL	CLS_LOWER	; routine CLS_LOWER anyway.
 		LD	A,$19		; compute scroll count to 25 minus
-		SUB	(IY+$4F)		; value of S_POSN_hi.
-		LD	($5C8C),A	; update SCR_CT system variable.
+		SUB	(IY+$4F)	; value of S_POSN_HI.
+		LD	(SCR_CT),A	; update SCR_CT system variable.
 		SET	7,(IY+$01)	; update FLAGS - signal running program.
 		LD	(IY+$00),$FF	; set ERR_NR to 'OK'.
 		LD	(IY+$0A),$01	; set NSPPC to one for first statement.
@@ -5378,7 +5378,7 @@ L1313	PUSH	AF		; save the error number.
 		RES	5,(IY+$37)	; update FLAGX - signal in EDIT not INPUT mode.
 					; Note. all the bits were reset earlier.
 
-		CALL	L0D6E		; call routine CLS-LOWER.
+		CALL	CLS_LOWER	; call routine CLS_LOWER.
 		SET	5,(IY+$02)	; update TV_FLAG - signal lower screen
 					; requires clearing.
 
@@ -5397,11 +5397,11 @@ L133C	CALL	L15EF		; call routine OUT-CODE to print the code.
 
 		LD	A,B		; fetch stored report code.
 		LD	DE,L1391		; address: rpt-mesgs.
-		CALL	L0C0A		; call routine PO-MSG to print.
+		CALL	PO_MSG		; call routine PO_MSG to print.
 
 		XOR	A		; clear to directly
 		LD	DE,L1537 - 1	; address comma and space message.  
-		CALL	L0C0A		; routine PO-MSG prints them although it would
+		CALL	PO_MSG		; routine PO_MSG prints them although it would
 					; be more succinct to use RST $10.
 
 		LD	BC,($5C45)	; fetch PPC the current line number.
@@ -5610,16 +5610,16 @@ L15AB	POP	AF		; drop the address of Report G
 ; other than a comma provides a convenient resting place for DATADD.
 
 ;; init-chan
-L15AF	DEFW	L09F4		; PRINT-OUT
+L15AF	DEFW	PRINT_OUT		; PRINT_OUT
 		DEFW	L10A8		; KEY-INPUT
 		DEFB	$4B		; 'K'
-		DEFW	L09F4		; PRINT-OUT
+		DEFW	PRINT_OUT		; PRINT_OUT
 		DEFW	L15C4		; REPORT-J
 		DEFB	$53		; 'S'
 		DEFW	L0F81		; ADD-CHAR
 		DEFW	L15C4		; REPORT-J
 		DEFB	$52		; 'R'
-		DEFW	L09F4		; PRINT-OUT
+		DEFW	PRINT_OUT		; PRINT_OUT
 		DEFW	L15C4		; REPORT-J
 		DEFB	$50		; 'P'
 
@@ -5685,7 +5685,7 @@ L15E4	RST	08H		; ERROR_1
 ;; INPUT-AD
 L15E6	EXX			; switch in alternate set.
 		PUSH	HL		; save HL register
-		LD	HL,($5C51)	; fetch address of CURCHL - current channel.
+		LD	HL,(CURCHL)	; fetch address of CURCHL - current channel.
 		INC	HL		; step over output routine
 		INC	HL		; to point to low byte of input routine.
 		JR	L15F7		; forward to CALL-SUB.
@@ -5708,7 +5708,7 @@ L15EF	LD	E,$30		; add 48 decimal to give ascii
 ;; PRINT_A-2
 L15F2	EXX			; switch in alternate set
 		PUSH	HL		; save HL register
-		LD	HL,($5C51)	; fetch CURCHL the current channel.
+		LD	HL,(CURCHL)	; fetch CURCHL the current channel.
 
 ; input-ad rejoins here also.
 
@@ -5767,7 +5767,7 @@ L1610	DEC	DE		; reduce offset so it points to the channel.
 ; current channel when it has been temporarily altered.
 
 ;; CHAN-FLAG
-L1615	LD	($5C51),HL	; set CURCHL system variable to the
+L1615	LD	(CURCHL),HL	; set CURCHL system variable to the
 					; address in HL
 		RES	4,(IY+$30)	; update FLAGS2  - signal K channel not in use.
 					; Note. provide a default for channel 'R'.
@@ -5829,7 +5829,7 @@ L1642	RES	0,(IY+$02)	; TV_FLAG  - signal main screen in use
 
 ;; CHAN-S-1
 L1646	RES	1,(IY+$01)	; update FLAGS  - signal printer not in use
-		JP	L0D4D		; jump back to TEMPS and exit via that
+		JP	TEMPS		; jump back to TEMPS and exit via that
 					; routine after setting temporary attributes.
 ;---------------
 ; Channel P flag
@@ -6377,7 +6377,7 @@ L177A	DEFB	'K', L1781-$-1  ; $06 offset to OPEN-K
 ; something bigger. In any case it would have to be created after
 ; the system variables but apart from that it is a simple task
 ; and all but one of the ROM routines can handle a buffer in that position.
-; (PR-ALL-6 would require an extra 3 bytes of code).
+; (PR_ALL_6 would require an extra 3 bytes of code).
 ; However it wouldn't be wise to have two streams attached to the ZX Printer
 ; as you can now, so one assumes that if PR_CC_hi was non-zero then
 ; the OPEN-P routine would have refused to attach a stream if another
@@ -6451,7 +6451,7 @@ L1793	JR	L1725		; to REPORT-Ob
 ; This produces an automatic listing in the upper screen.
 
 ;; AUTO-LIST
-L1795	LD	($5C3F),SP	; save stack pointer in LIST_SP
+L1795	LD	(LIST_SP),SP	; save stack pointer in LIST_SP
 		LD	(IY+$02),$10	; update TV_FLAG set bit 3
 		CALL	L0DAF		; routine CL-ALL.
 		SET	0,(IY+$02)	; update TV_FLAG  - signal lower screen in use
@@ -6606,7 +6606,7 @@ L1833	LD	E,$01		; signal current line not yet printed
 
 ;; LIST-ALL-2
 L1835	CALL	L1855		; routine OUT-LINE outputs a BASIC line
-					; using PRINT-OUT and makes an early return
+					; using PRINT_OUT and makes an early return
 					; when no more lines to print. >>>
 
 		RST	10H		; PRINT_A prints the carriage return (in A)
@@ -6617,8 +6617,8 @@ L1835	CALL	L1855		; routine OUT-LINE outputs a BASIC line
 
 ; continue here if an automatic listing required.
 
-		LD	A,($5C6B)	; fetch DF_SZ lower display file size.
-		SUB	(IY+$4F)		; subtract S_POSN_hi ithe current line number.
+		LD	A,(DF_SZ)	; fetch DF_SZ lower display file size.
+		SUB	(IY+$4F)		; subtract S_POSN_HI ithe current line number.
 		JR	NZ,L1835		; back to LIST-ALL-2 if upper screen not full.
 
 		XOR	E		; A contains zero, E contains one if the
@@ -6764,24 +6764,24 @@ L18B6	CP	$0E		; character fourteen ?
 ;; OUT-FLASH
 L18C1	EXX			; switch in alternate set
 
-		LD	HL,($5C8F)	; fetch L = ATTR_T, H = MASK-T
+		LD	HL,(ATTRT_MASKT); fetch L = ATTR_T, H = MASK-T
 		PUSH	HL		; save masks.
 		RES	7,H		; reset flash mask bit so active. 
 		SET	7,L		; make attribute FLASH.
-		LD	($5C8F),HL	; resave ATTR_T and MASK-T
+		LD	(ATTRT_MASKT),HL; resave ATTR_T and MASK-T
 
-		LD	HL,$5C91		; address P_FLAG
+		LD	HL,P_FLAG	; address P_FLAG
 		LD	D,(HL)		; fetch to D
 		PUSH	DE		; and save.
-		LD	(HL),$00		; clear inverse, over, ink/paper 9
+		LD	(HL),$00	; clear inverse, over, ink/paper 9
 
-		CALL	L09F4		; routine PRINT-OUT outputs character
+		CALL	PRINT_OUT	; routine PRINT_OUT outputs character
 					; without the need to vector via RST 10.
 
 		POP	HL		; pop P_FLAG to H.
 		LD	(IY+$57),H	; and restore system variable P_FLAG.
 		POP	HL		; restore temporary masks
-		LD	($5C8F),HL	; and restore system variables ATTR_T/MASK_T
+		LD	(ATTRT_MASKT),HL; and restore system variables ATTR_T/MASK_T
 
 		EXX			; switch back to main set
 		RET			; return
@@ -7525,7 +7525,7 @@ L1ABB	DEFB	$03		; Class-03 - A numeric expression may follow
 
 ;; P-CLS
 L1ABE	DEFB	$00		; Class-00 - No further operands.
-		DEFW	L0D6B		; Address: $0D6B; Address: CLS
+		DEFW	CLS		; Address: $0D6B; Address: CLS
 
 ;; P-PLOT
 L1AC1	DEFB	$09		; Class-09 - Two comma-separated numeric
@@ -8226,7 +8226,7 @@ L1C8C	CALL	L24FB		; routine SCANNING
 ;; CLASS-07
 L1C96	BIT	7,(IY+$01)	; test FLAGS - checking syntax only ?
 		RES	0,(IY+$02)	; TV_FLAG - signal main screen in use
-		CALL	NZ,L0D4D		; routine TEMPS is called in runtime.
+		CALL	NZ,TEMPS	; routine TEMPS is called in runtime.
 		POP	AF		; drop return address SCAN-LOOP
 		LD	A,(T_ADDR)	; T_ADDR_lo to accumulator.
 					; points to '$07' entry + 1
@@ -8243,9 +8243,9 @@ L1CA5	SUB	L1AEB-$D8 % 256 ; convert $EB to $D8 ('INK') etc.
 
 ; return here in runtime.
 
-		LD	HL,($5C8F)	; pick up ATTR_T and MASK_T
-		LD	($5C8D),HL	; and store in ATTR_P and MASK_P
-		LD	HL,$5C91		; point to P_FLAG.
+		LD	HL,(ATTRT_MASKT); pick up ATTR_T and MASK_T
+		LD	(ATTRP_MASKP),HL; and store in ATTR_P and MASK_P
+		LD	HL,P_FLAG	; point to P_FLAG.
 		LD	A,(HL)		; pick up in A
 		RLCA			; rotate to left
 		XOR	(HL)		; combine with HL
@@ -8267,7 +8267,7 @@ L1CBE	CALL	L2530		; routine SYNTAX-Z
 		JR	Z,L1CD6		; forward to CL-09-1 if checking syntax.
 
 		RES	0,(IY+$02)	; update TV_FLAG - signal main screen in use
-		CALL	L0D4D		; routine TEMPS is called.
+		CALL	TEMPS		; routine TEMPS is called.
 		LD	HL,$5C90		; point to MASK_T
 		LD	A,(HL)		; fetch mask to accumulator.
 		OR	$F8		; or with 11111000 paper/bright/flash 8
@@ -8970,7 +8970,7 @@ L1EB7	PUSH	BC		; save ramtop value.
 		DEC	HL		; adjust to point at variables end-marker.
 		CALL	L19E5		; routine RECLAIM-1 reclaims the space used by
 					; the variables.
-		CALL	L0D6B		; routine CLS to clear screen.
+		CALL	CLS		; routine CLS to clear screen.
 		LD	HL,($5C65)	; fetch STKEND the start of free memory.
 		LD	DE,$0032		; allow for another 50 bytes.
 		ADD	HL,DE		; add the overhead to HL.
@@ -9323,7 +9323,7 @@ L1FCD	LD	A,$02		; the stream for the upper screen.
 ;; PRINT-1
 L1FCF	CALL	L2530		; routine SYNTAX-Z checks if program running
 		CALL	NZ,L1601		; routine CHAN-OPEN if so
-		CALL	L0D4D		; routine TEMPS sets temporary colours.
+		CALL	TEMPS		; routine TEMPS sets temporary colours.
 		CALL	L1FDF		; routine PRINT-2 - the actual item
 		CALL	L1BEE		; routine CHECK-END gives error if not at end
 					; of statement
@@ -9557,7 +9557,7 @@ L2089	CALL	L2530		; routine SYNTAX-Z to check if in runtime.
 
 		LD	A,$01		; select channel 'K' the keyboard for input.
 		CALL	L1601		; routine CHAN-OPEN opens it.
-		CALL	L0D6E		; routine CLS-LOWER clears the lower screen.
+		CALL	CLS_LOWER	; routine CLS_LOWER clears the lower screen.
 
 ;; INPUT-1
 L2096	LD	(IY+$02),$01	; set TV_FLAG - signal lower screen in use
@@ -9572,9 +9572,9 @@ L2096	LD	(IY+$02),$01	; set TV_FLAG - signal lower screen in use
 ; keyboard input has been made and it remains to adjust the upper
 ; screen in case the lower two lines have been extended upwards.
 
-		LD	BC,($5C88)	; fetch S_POSN current line/column of
+		LD	BC,(S_POSN)	; fetch S_POSN current line/column of
 					; the upper screen.
-		LD	A,($5C6B)	; fetch DF_SZ the display file size of
+		LD	A,(DF_SZ)	; fetch DF_SZ the display file size of
 					; the lower screen.
 		CP	B		; test that lower screen does not overlap
 		JR	C,L20AD		; forward to INPUT-2 if not.
@@ -9587,14 +9587,14 @@ L2096	LD	(IY+$02),$01	; set TV_FLAG - signal lower screen in use
 					; print position.
 
 ;; INPUT-2
-L20AD	LD	($5C88),BC	; set S_POSN update upper screen line/column.
+L20AD	LD	(S_POSN),BC	; set S_POSN update upper screen line/column.
 		LD	A,$19		; subtract from twenty five
 		SUB	B		; the new line number.
-		LD	($5C8C),A	; and place result in SCR_CT - scroll count.
+		LD	(SCR_CT),A	; and place result in SCR_CT - scroll count.
 		RES	0,(IY+$02)	; update TV_FLAG - signal main screen in use.
 		CALL	L0DD9		; routine CL-SET sets the print position
 					; system variables for the upper screen.
-		JP	L0D6E		; jump back to CLS-LOWER and make
+		JP	CLS_LOWER	; jump back to CLS_LOWER and make
 					; an indirect exit >>.
 
 ;----------------------
@@ -9769,7 +9769,7 @@ L2161	LD	(IY+$22),$00	; set K_CUR_hi to a low value so that the cursor
 					; if you're inputting more than one item in
 					; a statement then that becomes apparent.
 
-		LD	BC,($5C82)	; fetch line and column from ECHO_E
+		LD	BC,(ECHO_E)	; fetch line and column from ECHO_E
 		CALL	L0DD9		; routine CL-SET sets S-POSNL to those
 					; values.
 
@@ -9887,7 +9887,7 @@ L21D4	RST	08H		; ERROR_1
 ; use is the one for the keyboard.
 
 ;; IN-CHAN-K
-L21D6	LD	HL,($5C51)	; fetch address of current channel CURCHL
+L21D6	LD	HL,(CURCHL)	; fetch address of current channel CURCHL
 		INC	HL		;
 		INC	HL		; advance past
 		INC	HL		; input and
@@ -9918,7 +9918,7 @@ L21D6	LD	HL,($5C51)	; fetch address of current channel CURCHL
 ; This bug does not apply to embedded PRINT items as it is quite permissible
 ; to mix stream altering commands and colour items.
 ; The fix therefore would be to ensure that CLASS-07 and CLASS-09 make
-; PRINT-OUT the current channel when not checking syntax.
+; PRINT_OUT the current channel when not checking syntax.
 ; -----------------------------------------------------------------
 
 ;; CO-TEMP-1
@@ -10020,7 +10020,7 @@ L21FC	SUB	$C9		; reduce to control character $10 (INK)
 ; ------------------------------------
 ;  The colour system variable handler.
 ; ------------------------------------
-; This is an exit branch from PO-1-OPER, PO-2-OPER
+; This is an exit branch from PO_1_OPER, PO_2_OPER
 ; A holds control $10 (INK) to $15 (OVER)
 ; D holds parameter 0-9 for ink/paper 0,1 or 8 for bright/flash,
 ; 0 or 1 for over/inverse.
@@ -10051,7 +10051,7 @@ L2228	LD	C,A		; save the A
 					; 'Invalid colour'.
 
 		LD	A,C		; restore A
-		LD	HL,$5C91		; address system variable P_FLAG
+		LD	HL,P_FLAG		; address system variable P_FLAG
 		JR	L226C		; forward to exit via routine CO-CHANGE
 
 ; the branch was here with INK/PAPER and carry set for INK.
@@ -10081,7 +10081,7 @@ L2244	RST	08H		; ERROR_1
 		DEFB	$13		; Error Report: Invalid colour
 
 ;; CO-TEMP-9
-L2246	LD	HL,$5C8F		; address system variable ATTR_T initially.
+L2246	LD	HL,ATTRT_MASKT		; address system variable ATTR_T initially.
 		CP	$08		; compare with 8
 		JR	C,L2258		; forward to CO-TEMP-B with 0-7.
 
@@ -10165,7 +10165,7 @@ L227D	LD	C,A		; store value in C
 
 ;; CO-TEMP-E
 L2287	LD	A,C		; value to A
-		LD	HL,$5C8F		; address ATTR_T
+		LD	HL,ATTRT_MASKT	; address ATTR_T
 		CALL	L226C		; routine CO-CHANGE addressing ATTR_T
 		LD	A,C		; fetch value
 		RRCA			; for flash8/bright8 complete
@@ -10282,7 +10282,7 @@ L22D4	RLCA			; rotate and loop back
 ;; PLOT
 L22DC	CALL	L2307		; routine STK-TO-BC
 		CALL	L22E5		; routine PLOT-SUB
-		JP	L0D4D		; to TEMPS
+		JP	TEMPS		; to TEMPS
 
 ; -------------------
 ; The Plot subroutine
@@ -10327,7 +10327,7 @@ L22FD	BIT	2,C		; is it inverse 1 ?
 
 ;; PLOT-END
 L2303	LD	(HL),A		; load byte to the screen.
-		JP	L0BDB		; exit to PO-ATTR to set colours for cell.
+		JP	PO_ATTR		; exit to PO_ATTR to set colours for cell.
 
 ;-------------------------------
 ; Put two numbers in BC register
@@ -10722,7 +10722,7 @@ L245F	RST	28H		;; FP_CALC
 
 ;; LINE-DRAW
 L2477	CALL	L24B7		; routine DRAW-LINE
-		JP	L0D4D		; to TEMPS
+		JP	TEMPS		; to TEMPS
 
 
 ;-------------------
@@ -11001,7 +11001,7 @@ L2530	BIT	7,(IY+$01)	; test FLAGS  - checking syntax only ?
 
 ;; S-SCRN$-S
 L2535	CALL	L2307		; routine STK-TO-BC.
-		LD	HL,($5C36)	; fetch address of CHARS.
+		LD	HL,(CHARS)	; fetch address of CHARS.
 		LD	DE,$0100		; fetch offset to chr$ 32
 		ADD	HL,DE		; and find start of bitmaps.
 					; Note. not inc h. ??
@@ -16296,7 +16296,7 @@ L34D3	DEC	A		; make range of bits 0-4 start at zero
 		JR	NC,L34E7		; to REPORT-A if originally higher 
 					; than 'U','u' or graphics U.
 
-		LD	BC,($5C7B)	; fetch the UDG system variable value.
+		LD	BC,(UDG)	; fetch the UDG system variable value.
 		ADD	A,C		; add the offset to character
 		LD	C,A		; and store back in register C.
 		JR	NC,L34E4		; forward to USR-STACK if no overflow.
@@ -16894,7 +16894,7 @@ L361F	LD	BC,$0001		; create an initial byte in workspace
 		LD	($5C5B),HL	; set system variable K_CUR to new location.
 		PUSH	HL		; and save start on machine stack also.
 
-		LD	HL,($5C51)	; fetch value of system variable CURCHL
+		LD	HL,(CURCHL)	; fetch value of system variable CURCHL
 		PUSH	HL		; and save that too.
 
 		LD	A,$FF		; select system channel 'R'.
@@ -16934,7 +16934,7 @@ L3645	CALL	L1E94		; routine FIND-INT1 fetches stream to A
 					; 'Integer out of range'
 					; (REPORT-Bd is within range)
 
-		LD	HL,($5C51)	; fetch current channel CURCHL
+		LD	HL,(CURCHL)	; fetch current channel CURCHL
 		PUSH	HL		; save it
 		CALL	L1601		; routine CHAN-OPEN opens channel
 
