@@ -2912,7 +2912,7 @@ PO_BACK_1:	INC	C		; move left one column.
 PO_BACK_2:	LD	C,$21		; the leftmost column position.
 
 ;; $0A3A
-PO_BACK_3:	JP	L0DD9		; to CL-SET and PO_STORE to save new
+PO_BACK_3:	JP	CL_SET		; to CL_SET and PO_STORE to save new
 					; position in system variables.
 
 ;---------------------
@@ -2949,13 +2949,13 @@ PO_RIGHT:	LD	A,(P_FLAG)	; fetch P_FLAG value
 
 ;; $0A4F
 PO_ENTER:	BIT	1,(IY+$01)	; test FLAGS  - is printer in use ?
-		JP	NZ,L0ECD	; to COPY-BUFF if so, to flush buffer and reset
+		JP	NZ,COPY_BUFF	; to COPY_BUFF if so, to flush buffer and reset
 					; the print position.
 
 		LD	C,$21		; the leftmost column position.
 		CALL	PO_SCR		; routine PO_SCR handles any scrolling required.
 		DEC	B		; to next screen line.
-		JP	L0DD9		; jump forward to CL-SET to store new position.
+		JP	CL_SET		; jump forward to CL_SET to store new position.
 
 ;------------
 ; Print comma
@@ -3062,7 +3062,7 @@ PO_AT_ERR:	JP	C,L1E9F		; to REPORT_B if higher than 22 decimal
 					; Out of screen.
 
 ;; $0ABF
-PO_AT_SET:	JP	L0DD9		; print position is valid so exit via CL-SET
+PO_AT_SET:	JP	CL_SET		; print position is valid so exit via CL_SET
 
 					; Continue here when dealing with TAB.
 					; Note. In basic TAB is followed by a 16-bit number and was initially
@@ -3279,7 +3279,7 @@ PR_ALL:		LD	A,C		; column to A
 		JR	Z,PR_ALL_1	; to PR_ALL_1 if not
 
 		PUSH	DE		; save source address
-		CALL	L0ECD		; routine COPY-BUFF outputs line to printer
+		CALL	COPY_BUFF	; routine COPY_BUFF outputs line to printer
 		POP	DE		; restore character source address
 		LD	A,C		; the new column number ($21) to C
 
@@ -3518,7 +3518,7 @@ PO_STEP:	BIT	7,(HL)		; is character inverted ?
 PO_SCR:		BIT	1,(IY+$01)	; test FLAGS  - is printer in use ?
 		RET	NZ		; return immediately if so.
 
-		LD	DE,L0DD9	; set DE to address: CL-SET
+		LD	DE,CL_SET	; set DE to address: CL_SET
 		PUSH	DE		; and push for return address.
 		LD	A,B		; transfer the line to A.
 		BIT	0,(IY+$02)	; test TV_FLAG  - Lower screen in use ?
@@ -3528,7 +3528,7 @@ PO_SCR:		BIT	1,(IY+$01)	; test FLAGS  - is printer in use ?
 		JR	C,REPORT_5	; forward to REPORT_5 if less.
 					; 'Out of screen'
 
-		RET	NZ		; return (via CL-SET) if greater
+		RET	NZ		; return (via CL_SET) if greater
 
 		BIT	4,(IY+$02)	; test TV_FLAG  - Automatic listing ?
 		JR	Z,PO_SCR_2	; forward to PO_SCR_2 if not.
@@ -3543,7 +3543,7 @@ PO_SCR:		BIT	1,(IY+$01)	; test FLAGS  - is printer in use ?
 		LD	SP,(LIST_SP)	; set stack pointer to LIST_SP
 
 		RES	4,(IY+$02)	; reset TV_FLAG  - signal auto listing finished.
-		RET			; return ignoring pushed value, CL-SET
+		RET			; return ignoring pushed value, CL_SET
 					; to MAIN or EDITOR without updating
 					; print position			->
 
@@ -3607,13 +3607,13 @@ PO_SCR_2:	DEC	(IY+$52)	; decrease SCR_CT
 					; been printed.
 
 ;; $0CD2
-PO_SCR_3:	CALL	L0DFE		; routine CL-SC-ALL to scroll whole display
+PO_SCR_3:	CALL	CL_SC_ALL	; routine CL_SC_ALL to scroll whole display
 		LD	B,(IY+$31)	; fetch DF_SZ to B
 		INC	B		; increase to address last line of display
 		LD	C,$21		; set C to $21 (was $21 from above routine)
 		PUSH	BC		; save the line and column in BC.
 
-		CALL	L0E9B		; routine CL-ADDR finds display address.
+		CALL	CL_ADDR		; routine CL_ADDR finds display address.
 
 		LD	A,H		; now find the corresponding attribute byte
 		RRCA			; (this code sequence is used twice
@@ -3638,7 +3638,7 @@ PO_SCR_3A:	LD	(DE),A		; transfer
 					; attribute lines.
 
 		POP	BC		; restore the line/column.
-		RET			; return via CL-SET (was pushed on stack).
+		RET			; return via CL_SET (was pushed on stack).
 
 					; The message 'scroll?' appears here with last byte inverted.
 
@@ -3691,7 +3691,7 @@ PO_SCR_4A:	PUSH	AF		; save scroll number.
 					; is harmless on the standard set up.
 
 ;; $0D2D
-PO_SCR_4B:	CALL	L0E00		; routine CL-SCROLL scrolls B lines
+PO_SCR_4B:	CALL	CL_SCROLL	; routine CL_SCROLL scrolls B lines
 		POP	AF		; restore scroll counter.
 		DEC	A		; decrease
 		JR	NZ,PO_SCR_4A	; back to to PO_SCR_4A until done
@@ -3704,11 +3704,11 @@ PO_SCR_4B:	CALL	L0E00		; routine CL-SCROLL scrolls B lines
 
 		LD	BC,(S_POSN)	; fetch S_POSN to BC.
 		RES	0,(IY+$02)	; signal to TV_FLAG  - main screen in use.
-		CALL	L0DD9		; call routine CL-SET for upper display.
+		CALL	CL_SET		; call routine CL_SET for upper display.
 
 		SET	0,(IY+$02)	; signal to TV_FLAG  - lower screen in use.
 		POP	BC		; restore line/column
-		RET			; return via CL-SET for lower display.
+		RET			; return via CL_SET for lower display.
 
 ;-----------------------
 ; Temporary colour items
@@ -3751,7 +3751,7 @@ TEMPS_2:	XOR	(HL)
 ; if it's difficult to write it should be difficult to read.
 
 ;; $0D6B
-CLS:		CALL	L0DAF		; routine CL-ALL  clears display and
+CLS:		CALL	CL_ALL		; routine CL_ALL  clears display and
 					; resets attributes to permanent.
 					; re-attaches it to this computer.
 
@@ -3763,7 +3763,7 @@ CLS_LOWER:	LD	HL,TV_FLAG	; address TV_FLAG
 		SET	0,(HL)		; TV_FLAG - signal lower screen in use.
 		CALL	TEMPS		; routine TEMPS picks up temporary colours.
 		LD	B,(IY+$31)	; fetch lower screen DF_SZ
-		CALL	L0E44		; routine CL-LINE clears lower part
+		CALL	CL_LINE		; routine CL_LINE clears lower part
 					; and sets permanent attributes.
 
 		LD	HL,$5AC0	; fetch attribute address leftmost cell,
@@ -3787,7 +3787,7 @@ CLS_3:		DJNZ	CLS_1		; decrease B counter and back to CLS_1
 
 		LD	(IY+$31),$02	; set DF_SZ lower screen to 2
 
-					; This entry point is called from CL-ALL below to
+					; This entry point is called from CL_ALL below to
 					; reset the system channel input and output addresses to normal.
 
 ;; $0D94
@@ -3808,7 +3808,7 @@ CL_CHAN_A:	LD	(HL),E		; insert output address first pass.
 		JR	C,CL_CHAN_A	; back to CL_CHAN_A if first pass else done.
 
 		LD	BC,$1721	; line 23 for lower screen
-		JR	L0DD9		; exit via CL-SET to set column
+		JR	CL_SET		; exit via CL_SET to set column
 					; for lower display
 
 ;----------------------------
@@ -3818,9 +3818,9 @@ CL_CHAN_A:	LD	(HL),E		; insert output address first pass.
 ; clears 24 lines of the display and resets the relevant system variables
 ; and system channels.
 
-;; CL-ALL
-L0DAF	LD	HL,$0000		; initialize plot coordinates.
-		LD	($5C7D),HL	; set COORDS to 0,0.
+;; $0DAF
+CL_ALL:	LD	HL,$0000		; initialize plot coordinates.
+		LD	(COORDS),HL	; set COORDS to 0,0.
 		RES	0,(IY+$30)	; update FLAGS2  - signal main screen is clear.
 
 		CALL	CL_CHAN		; routine CL_CHAN makes channel 'K' 'normal'.
@@ -3829,20 +3829,20 @@ L0DAF	LD	HL,$0000		; initialize plot coordinates.
 		CALL	L1601		; routine CHAN-OPEN opens it
 		CALL	TEMPS		; routine TEMPS picks up permanent values.
 		LD	B,$18		; There are 24 lines.
-		CALL	L0E44		; routine CL-LINE clears 24 text lines
+		CALL	CL_LINE		; routine CL_LINE clears 24 text lines
 					; (and sets BC to $1821)
 
 		LD	HL,(CURCHL)	; fetch CURCHL make HL address current
 					; channel 'S'
-		LD	DE,PRINT_OUT		; address: PRINT_OUT
+		LD	DE,PRINT_OUT	; address: PRINT_OUT
 		LD	(HL),E		; is made
 		INC	HL		; the normal
 		LD	(HL),D		; output address.
 
 		LD	(IY+$52),$01	; set SCR_CT - scroll count is set to default.
 					; Note. BC already contains $1821.
-		LD	BC,$1821		; reset column and line to 0,0
-					; and continue into CL-SET, below, exiting
+		LD	BC,$1821	; reset column and line to 0,0
+					; and continue into CL_SET, below, exiting
 					; via PO_STORE (for upper screen).
 
 ;----------------------------
@@ -3852,29 +3852,29 @@ L0DAF	LD	HL,$0000		; initialize plot coordinates.
 ; address for screens or printer based on the line/column for screens
 ; or the column for printer.
 
-;; CL-SET
-L0DD9	LD	HL,$5B00		; the base address of printer buffer
+;; $0DD9
+CL_SET:		LD	HL,$5B00	; the base address of printer buffer
 		BIT	1,(IY+$01)	; test FLAGS  - is printer in use ?
-		JR	NZ,L0DF4		; forward to CL-SET-2 if so.
+		JR	NZ,CL_SET_2	; forward to CL_SET_2 if so.
 
 		LD	A,B		; transfer line to A.
 		BIT	0,(IY+$02)	; test TV_FLAG  - lower screen in use ?
-		JR	Z,L0DEE		; skip to CL-SET-1 if handling upper part
+		JR	Z,CL_SET_1	; skip to CL_SET_1 if handling upper part
 
 		ADD	A,(IY+$31)	; add DF_SZ for lower screen
 		SUB	$18		; and adjust.
 
-;; CL-SET-1
-L0DEE	PUSH	BC		; save the line/column.
+;; $0DEE
+CL_SET_1:	PUSH	BC		; save the line/column.
 		LD	B,A		; transfer line to B
 					; (adjusted if lower screen)
 
-		CALL	L0E9B		; routine CL-ADDR calculates address at left
+		CALL	CL_ADDR		; routine CL_ADDR calculates address at left
 					; of screen.
 		POP	BC		; restore the line/column.
 
-;; CL-SET-2
-L0DF4	LD	A,$21		; the column $1-$21 is reversed
+;; $0DF4
+CL_SET_2:	LD	A,$21		; the column $1-$21 is reversed
 		SUB	C		; to range $00 - $20
 		LD	E,A		; now transfer to DE
 		LD	D,$00		; prepare for addition
@@ -3884,40 +3884,40 @@ L0DF4	LD	A,$21		; the column $1-$21 is reversed
 ;-----------------
 ; Handle scrolling
 ;-----------------
-; The routine CL-SC-ALL is called once from PO to scroll all the display
-; and from the routine CL-SCROLL, once, to scroll part of the display.
+; The routine CL_SC_ALL is called once from PO to scroll all the display
+; and from the routine CL_SCROLL, once, to scroll part of the display.
 
-;; CL-SC-ALL
-L0DFE	LD	B,$17		; scroll 23 lines, after 'scroll?'.
+;; $0DFE
+CL_SC_ALL:	LD	B,$17		; scroll 23 lines, after 'scroll?'.
 
-;; CL-SCROLL
-L0E00	CALL	L0E9B		; routine CL-ADDR gets screen address in HL.
+;; $0E00
+CL_SCROLL:	CALL	CL_ADDR		; routine CL_ADDR gets screen address in HL.
 		LD	C,$08		; there are 8 pixel lines to scroll.
 
-;; CL-SCR-1
-L0E05	PUSH	BC		; save counters.
+;; $0E05
+CL_SCR_1:	PUSH	BC		; save counters.
 		PUSH	HL		; and initial address.
 		LD	A,B		; get line count.
 		AND	$07		; will set zero if all third to be scrolled.
 		LD	A,B		; re-fetch the line count.
-		JR	NZ,L0E19		; forward to CL-SCR-3 if partial scroll.
+		JR	NZ,CL_SCR_3	; forward to CL_SCR_3 if partial scroll.
 
 ; HL points to top line of third and must be copied to bottom of previous 3rd.
 ; ( so HL = $4800 or $5000 ) ( but also sometimes $4000 )
 
-;; CL-SCR-2
-L0E0D	EX	DE,HL		; copy HL to DE.
-		LD	HL,$F8E0		; subtract $08 from H and add $E0 to L -
+;; $0E0D
+CL_SCR_2:	EX	DE,HL		; copy HL to DE.
+		LD	HL,$F8E0	; subtract $08 from H and add $E0 to L -
 		ADD	HL,DE		; to make destination bottom line of previous
 					; third.
 		EX	DE,HL		; restore the source and destination.
-		LD	BC,$0020		; thirty-two bytes are to be copied.
+		LD	BC,$0020	; thirty-two bytes are to be copied.
 		DEC	A		; decrement the line count.
 		LDIR			; copy a pixel line to previous third.
 
-;; CL-SCR-3
-L0E19	EX	DE,HL		; save source in DE.
-		LD	HL,$FFE0		; load the value -32.
+;; $0E19
+CL_SCR_3:	EX	DE,HL		; save source in DE.
+		LD	HL,$FFE0	; load the value -32.
 		ADD	HL,DE		; add to form destination in HL.
 		EX	DE,HL		; switch source and destination
 		LD	B,A		; save the count in B.
@@ -3933,17 +3933,17 @@ L0E19	EX	DE,HL		; save source in DE.
 		LD	B,$07		; set B to 7, C is zero.
 		ADD	HL,BC		; add 7 to H to address next third.
 		AND	$F8		; has last third been done ?
-		JR	NZ,L0E0D		; back to CL-SCR-2 if not
+		JR	NZ,CL_SCR_2	; back to CL_SCR_2 if not
 
 		POP	HL		; restore topmost address.
 		INC	H		; next pixel line down.
 		POP	BC		; restore counts.
 		DEC	C		; reduce pixel line count.
-		JR	NZ,L0E05		; back to CL-SCR-1 if all eight not done.
+		JR	NZ,CL_SCR_1	; back to CL_SCR_1 if all eight not done.
 
-		CALL	L0E88		; routine CL-ATTR gets address in attributes
+		CALL	CL_ATTR		; routine CL_ATTR gets address in attributes
 					; from current 'ninth line', count in BC.
-		LD	HL,$FFE0		; set HL to the 16-bit value -32.
+		LD	HL,$FFE0	; set HL to the 16-bit value -32.
 		ADD	HL,DE		; and add to form destination address.
 		EX	DE,HL		; swap source and destination addresses.
 		LDIR			; copy bytes scrolling the linear attributes.
@@ -3952,22 +3952,22 @@ L0E19	EX	DE,HL		; save source in DE.
 ;----------------------------
 ; Clear text lines of display
 ;----------------------------
-; This subroutine, called from CL-ALL, CLS_LOWER and AUTO-LIST and above,
+; This subroutine, called from CL_ALL, CLS_LOWER and AUTO-LIST and above,
 ; clears text lines at bottom of display.
 ; The B register holds on entry the number of lines to be cleared 1-24.
 
-;; CL-LINE
-L0E44	PUSH	BC		; save line count
-		CALL	L0E9B		; routine CL-ADDR gets top address
+;; $0E44
+CL_LINE:	PUSH	BC		; save line count
+		CALL	CL_ADDR		; routine CL_ADDR gets top address
 		LD	C,$08		; there are eight screen lines to a text line.
 
-;; CL-LINE-1
-L0E4A	PUSH	BC		; save pixel line count
+;; $0E4A
+CL_LINE_1:	PUSH	BC		; save pixel line count
 		PUSH	HL		; and save the address
 		LD	A,B		; transfer the line to A (1-24).
 
-;; CL-LINE-2
-L0E4D	AND	$07		; mask 0-7 to consider thirds at a time
+;; $0E4D
+CL_LINE_2:	AND	$07		; mask 0-7 to consider thirds at a time
 		RRCA			; multiply
 		RRCA			; by 32  (same as five RLCA instructions)
 		RRCA			; now 32 - 256(0)
@@ -3977,24 +3977,24 @@ L0E4D	AND	$07		; mask 0-7 to consider thirds at a time
 		DEC	C		; decrement count 31-255.
 		LD	D,H		; copy HL
 		LD	E,L		; to DE.
-		LD	(HL),$00		; blank the first byte.
+		LD	(HL),$00	; blank the first byte.
 		INC	DE		; make DE point to next byte.
 		LDIR			; ldir will clear lines.
-		LD	DE,$0701		; now address next third adjusting
+		LD	DE,$0701	; now address next third adjusting
 		ADD	HL,DE		; register E to address left hand side
 		DEC	A		; decrease the line count.
 		AND	$F8		; will be 16, 8 or 0  (AND $18 will do).
 		LD	B,A		; transfer count to B.
-		JR	NZ,L0E4D		; back to CL-LINE-2 if 16 or 8 to do
+		JR	NZ,CL_LINE_2	; back to CL_LINE_2 if 16 or 8 to do
 					; the next third.
 
 		POP	HL		; restore start address.
 		INC	H		; address next line down.
 		POP	BC		; fetch counts.
 		DEC	C		; decrement pixel line count
-		JR	NZ,L0E4A		; back to CL-LINE-1 till all done.
+		JR	NZ,CL_LINE_1	; back to CL_LINE_1 till all done.
 
-		CALL	L0E88		; routine CL-ATTR gets attribute address
+		CALL	CL_ATTR		; routine CL_ATTR gets attribute address
 					; in DE and B * 32 in BC.
 		LD	H,D		; transfer the address
 		LD	L,E		; to HL.
@@ -4003,12 +4003,12 @@ L0E4D	AND	$07		; mask 0-7 to consider thirds at a time
 
 		LD	A,(ATTRP_MASKP)	; fetch ATTR_P - permanent attributes
 		BIT	0,(IY+$02)	; test TV_FLAG  - lower screen in use ?
-		JR	Z,L0E80		; skip to CL-LINE-3 if not.
+		JR	Z,CL_LINE_3	; skip to CL_LINE_3 if not.
 
 		LD	A,(BORDCR)	; else lower screen uses BORDCR as attribute.
 
-;; CL-LINE-3
-L0E80	LD	(HL),A		; put attribute in first byte.
+;; $0E80
+CL_LINE_3:	LD	(HL),A		; put attribute in first byte.
 		DEC	BC		; decrement the counter.
 		LDIR			; copy bytes to set all attributes.
 		POP	BC		; restore the line $01-$24.
@@ -4018,7 +4018,7 @@ L0E80	LD	(HL),A		; put attribute in first byte.
 ;-------------------
 ; Attribute handling
 ;-------------------
-; This subroutine is called from CL-LINE or CL-SCROLL with the HL register
+; This subroutine is called from CL_LINE or CL_SCROLL with the HL register
 ; pointing to the 'ninth' line and H needs to be decremented before or after
 ; the division. Had it been done first then either present code or that used
 ; at the start of PO_ATTR could have been used.
@@ -4026,8 +4026,8 @@ L0E80	LD	(HL),A		; put attribute in first byte.
 ; the correct value for the attribute file and it is only necessary
 ; to manipulate H to form the correct colour attribute address.
 
-;; CL-ATTR
-L0E88	LD	A,H		; fetch H to A - $48, $50, or $58.
+;; $0E88
+CL_ATTR:	LD	A,H		; fetch H to A - $48, $50, or $58.
 		RRCA			; divide by
 		RRCA			; eight.
 		RRCA			; $09, $0A or $0B.
@@ -4055,8 +4055,8 @@ L0E88	LD	A,H		; fetch H to A - $48, $50, or $58.
 ; This subroutine is called from four places to calculate the address
 ; of the start of a screen character line which is supplied in B.
 
-;; CL-ADDR
-L0E9B	LD	A,$18		; reverse the line number
+;; $0E9B
+CL_ADDR:	LD	A,$18		; reverse the line number
 		SUB	B		; to range $00 - $17.
 		LD	D,A		; save line in D for later.
 		RRCA			; multiply
@@ -4085,27 +4085,27 @@ L0E9B	LD	A,$18		; reverse the line number
 ; machine code routines cannot be written in the first 16K of RAM as
 ; it is shared with the ULA which has precedence over the Z80 chip.
 
-;; COPY
+;; $0EAC
 
-L0EAC	DI			; disable interrupts as this is time-critical.
+COPY:		DI			; disable interrupts as this is time-critical.
 
 		LD	B,$B0		; top 176 lines.
-L0EAF	LD	HL,$4000		; address start of the display file.
+L0EAF:		LD	HL,$4000	; address start of the display file.
 
-; now enter a loop to handle each pixel line.
+					; now enter a loop to handle each pixel line.
 
-;; COPY-1
-L0EB2	PUSH	HL		; save the screen address.
+;; $0EB2
+COPY_1:		PUSH	HL		; save the screen address.
 		PUSH	BC		; and the line counter.
 
-		CALL	L0EF4		; routine COPY-LINE outputs one line.
+		CALL	COPY_LINE	; routine COPY_LINE outputs one line.
 
 		POP	BC		; restore the line counter.
 		POP	HL		; and display address.
 		INC	H		; next line down screen within 'thirds'.
 		LD	A,H		; high byte to A.
 		AND	$07		; result will be zero if we have left third.
-		JR	NZ,L0EC9		; forward to COPY-2 if not to continue loop.
+		JR	NZ,COPY_2	; forward to COPY_2 if not to continue loop.
 
 		LD	A,L		; consider low byte first.
 		ADD	A,$20		; increase by 32 - sets carry if back to zero.
@@ -4117,10 +4117,10 @@ L0EB2	PUSH	HL		; save the screen address.
 		ADD	A,H		; that is subtract 8, if more to do in third.
 		LD	H,A		; and reset address.
 
-;; COPY-2
-L0EC9	DJNZ	L0EB2		; back to COPY-1 for all lines.
+;; $0EC9
+COPY_2:		DJNZ	COPY_1		; back to COPY_1 for all lines.
 
-		JR	L0EDA		; forward to COPY-END to switch off the printer
+		JR	COPY_END	; forward to COPY_END to switch off the printer
 					; motor and enable interrupts.
 					; Note. Nothing else required.
 
@@ -4131,23 +4131,23 @@ L0EC9	DJNZ	L0EB2		; back to COPY-1 for all lines.
 ; to the ZX Printer. These text lines are mapped linearly so HL does
 ; not need to be adjusted at the end of each line.
 
-;; COPY-BUFF
-L0ECD	DI			; disable interrupts
-		LD	HL,$5B00		; the base address of the Printer Buffer.
+;; $0ECD
+COPY_BUFF:	DI			; disable interrupts
+		LD	HL,$5B00	; the base address of the Printer Buffer.
 		LD	B,$08		; set count to 8 lines of 32 bytes.
 
-;; COPY-3
-L0ED3	PUSH	BC		; save counter.
-		CALL	L0EF4		; routine COPY-LINE outputs 32 bytes
+;; $0ED3
+COPY_3:		PUSH	BC		; save counter.
+		CALL	COPY_LINE	; routine COPY_LINE outputs 32 bytes
 		POP	BC		; restore counter.
-		DJNZ	L0ED3		; loop back to COPY-3 for all 8 lines.
+		DJNZ	COPY_3		; loop back to COPY_3 for all 8 lines.
 					; then stop motor and clear buffer.
 
-; Note. the COPY command rejoins here, essentially to execute the next
-; three instructions.
+					; Note. the COPY command rejoins here, essentially to execute the next
+					; three instructions.
 
-;; COPY-END
-L0EDA	LD	A,$04		; output value 4 to port
+;; $0EDA
+COPY_END:	LD	A,$04		; output value 4 to port
 		OUT	($FB),A		; to stop the slowed printer motor.
 		EI			; enable interrupts.
 
@@ -4167,25 +4167,25 @@ L0EDA	LD	A,$04		; output value 4 to port
 ; There seems to have been an unsuccessful attempt to circumvent the use
 ; of PR_CC_hi.
 
-;; CLEAR-PRB
-L0EDF	LD	HL,$5B00		; the location of the buffer.
+;; $0EDF
+CLEAR_PRB:	LD	HL,$5B00	; the location of the buffer.
 		LD	(IY+$46),L	; update PR_CC_lo - set to zero - superfluous.
 		XOR	A		; clear the accumulator.
 		LD	B,A		; set count to 256 bytes.
 
-;; PRB-BYTES
-L0EE7	LD	(HL),A		; set addressed location to zero.
+;; $0EE7
+PRB_BYTES:	LD	(HL),A		; set addressed location to zero.
 		INC	HL		; address next byte - Note. not INC L.
-		DJNZ	L0EE7		; back to PRB-BYTES. repeat for 256 bytes.
+		DJNZ	PRB_BYTES	; back to PRB_BYTES. repeat for 256 bytes.
 
 		RES	1,(IY+$30)	; set FLAGS2 - signal printer buffer is clear.
 		LD	C,$21		; set the column position .
-		JP	L0DD9		; exit via CL-SET and then PO_STORE.
+		JP	CL_SET		; exit via CL_SET and then PO_STORE.
 
 ;------------------
 ; Copy line routine
 ;------------------
-; This routine is called from COPY and COPY-BUFF to output a line of
+; This routine is called from COPY and COPY_BUFF to output a line of
 ; 32 bytes to the ZX Printer.
 ; Output to port $FB -
 ; bit 7 set - activate stylus.
@@ -4195,8 +4195,8 @@ L0EE7	LD	(HL),A		; set addressed location to zero.
 ; bit 1 set - slows printer.
 ; bit 1 reset - normal speed.
 
-;; COPY-LINE
-L0EF4	LD	A,B		; fetch the counter 1-8 or 1-176
+;; $0EF4
+COPY_LINE:	LD	A,B		; fetch the counter 1-8 or 1-176
 		CP	$03		; is it 01 or 02 ?.
 		SBC	A,A		; result is $FF if so else $00.
 		AND	$02		; result is 02 now else 00.
@@ -4205,54 +4205,54 @@ L0EF4	LD	A,B		; fetch the counter 1-8 or 1-176
 					; last two lines.
 		LD	D,A		; save the mask to control the printer later.
 
-;; COPY-L-1
-L0EFD	CALL	L1F54		; call BREAK-KEY to read keyboard immediately.
-		JR	C,L0F0C		; forward to COPY-L-2 if 'break' not pressed.
+;; $0EFD
+COPY_L_1:	CALL	L1F54		; call BREAK-KEY to read keyboard immediately.
+		JR	C,COPY_L_2	; forward to COPY_L_2 if 'break' not pressed.
 
 		LD	A,$04		; else stop the
 		OUT	($FB),A		; printer motor.
 		EI			; enable interrupts.
-		CALL	L0EDF		; call routine CLEAR-PRB.
+		CALL	CLEAR_PRB	; call routine CLEAR_PRB.
 					; Note. should not be cleared if COPY in use.
 
-;; REPORT_DC
-L0F0A	RST	08H		; ERROR_1
+;; $0F0A
+REPORT_DC:	RST	08H		; ERROR_1
 		DEFB	$0C		; Error Report: BREAK - CONT repeats
 
-;; COPY-L-2
-L0F0C	IN	A,($FB)		; test now to see if
+;; $0F0C
+COPY_L_2:	IN	A,($FB)		; test now to see if
 		ADD	A,A		; a printer is attached.
 		RET	M		; return if not - but continue with parent
 					; command.
 
-		JR	NC,L0EFD		; back to COPY-L-1 if stylus of printer not
+		JR	NC,COPY_L_1	; back to COPY_L_1 if stylus of printer not
 					; in position.
 
 		LD	C,$20		; set count to 32 bytes.
 
-;; COPY-L-3
-L0F14	LD	E,(HL)		; fetch a byte from line.
+;; $0F14
+COPY_L_3:	LD	E,(HL)		; fetch a byte from line.
 		INC	HL		; address next location. Note. not INC L.
 		LD	B,$08		; count the bits.
 
-;; COPY-L-4
-L0F18	RL	D		; prepare mask to receive bit.
+;; $0F18
+COPY_L_4:	RL	D		; prepare mask to receive bit.
 		RL	E		; rotate leftmost print bit to carry
 		RR	D		; and back to bit 7 of D restoring bit 1
 
-;; COPY-L-5
-L0F1E	IN	A,($FB)		; read the port.
+;; $0F1E
+COPY_L_5:	IN	A,($FB)		; read the port.
 		RRA			; bit 0 to carry.
-		JR	NC,L0F1E		; back to COPY-L-5 if stylus not in position.
+		JR	NC,COPY_L_5	; back to COPY_L_5 if stylus not in position.
 
 		LD	A,D		; transfer command bits to A.
 		OUT	($FB),A		; and output to port.
-		DJNZ	L0F18		; loop back to COPY-L-4 for all 8 bits.
+		DJNZ	COPY_L_4	; loop back to COPY_L_4 for all 8 bits.
 
 		DEC	C		; decrease the byte count.
-		JR	NZ,L0F14		; back to COPY-L-3 until 256 bits done.
+		JR	NZ,COPY_L_3	; back to COPY_L_3 until 256 bits done.
 
-		RET			; return to calling routine COPY/COPY-BUFF.
+		RET			; return to calling routine COPY/COPY_BUFF.
 
 
 ;-----------------------------------
@@ -4287,11 +4287,11 @@ L0F38	CALL	L15D4		; routine WAIT-KEY gets key possibly
 		PUSH	AF		; save key.
 		LD	D,$00		; and give a short click based
 		LD	E,(IY-$01)	; on PIP value for duration.
-		LD	HL,$00C8		; and pitch.
+		LD	HL,$00C8	; and pitch.
 		CALL	BEEPER		; routine BEEPER gives click - effective
 					; with rubber keyboard.
 		POP	AF		; get saved key value.
-		LD	HL,L0F38		; address: ED-LOOP is loaded to HL.
+		LD	HL,L0F38	; address: ED-LOOP is loaded to HL.
 		PUSH	HL		; and pushed onto stack.
 
 ; At this point there is a looping return address on the stack, an error
@@ -4299,7 +4299,7 @@ L0F38	CALL	L15D4		; routine WAIT-KEY gets key possibly
 ; The character that has been received can now be processed.
 
 		CP	$18		; range 24 to 255 ?
-		JR	NC,L0F81		; forward to ADD-CHAR if so.
+		JR	NC,L0F81	; forward to ADD-CHAR if so.
 
 		CP	$07		; lower than 7 ?
 		JR	C,L0F81		; forward to ADD-CHAR also.
@@ -4312,7 +4312,7 @@ L0F38	CALL	L15D4		; routine WAIT-KEY gets key possibly
 		JR	C,L0F92		; forward to ED-KEYS if editing control
 					; range 7 to 15 dealt with by a table
 
-		LD	BC,$0002		; prepare for ink/paper etc.
+		LD	BC,$0002	; prepare for ink/paper etc.
 		LD	D,A		; save character in D
 		CP	$16		; is it ink/paper/bright etc. ?
 		JR	C,L0F6C		; forward to ED-CONTR if so
@@ -4414,7 +4414,7 @@ L0FA0	DEFB	L0FA9 - $  ; 07d offset $09 to Address: ED-EDIT
 L0FA9	LD	HL,($5C49)	; fetch E_PPC the last line number entered.
 					; Note. may not exist and may follow program.
 		BIT	5,(IY+$37)	; test FLAGX  - input mode ?
-		JP	NZ,L1097		; jump forward to CLEAR-SP if not in editor.
+		JP	NZ,L1097	; jump forward to CLEAR-SP if not in editor.
 
 		CALL	L196E		; routine LINE-ADDR to find address of line
 					; or following line if it doesn't exist.
@@ -4434,7 +4434,7 @@ L0FA9	LD	HL,($5C49)	; fetch E_PPC the last line number entered.
 		LD	C,(HL)		; transfer to C
 		INC	HL		; next to high byte
 		LD	B,(HL)		; transfer to B.
-		LD	HL,$000A		; an overhead of ten bytes
+		LD	HL,$000A	; an overhead of ten bytes
 		ADD	HL,BC		; is added to length.
 		LD	B,H		; transfer adjusted value
 		LD	C,L		; to BC register.
@@ -4449,7 +4449,7 @@ L0FA9	LD	HL,($5C49)	; fetch E_PPC the last line number entered.
 
 		POP	HL		; drop line address
 		DEC	HL		; make it point to first byte of line num.
-		DEC	(IY+$0F)		; decrease E_PPC_lo to suppress line cursor.
+		DEC	(IY+$0F)	; decrease E_PPC_lo to suppress line cursor.
 					; Note. ineffective when E_PPC is one
 					; greater than last line of program perhaps
 					; as a result of a delete.
@@ -4457,7 +4457,7 @@ L0FA9	LD	HL,($5C49)	; fetch E_PPC the last line number entered.
 
 		CALL	L1855		; routine OUT-LINE outputs the BASIC line
 					; to the editing area.
-		INC	(IY+$0F)		; restore E_PPC_lo to the previous value.
+		INC	(IY+$0F)	; restore E_PPC_lo to the previous value.
 		LD	HL,(E_LINE)	; address E_LINE in editing area.
 		INC	HL		; advance
 		INC	HL		; past space
@@ -4478,9 +4478,9 @@ L0FA9	LD	HL,($5C49)	; fetch E_PPC the last line number entered.
 
 ;; ED-DOWN
 L0FF3	BIT	5,(IY+$37)	; test FLAGX  - Input Mode ?
-		JR	NZ,L1001		; skip to ED-STOP if so
+		JR	NZ,L1001	; skip to ED-STOP if so
 
-		LD	HL,$5C49		; address E_PPC - 'current line'
+		LD	HL,$5C49	; address E_PPC - 'current line'
 		CALL	L190F		; routine LN-FETCH fetches number of next
 					; line or same if at end of program.
 		JR	L106E		; forward to ED-LIST to produce an
@@ -4529,7 +4529,7 @@ L1011	LD	($5C5B),HL	; update K_CUR system variable
 
 ;; ED-DELETE
 L1015	CALL	L1031		; routine ED-EDGE moves cursor to left.
-		LD	BC,$0001		; of character to be deleted.
+		LD	BC,$0001	; of character to be deleted.
 		JP	L19E8		; to RECLAIM-2 reclaim the character.
 
 ;-------------------------------------------
@@ -4602,7 +4602,7 @@ L103E	LD	H,D		; transfer DE - leftmost pointer
 		AND	$F0		; lose the low bits
 		CP	$10		; is it INK to TAB $10-$1F ?
 					; that is, is it followed by a parameter ?
-		JR	NZ,L1051		; to ED-EDGE-2 if not
+		JR	NZ,L1051	; to ED-EDGE-2 if not
 					; HL has been incremented once
 
 		INC	HL		; address next as at least one parameter.
@@ -4614,7 +4614,7 @@ L103E	LD	H,D		; transfer DE - leftmost pointer
 		LD	A,(DE)		; reload leftmost character
 		SUB	$17		; decimal 23 ('tab')
 		ADC	A,$00		; will be 0 for 'tab' and 'at'.
-		JR	NZ,L1051		; forward to ED-EDGE-2 if not
+		JR	NZ,L1051	; forward to ED-EDGE-2 if not
 					; HL has been incremented twice
 
 		INC	HL		; increment a third time for 'at'/'tab'
@@ -4648,7 +4648,7 @@ L1059	BIT	5,(IY+$37)	; test FLAGX  - input mode ?
 		CALL	L196E		; routine LINE-ADDR gets address
 		EX	DE,HL		; and previous in DE
 		CALL	L1695		; routine LINE-NO gets prev line number
-		LD	HL,$5C4A		; set HL to E_PPC_hi as next routine stores
+		LD	HL,$5C4A	; set HL to E_PPC_hi as next routine stores
 					; top first.
 		CALL	L191C		; routine LN-STORE loads DE value to HL
 					; high byte first - E_PPC_lo takes E
@@ -4707,7 +4707,7 @@ L107F	BIT	4,(IY+$30)	; test FLAGS2  - is K channel in use ?
 		LD	(IY+$00),$FF	; reset ERR_NR to 'OK'.
 		LD	D,$00		; prepare for beeper.
 		LD	E,(IY-$02)	; use RASP value.
-		LD	HL,$1A90		; set a duration.
+		LD	HL,$1A90	; set a duration.
 		CALL	BEEPER		; routine BEEPER emits a warning rasp.
 		JP	L0F30		; to ED-AGAIN to re-stack address of
 					; this routine and make ERR_SP point to it.
@@ -4743,7 +4743,7 @@ L1097	PUSH	HL		; preserve HL
 ;; KEY-INPUT
 L10A8	BIT	3,(IY+$02)	; test TV_FLAG  - has a key been pressed in
 					; editor ?
-		CALL	NZ,L111D		; routine ED-COPY if so to reprint the lower
+		CALL	NZ,L111D	; routine ED-COPY if so to reprint the lower
 					; screen at every keystroke.
 		AND	A		; clear carry - required exit condition.
 		BIT	5,(IY+$01)	; test FLAGS  - has a new key been pressed ?
@@ -4758,14 +4758,14 @@ L10A8	BIT	3,(IY+$02)	; test TV_FLAG  - has a key been pressed in
 
 		POP	AF		; restore the character code.
 		CP	$20		; if space or higher then
-		JR	NC,L111B		; forward to KEY-DONE2 and return with carry
+		JR	NC,L111B	; forward to KEY-DONE2 and return with carry
 					; set to signal key-found.
 
 		CP	$10		; with 16d INK and higher skip
-		JR	NC,L10FA		; forward to KEY-CONTR.
+		JR	NC,L10FA	; forward to KEY-CONTR.
 
 		CP	$06		; for 6 - 15d
-		JR	NC,L10DB		; skip forward to KEY-M-CL to handle Modes
+		JR	NC,L10DB	; skip forward to KEY-M-CL to handle Modes
 					; and CapsLock.
 
 ; that only leaves 0-5, the flash bright inverse switches.
@@ -4785,7 +4785,7 @@ L10A8	BIT	3,(IY+$02)	; test TV_FLAG  - has a key been pressed in
 ;; KEY-M-CL
 L10DB	JR	NZ,L10E6		; forward to KEY-MODE if not 06 (capslock)
 
-		LD	HL,$5C6A		; point to FLAGS2
+		LD	HL,$5C6A	; point to FLAGS2
 		LD	A,$08		; value 00000100
 		XOR	(HL)		; toggle BIT 2 of FLAGS2 the capslock bit
 		LD	(HL),A		; and store result in FLAGS2 again.
@@ -4802,9 +4802,9 @@ L10E6	CP	$0E		; compare with chr 14d
 		LD	HL,$5C41		; address the MODE system variable.
 		CP	(HL)		; compare with existing value before
 		LD	(HL),A		; inserting the new value.
-		JR	NZ,L10F4		; forward to KEY-FLAG if it has changed.
+		JR	NZ,L10F4	; forward to KEY-FLAG if it has changed.
 
-		LD	(HL),$00		; else make MODE zero - KLC mode
+		LD	(HL),$00	; else make MODE zero - KLC mode
 					; Note. while in Extended/Graphics mode,
 					; the Extended Mode/Graphics key is pressed
 					; again to get out.
@@ -4823,21 +4823,21 @@ L10FA	LD	B,A		; make a copy of character.
 		LD	C,A		; and store in C.
 		LD	A,$10		; initialize to 16d - INK.
 		BIT	3,B		; was it paper ?
-		JR	NZ,L1105		; forward to KEY-DATA with INK 16d and
+		JR	NZ,L1105	; forward to KEY-DATA with INK 16d and
 					; colour in C.
 
 		INC	A		; else change from INK to PAPER (17d) if so.
 
 ;; KEY-DATA
 L1105	LD	(IY-$2D),C	; put the colour (0-7)/state(0/1) in KDATA
-		LD	DE,L110D		; address: KEY-NEXT will be next input stream
+		LD	DE,L110D	; address: KEY-NEXT will be next input stream
 		JR	L1113		; forward to KEY-CHAN to change it ...
 
 ; ... so that INPUT_AD directs control to here at next call to WAIT-KEY
 
 ;; KEY-NEXT
 L110D	LD	A,($5C0D)	; pick up the parameter stored in KDATA.
-		LD	DE,L10A8		; address: KEY-INPUT will be next input stream
+		LD	DE,L10A8	; address: KEY-INPUT will be next input stream
 					; continue to restore default channel and
 					; make a return with the control code.
 
@@ -4875,7 +4875,7 @@ L111D	CALL	TEMPS		; routine TEMPS sets temporary attributes.
 
 		LD	HL,(ERR_SP)	; fetch ERR_SP
 		PUSH	HL		; and save also
-		LD	HL,L1167		; address: ED-FULL
+		LD	HL,L1167	; address: ED-FULL
 		PUSH	HL		; is pushed as the error routine
 		LD	(ERR_SP),SP	; and ERR_SP made to point to it.
 
@@ -4909,16 +4909,16 @@ L1150	LD	A,($5C8B)	; fetch SPOSNL_hi is current line
 		SUB	D		; compare with old
 		JR	C,L117C		; forward to ED-C-DONE if no blanking
 
-		JR	NZ,L115E		; forward to ED-SPACES if line has changed
+		JR	NZ,L115E	; forward to ED-SPACES if line has changed
 
 		LD	A,E		; old column to A
-		SUB	(IY+$50)		; subtract new in SPOSNL_lo
-		JR	NC,L117C		; forward to ED-C-DONE if no backfilling.
+		SUB	(IY+$50)	; subtract new in SPOSNL_lo
+		JR	NC,L117C	; forward to ED-C-DONE if no backfilling.
 
 ;; ED-SPACES
 L115E	LD	A,$20		; prepare a space.
 		PUSH	DE		; save old line/column.
-		CALL	PRINT_OUT		; routine PRINT_OUT prints a space over
+		CALL	PRINT_OUT	; routine PRINT_OUT prints a space over
 					; any text from previous print.
 					; Note. Since the blanking only occurs when
 					; using $09F4 to print to the lower screen,
@@ -4939,7 +4939,7 @@ L115E	LD	A,$20		; prepare a space.
 ;; ED-FULL
 L1167	LD	D,$00		; prepare to moan.
 		LD	E,(IY-$02)	; fetch RASP value.
-		LD	HL,$1A90		; set duration.
+		LD	HL,$1A90	; set duration.
 		CALL	BEEPER		; routine BEEPER.
 		LD	(IY+$00),$FF	; clear ERR_NR.
 		LD	DE,(SPOSNL)	; fetch SPOSNL.
@@ -4960,7 +4960,7 @@ L117E	POP	HL		; restore the old value of ERR_SP.
 		LD	(ERR_SP),HL	; update the system variable ERR_SP
 		POP	BC		; old value of SPOSN_L
 		PUSH	DE		; save new value
-		CALL	L0DD9		; routine CL-SET and PO_STORE
+		CALL	CL_SET		; routine CL_SET and PO_STORE
 					; update ECHO_E and SPOSN_L from BC
 		POP	HL		; restore new value
 		LD	(ECHO_E),HL	; and update ECHO_E
@@ -5007,12 +5007,12 @@ L1195	LD	DE,(E_LINE)	; fetch E_LINE to DE
 ;; REMOVE-FP
 L11A7	LD	A,(HL)		; fetch character
 		CP	$0E		; is it the number marker ?
-		LD	BC,$0006		; prepare for six bytes
+		LD	BC,$0006	; prepare for six bytes
 		CALL	Z,L19E8		; routine RECLAIM-2 reclaims space if $0E
 		LD	A,(HL)		; reload next (or same) character
 		INC	HL		; and advance address
 		CP	$0D		; end of line or input buffer ?
-		JR	NZ,L11A7		; back to REMOVE-FP until entire line done.
+		JR	NZ,L11A7	; back to REMOVE-FP until entire line done.
 
 		RET			; return
 
@@ -5139,12 +5139,12 @@ L11EF	DEC	HL		; step back to last valid location.
 		INC	B		; now test if we arrived here from NEW.
 		JR	Z,L1219		; forward to RAM-SET if we did.
 
-; this section applies to START only.
+					; this section applies to START only.
 
 		LD	($5CB4),HL	; set P-RAMT to the highest working RAM
 					; address.
-		LD	DE,$3EAF		; address of last byte of 'U' bitmap in ROM.
-		LD	BC,$00A8		; there are 21 user defined graphics.
+		LD	DE,$3EAF	; address of last byte of 'U' bitmap in ROM.
+		LD	BC,$00A8	; there are 21 user defined graphics.
 		EX	DE,HL		; switch pointers and make the UDGs a
 		LDDR			; copy of the standard characters A - U.
 		EX	DE,HL		; switch the pointer to HL.
@@ -5153,20 +5153,20 @@ L11EF	DEC	HL		; step back to last valid location.
 					; bitmap.
 		DEC	HL		; point at RAMTOP again.
 
-		LD	BC,$0040		; set the values of
+		LD	BC,$0040	; set the values of
 		LD	($5C38),BC	; the PIP and RASP system variables.
 
-; the NEW command path rejoins here.
+					; the NEW command path rejoins here.
 
 ;; RAM-SET
 L1219	LD	($5CB2),HL	; set system variable RAMTOP to HL.
 
-		LD	HL,$3C00		; a strange place to set the pointer to the 
+		LD	HL,$3C00	; a strange place to set the pointer to the 
 		LD	(CHARS),HL	; character set, CHARS - as no printing yet.
 
 		LD	HL,($5CB2)	; fetch RAMTOP to HL again as we've lost it.
 
-		LD	(HL),$3E		; top of user ram holds GOSUB end marker
+		LD	(HL),$3E	; top of user ram holds GOSUB end marker
 					; an impossible line number - see RETURN.
 					; no significance in the number $3E. It has
 					; been traditional since the ZX80.
@@ -5182,18 +5182,18 @@ L1219	LD	($5CB2),HL	; set system variable RAMTOP to HL.
 					; of this location in meantime.
 
 		IM	1		; select interrupt mode 1.
-		LD	IY,$5C3A		; set IY to ERR_NR. IY can reach all standard
+		LD	IY,$5C3A	; set IY to ERR_NR. IY can reach all standard
 					; system variables but shadow ROM system
 					; variables will be mostly out of range.
 
 		EI			; enable interrupts now that we have a stack.
 
-		LD	HL,$5CB6		; the address of the channels - initially
+		LD	HL,$5CB6	; the address of the channels - initially
 					; following system variables.
 		LD	($5C4F),HL	; set the CHANS system variable.
 
-		LD	DE,L15AF		; address: init-chan in ROM.
-		LD	BC,$0015		; there are 21 bytes of initial data in ROM.
+		LD	DE,L15AF	; address: init-chan in ROM.
+		LD	BC,$0015	; there are 21 bytes of initial data in ROM.
 		EX	DE,HL		; swap the pointers.
 		LDIR			; copy the bytes to RAM.
 
@@ -5204,7 +5204,7 @@ L1219	LD	($5CB2),HL	; set system variable RAMTOP to HL.
 
 		LD	(PROG),HL	; set PROG the location where BASIC starts.
 		LD	(VARS),HL	; set VARS to same location with a
-		LD	(HL),$80		; variables end-marker.
+		LD	(HL),$80	; variables end-marker.
 		INC	HL		; advance address.
 		LD	(E_LINE),HL	; set E_LINE, where the edit line
 					; will be created.
@@ -5212,9 +5212,9 @@ L1219	LD	($5CB2),HL	; set system variable RAMTOP to HL.
 					; execute the next fifteen bytes of code
 					; as this will be done by the call to SET-MIN.
 					; --
-		LD	(HL),$0D		; initially just has a carriage return
+		LD	(HL),$0D	; initially just has a carriage return
 		INC	HL		; followed by
-		LD	(HL),$80		; an end-marker.
+		LD	(HL),$80	; an end-marker.
 		INC	HL		; address the next location.
 		LD	(WORKSP),HL	; set WORKSP - empty workspace.
 		LD	($5C63),HL	; set STKBOT - bottom of the empty stack.
@@ -5240,7 +5240,7 @@ L1219	LD	($5CB2),HL	; set system variable RAMTOP to HL.
 		LDIR			; from ROM to RAM.
 
 		SET	1,(IY+$01)	; update FLAGS  - signal printer in use.
-		CALL	L0EDF		; call routine CLEAR-PRB to initialize system
+		CALL	CLEAR_PRB	; call routine CLEAR_PRB to initialize system
 					; variables associated with printer.
 
 		LD	(IY+$31),$02	; set DF_SZ the lower screen display size to
@@ -5330,7 +5330,7 @@ L12CF	LD	HL,(E_LINE)	; fetch the edit line address from E_LINE.
 ; this must be a direct command.
 
 		BIT	0,(IY+$30)	; test FLAGS2 - clear the main screen ?
-		CALL	NZ,L0DAF	; routine CL-ALL, if so, e.g. after listing.
+		CALL	NZ,CL_ALL	; routine CL_ALL, if so, e.g. after listing.
 		CALL	CLS_LOWER	; routine CLS_LOWER anyway.
 		LD	A,$19		; compute scroll count to 25 minus
 		SUB	(IY+$4F)	; value of S_POSN_HI.
@@ -5352,7 +5352,7 @@ L1303	HALT			; wait for interrupt.
 
 		RES	5,(IY+$01)	; update FLAGS - signal no new key.
 		BIT	1,(IY+$30)	; test FLAGS2 - is printer buffer clear ?
-		CALL	NZ,L0ECD		; call routine COPY-BUFF if not.
+		CALL	NZ,COPY_BUFF	; call routine COPY_BUFF if not.
 					; Note. the programmer has neglected
 					; to set bit 1 of FLAGS first.
 
@@ -6453,11 +6453,11 @@ L1793	JR	L1725		; to REPORT-Ob
 ;; AUTO-LIST
 L1795	LD	(LIST_SP),SP	; save stack pointer in LIST_SP
 		LD	(IY+$02),$10	; update TV_FLAG set bit 3
-		CALL	L0DAF		; routine CL-ALL.
+		CALL	CL_ALL		; routine CL_ALL.
 		SET	0,(IY+$02)	; update TV_FLAG  - signal lower screen in use
 
 		LD	B,(IY+$31)	; fetch DF_SZ to B.
-		CALL	L0E44		; routine CL-LINE clears lower display
+		CALL	CL_LINE		; routine CL_LINE clears lower display
 					; preserving B.
 		RES	0,(IY+$02)	; update TV_FLAG  - signal main screen in use
 		SET	0,(IY+$30)	; update FLAGS2  - signal unnecessary to
@@ -7564,7 +7564,7 @@ L1AD2	DEFB	$09		; Class-09 - Two comma-separated numeric
 
 ;; P-COPY
 L1AD6	DEFB	$00		; Class-00 - No further operands.
-		DEFW	L0EAC		; Address: $0EAC; Address: COPY
+		DEFW	COPY		; Address: $0EAC; Address: COPY
 
 ;; P-LPRINT
 L1AD9	DEFB	$05		; Class-05 - Variable syntax checked entirely
@@ -9145,7 +9145,7 @@ L1F4F	RES	5,(IY+$01)	; update FLAGS - signal no new key
 ;--------------------
 ; Check for BREAK key
 ;--------------------
-; This routine is called from COPY-LINE, when interrupts are disabled,
+; This routine is called from COPY_LINE, when interrupts are disabled,
 ; to test if BREAK (SHIFT - SPACE) is being pressed.
 ; It is also called at STMT-RET after every statement.
 
@@ -9592,7 +9592,7 @@ L20AD	LD	(S_POSN),BC	; set S_POSN update upper screen line/column.
 		SUB	B		; the new line number.
 		LD	(SCR_CT),A	; and place result in SCR_CT - scroll count.
 		RES	0,(IY+$02)	; update TV_FLAG - signal main screen in use.
-		CALL	L0DD9		; routine CL-SET sets the print position
+		CALL	CL_SET		; routine CL_SET sets the print position
 					; system variables for the upper screen.
 		JP	CLS_LOWER	; jump back to CLS_LOWER and make
 					; an indirect exit >>.
@@ -9770,7 +9770,7 @@ L2161	LD	(IY+$22),$00	; set K_CUR_hi to a low value so that the cursor
 					; a statement then that becomes apparent.
 
 		LD	BC,(ECHO_E)	; fetch line and column from ECHO_E
-		CALL	L0DD9		; routine CL-SET sets S-POSNL to those
+		CALL	CL_SET		; routine CL_SET sets S-POSNL to those
 					; values.
 
 ; if using another input channel rejoin here.
@@ -10296,7 +10296,7 @@ L22DC	CALL	L2307		; routine STK-TO-BC
 ; back on the screen though the colours may change.
 
 ;; PLOT-SUB
-L22E5	LD	($5C7D),BC	; store new x/y values in COORDS
+L22E5	LD	(COORDS),BC	; store new x/y values in COORDS
 		CALL	L22AA		; routine PIXEL-ADD gets address in HL,
 					; count from left 0-7 in B.
 		LD	B,A		; transfer count to B.
@@ -10464,7 +10464,7 @@ L235A	RST	28H		;; FP_CALC
 		CALL	L1E94		; routine FIND-INT1
 		POP	HL		;
 		LD	H,A		;
-		LD	($5C7D),HL	; COORDS
+		LD	(COORDS),HL	; COORDS
 		POP	BC		;
 		JP	L2420		; to DRW-STEPS
 
@@ -10612,7 +10612,7 @@ L23C1	CALL	L247D		; routine CD-PRMS1
 		DEFB	$01		;;exchange
 		DEFB	$38		;;end-calc
 
-		LD	A,($5C7D)	; COORDS-x
+		LD	A,(COORDS)	; COORDS-x
 		CALL	L2D28		; routine STACK-A
 
 		RST	28H		;; FP_CALC
@@ -10673,7 +10673,7 @@ L2439	PUSH	BC		;
 		DEFB	$31		;;duplicate
 		DEFB	$38		;;end-calc
 
-		LD	A,($5C7D)	; COORDS-x
+		LD	A,(COORDS)	; COORDS-x
 		CALL	L2D28		; routine STACK-A
 
 		RST	28H		;; FP_CALC
@@ -10705,7 +10705,7 @@ L245F	RST	28H		;; FP_CALC
 		DEFB	$01		;;exchange
 		DEFB	$38		;;end-calc
 
-		LD	A,($5C7D)	; COORDS-x
+		LD	A,(COORDS)	; COORDS-x
 		CALL	L2D28		; routine STACK-A
 
 		RST	28H		;; FP_CALC
@@ -10844,7 +10844,7 @@ L24DB	LD	C,A		;
 		POP	BC		;
 
 ;; D-L-STEP
-L24DF	LD	HL,($5C7D)	; COORDS
+L24DF	LD	HL,(COORDS)	; COORDS
 		LD	A,B		;
 		ADD	A,H		;
 		LD	B,A		;

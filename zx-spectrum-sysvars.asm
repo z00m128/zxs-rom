@@ -26,6 +26,7 @@ DF_SZ		equ	$5C6B
 T_ADDR		equ	$5C74
 FRAMES1		equ	$5C78
 UDG		equ	$5C7B
+COORDS		equ	$5C7D
 PR_CC		equ	$5C80
 ECHO_E		equ	$5C82
 DF_CC		equ	$5C84
