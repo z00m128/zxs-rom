@@ -170,8 +170,8 @@ ERROR_3:	LD	(IY+$00),L	; store it in the system variable ERR_NR.
 					; of routines.
 					; to MAIN-4 initially at base.
 					; or REPORT-G on line entry.
-					; or ED-ERROR when editing.
-					; or ED-FULL during ed-enter.
+					; or ED_ERROR when editing.
+					; or ED_FULL during ED_ENTER.
 					; or IN-VAR-1 during runtime input etc.
 
 		JP	L16C5		; jump to SET-STK to clear the calculator
@@ -3802,7 +3802,7 @@ CL_CHAN_A:	LD	(HL),E		; insert output address first pass.
 		INC	HL		; or input address on second pass.
 		LD	(HL),D		;
 		INC	HL		;
-		LD	DE,L10A8	; fetch address KEY-INPUT for second pass
+		LD	DE,KEY_INPUT	; fetch address KEY_INPUT for second pass
 		CCF			; complement carry flag - will set on pass 1.
 
 		JR	C,CL_CHAN_A	; back to CL_CHAN_A if first pass else done.
@@ -3819,7 +3819,7 @@ CL_CHAN_A:	LD	(HL),E		; insert output address first pass.
 ; and system channels.
 
 ;; $0DAF
-CL_ALL:	LD	HL,$0000		; initialize plot coordinates.
+CL_ALL:		LD	HL,$0000	; initialize plot coordinates.
 		LD	(COORDS),HL	; set COORDS to 0,0.
 		RES	0,(IY+$30)	; update FLAGS2  - signal main screen is clear.
 
@@ -4265,24 +4265,24 @@ COPY_L_5:	IN	A,($FB)		; read the port.
 ;
 ; This is a compact and highly versatile routine.
 
-;; EDITOR
-L0F2C	LD	HL,(ERR_SP)	; fetch ERR_SP
+;; $0F2C
+EDITOR:		LD	HL,(ERR_SP)	; fetch ERR_SP
 		PUSH	HL		; save on stack
 
-;; ED-AGAIN
-L0F30	LD	HL,L107F		; address: ED-ERROR
+;; $0F30
+ED_AGAIN:	LD	HL,ED_ERROR	; address: ED_ERROR
 		PUSH	HL		; save address on stack and
 		LD	(ERR_SP),SP	; make ERR_SP point to it.
 
-; Note. While in editing/input mode should an error occur then RST 08 will
-; update X_PTR to the location reached by CH_ADD and jump to ED-ERROR
-; where the error will be cancelled and the loop begin again from ED-AGAIN
-; above. The position of the error will be apparent when the lower screen is
-; reprinted. If no error then the re-iteration is to ED-LOOP below when
-; input is arriving from the keyboard.
+					; Note. While in editing/input mode should an error occur then RST 08 will
+					; update X_PTR to the location reached by CH_ADD and jump to ED_ERROR
+					; where the error will be cancelled and the loop begin again from ED_AGAIN
+					; above. The position of the error will be apparent when the lower screen is
+					; reprinted. If no error then the re-iteration is to ED_LOOP below when
+					; input is arriving from the keyboard.
 
-;; ED-LOOP
-L0F38	CALL	L15D4		; routine WAIT-KEY gets key possibly
+;; $0F38
+ED_LOOP:	CALL	L15D4		; routine WAIT-KEY gets key possibly
 					; changing the mode.
 		PUSH	AF		; save key.
 		LD	D,$00		; and give a short click based
@@ -4291,51 +4291,51 @@ L0F38	CALL	L15D4		; routine WAIT-KEY gets key possibly
 		CALL	BEEPER		; routine BEEPER gives click - effective
 					; with rubber keyboard.
 		POP	AF		; get saved key value.
-		LD	HL,L0F38	; address: ED-LOOP is loaded to HL.
+		LD	HL,ED_LOOP	; address: ED_LOOP is loaded to HL.
 		PUSH	HL		; and pushed onto stack.
 
-; At this point there is a looping return address on the stack, an error
-; handler and an input stream set up to supply characters.
-; The character that has been received can now be processed.
+					; At this point there is a looping return address on the stack, an error
+					; handler and an input stream set up to supply characters.
+					; The character that has been received can now be processed.
 
 		CP	$18		; range 24 to 255 ?
-		JR	NC,L0F81	; forward to ADD-CHAR if so.
+		JR	NC,ADD_CHAR	; forward to ADD_CHAR if so.
 
 		CP	$07		; lower than 7 ?
-		JR	C,L0F81		; forward to ADD-CHAR also.
+		JR	C,ADD_CHAR	; forward to ADD_CHAR also.
 					; Note. This is a 'bug' and chr$ 6, the comma
 					; control character, should have had an
-					; entry in the ED-KEYS table.
+					; entry in the ED_KEYS table.
 					; Steven Vickers, 1984, Pitman.
 
 		CP	$10		; less than 16 ?
-		JR	C,L0F92		; forward to ED-KEYS if editing control
+		JR	C,ED_KEYS	; forward to ED_KEYS if editing control
 					; range 7 to 15 dealt with by a table
 
 		LD	BC,$0002	; prepare for ink/paper etc.
 		LD	D,A		; save character in D
 		CP	$16		; is it ink/paper/bright etc. ?
-		JR	C,L0F6C		; forward to ED-CONTR if so
+		JR	C,ED_CONTR	; forward to ED_CONTR if so
 
 					; leaves 22d AT and 23d TAB
-					; which can't be entered via KEY-INPUT.
+					; which can't be entered via KEY_INPUT.
 					; so this code is never normally executed
 					; when the keyboard is used for input.
 
 		INC	BC		; if it was AT/TAB - 3 locations required
 		BIT	7,(IY+$37)	; test FLAGX  - Is this INPUT LINE ?
-		JP	Z,L101E		; jump to ED-IGNORE if not, else 
+		JP	Z,ED_IGNORE	; jump to ED_IGNORE if not, else 
 
-		CALL	L15D4		; routine WAIT-KEY - input address is KEY-NEXT
-					; but is reset to KEY-INPUT
+		CALL	L15D4		; routine WAIT-KEY - input address is KEY_NEXT
+					; but is reset to KEY_INPUT
 		LD	E,A		; save first in E
 
-;; ED-CONTR
-L0F6C	CALL	L15D4		; routine WAIT-KEY for control.
-					; input address will be key-next.
+;; $0F6C
+ED_CONTR:	CALL	L15D4		; routine WAIT-KEY for control.
+					; input address will be KEY_NEXT.
 
 		PUSH	DE		; saved code/parameters
-		LD	HL,($5C5B)	; fetch address of keyboard cursor from K_CUR
+		LD	HL,(K_CUR)	; fetch address of keyboard cursor from K_CUR
 		RES	0,(IY+$07)	; set MODE to 'L'
 
 		CALL	L1655		; routine MAKE-ROOM makes 2/3 spaces at cursor
@@ -4346,42 +4346,42 @@ L0F6C	CALL	L15D4		; routine WAIT-KEY for control.
 		INC	HL		; address next
 		LD	(HL),C		; place possible parameter. If only one
 					; then DE points to this location also.
-		JR	L0F8B		; forward to ADD-CH-1
+		JR	ADD_CH_1	; forward to ADD_CH_1
 
 ;-------------------------
 ; Add code to current line
 ;-------------------------
 ; this is the branch used to add normal non-control characters
-; with ED-LOOP as the stacked return address.
+; with ED_LOOP as the stacked return address.
 ; it is also the OUTPUT service routine for system channel 'R'.
 
-;; ADD-CHAR
-L0F81	RES	0,(IY+$07)	; set MODE to 'L'
+;; $0F81
+ADD_CHAR:	RES	0,(IY+$07)	; set MODE to 'L'
 
-X0F85	LD	HL,($5C5B)	; fetch address of keyboard cursor from K_CUR
+		LD	HL,(K_CUR)	; fetch address of keyboard cursor from K_CUR
 		CALL	L1652		; routine ONE-SPACE creates one space.
 
-; either a continuation of above or from ED-CONTR with ED-LOOP on stack.
+					; either a continuation of above or from ED_CONTR with ED_LOOP on stack.
 
-;; ADD-CH-1
-L0F8B	LD	(DE),A		; load current character to last new location.
+;; $0F8B
+ADD_CH_1:	LD	(DE),A		; load current character to last new location.
 		INC	DE		; address next
-		LD	($5C5B),DE	; and update K_CUR system variable.
+		LD	(K_CUR),DE	; and update K_CUR system variable.
 		RET			; return - either a simple return
-					; from ADD-CHAR or to ED-LOOP on stack.
+					; from ADD_CHAR or to ED_LOOP on stack.
 
-; a branch of the editing loop to deal with control characters
-; using a look-up table.
+					; a branch of the editing loop to deal with control characters
+					; using a look-up table.
 
-;; ED-KEYS
-L0F92	LD	E,A		; character to E.
+;; $0F92
+ED_KEYS:	LD	E,A		; character to E.
 		LD	D,$00		; prepare to add.
-		LD	HL,L0FA0 - 7	; base address of editing keys table. $0F99
+		LD	HL,ED_KEYS_T - 7; base address of editing keys table. $0F99
 		ADD	HL,DE		; add E
 		LD	E,(HL)		; fetch offset to E
 		ADD	HL,DE		; add offset for address of handling routine.
 		PUSH	HL		; push the address on machine stack.
-		LD	HL,($5C5B)	; load address of cursor from K_CUR.
+		LD	HL,(K_CUR)	; load address of cursor from K_CUR.
 		RET			; an make an indirect jump forward to routine.
 
 ;-------------------
@@ -4390,18 +4390,18 @@ L0F92	LD	E,A		; character to E.
 ; For each code in the range $07 to $0F this table contains a
 ; single offset byte to the routine that services that code.
 ; Note. for what was intended there should also have been an
-; entry for chr$ 6 with offset to ed-symbol.
+; entry for chr$ 6 with offset to ED_SYMBOL.
 
-;; ed-keys-t
-L0FA0	DEFB	L0FA9 - $  ; 07d offset $09 to Address: ED-EDIT
-		DEFB	L1007 - $  ; 08d offset $66 to Address: ED-LEFT
-		DEFB	L100C - $  ; 09d offset $6A to Address: ED-RIGHT
-		DEFB	L0FF3 - $  ; 10d offset $50 to Address: ED-DOWN
-		DEFB	L1059 - $  ; 11d offset $B5 to Address: ED-UP
-		DEFB	L1015 - $  ; 12d offset $70 to Address: ED-DELETE
-		DEFB	L1024 - $  ; 13d offset $7E to Address: ED-ENTER
-		DEFB	L1076 - $  ; 14d offset $CF to Address: ED-SYMBOL
-		DEFB	L107C - $  ; 15d offset $D4 to Address: ED-GRAPH
+;; $0FA0
+ED_KEYS_T:	DEFB	ED_EDIT - $	; 07d offset $09 to Address: ED_EDIT
+		DEFB	ED_LEFT - $	; 08d offset $66 to Address: ED_LEFT
+		DEFB	ED_RIGHT - $	; 09d offset $6A to Address: ED_RIGHT
+		DEFB	ED_DOWN - $	; 10d offset $50 to Address: ED_DOWN
+		DEFB	ED_UP - $	; 11d offset $B5 to Address: ED_UP
+		DEFB	ED_DELETE - $	; 12d offset $70 to Address: ED_DELETE
+		DEFB	ED_ENTER - $	; 13d offset $7E to Address: ED_ENTER
+		DEFB	ED_SYMBOL - $	; 14d offset $CF to Address: ED-SYMBOL
+		DEFB	ED_GRAPH - $	; 15d offset $D4 to Address: ED_GRAPH
 
 ;----------------
 ; Handle EDIT key
@@ -4410,11 +4410,11 @@ L0FA0	DEFB	L0FA9 - $  ; 07d offset $09 to Address: ED-EDIT
 ; Alternatively the user wishes to clear the input buffer and start again.
 ; Alternatively ...
 
-;; ED-EDIT
-L0FA9	LD	HL,($5C49)	; fetch E_PPC the last line number entered.
+;; $0FA9
+ED_EDIT:	LD	HL,(E_PPC)	; fetch E_PPC the last line number entered.
 					; Note. may not exist and may follow program.
 		BIT	5,(IY+$37)	; test FLAGX  - input mode ?
-		JP	NZ,L1097	; jump forward to CLEAR-SP if not in editor.
+		JP	NZ,CLEAR_SP	; jump forward to CLEAR_SP if not in editor.
 
 		CALL	L196E		; routine LINE-ADDR to find address of line
 					; or following line if it doesn't exist.
@@ -4422,12 +4422,12 @@ L0FA9	LD	HL,($5C49)	; fetch E_PPC the last line number entered.
 					; address or previous line if at end-marker.
 		LD	A,D		; if there is no program then DE will
 		OR	E		; contain zero so test for this.
-		JP	Z,L1097		; jump to to CLEAR-SP if so.
+		JP	Z,CLEAR_SP	; jump to to CLEAR_SP if so.
 
-; Note. at this point we have a validated line number, not just an
-; approximation and it would be best to update E_PPC with the true
-; cursor line value which would enable the line cursor to be suppressed
-; in all situations - see shortly.
+					; Note. at this point we have a validated line number, not just an
+					; approximation and it would be best to update E_PPC with the true
+					; cursor line value which would enable the line cursor to be suppressed
+					; in all situations - see shortly.
 
 		PUSH	HL		; save address of line.
 		INC	HL		; address low byte of length.
@@ -4439,7 +4439,7 @@ L0FA9	LD	HL,($5C49)	; fetch E_PPC the last line number entered.
 		LD	B,H		; transfer adjusted value
 		LD	C,L		; to BC register.
 		CALL	L1F05		; routine TEST-ROOM checks free memory.
-		CALL	L1097		; routine CLEAR-SP clears editing area.
+		CALL	CLEAR_SP	; routine CLEAR_SP clears editing area.
 		LD	HL,(CURCHL)	; address CURCHL
 		EX	(SP),HL		; swap with line address on stack
 		PUSH	HL		; save line address underneath
@@ -4449,7 +4449,7 @@ L0FA9	LD	HL,($5C49)	; fetch E_PPC the last line number entered.
 
 		POP	HL		; drop line address
 		DEC	HL		; make it point to first byte of line num.
-		DEC	(IY+$0F)	; decrease E_PPC_lo to suppress line cursor.
+		DEC	(IY+$0F)	; decrease E_PPC_LO to suppress line cursor.
 					; Note. ineffective when E_PPC is one
 					; greater than last line of program perhaps
 					; as a result of a delete.
@@ -4457,17 +4457,17 @@ L0FA9	LD	HL,($5C49)	; fetch E_PPC the last line number entered.
 
 		CALL	L1855		; routine OUT-LINE outputs the BASIC line
 					; to the editing area.
-		INC	(IY+$0F)	; restore E_PPC_lo to the previous value.
+		INC	(IY+$0F)	; restore E_PPC_LO to the previous value.
 		LD	HL,(E_LINE)	; address E_LINE in editing area.
 		INC	HL		; advance
 		INC	HL		; past space
 		INC	HL		; and digit characters
 		INC	HL		; of line number.
 
-		LD	($5C5B),HL	; update K_CUR to address start of BASIC.
+		LD	(K_CUR),HL	; update K_CUR to address start of BASIC.
 		POP	HL		; restore the address of CURCHL.
 		CALL	L1615		; routine CHAN-FLAG sets flags for it.
-		RET			; return to ED-LOOP.
+		RET			; return to ED_LOOP.
 
 ;--------------------
 ; Cursor down editing
@@ -4476,19 +4476,19 @@ L0FA9	LD	HL,($5C49)	; fetch E_PPC the last line number entered.
 ; wishes to move the cursor down one line in edit mode.
 ; In input mode this key can be used as an alternative to entering STOP.
 
-;; ED-DOWN
-L0FF3	BIT	5,(IY+$37)	; test FLAGX  - Input Mode ?
-		JR	NZ,L1001	; skip to ED-STOP if so
+;; $0FF3
+ED_DOWN:	BIT	5,(IY+$37)	; test FLAGX  - Input Mode ?
+		JR	NZ,ED_STOP	; skip to ED_STOP if so
 
-		LD	HL,$5C49	; address E_PPC - 'current line'
+		LD	HL,E_PPC	; address E_PPC - 'current line'
 		CALL	L190F		; routine LN-FETCH fetches number of next
 					; line or same if at end of program.
-		JR	L106E		; forward to ED-LIST to produce an
+		JR	ED_LIST		; forward to ED_LIST to produce an
 					; automatic listing.
 
-;; ED-STOP
-L1001	LD	(IY+$00),$10	; set ERR_NR to 'STOP in INPUT' code
-		JR	L1024		; forward to ED-ENTER to produce error.
+;; $1001
+ED_STOP:	LD	(IY+$00),$10	; set ERR_NR to 'STOP in INPUT' code
+		JR	ED_ENTER	; forward to ED_ENTER to produce error.
 
 ;--------------------
 ; Cursor left editing
@@ -4496,10 +4496,10 @@ L1001	LD	(IY+$00),$10	; set ERR_NR to 'STOP in INPUT' code
 ; This acts on the cursor in the lower section of the screen in both
 ; editing and input mode.
 
-;; ED-LEFT
-L1007	CALL	L1031		; routine ED-EDGE moves left if possible
-		JR	L1011		; forward to ED-CUR to update K-CUR
-					; and return to ED-LOOP.
+;; $1007
+ED_LEFT:	CALL	ED_EDGE		; routine ED_EDGE moves left if possible
+		JR	ED_CUR		; forward to ED_CUR to update K-CUR
+					; and return to ED_LOOP.
 
 ;---------------------
 ; Cursor right editing
@@ -4507,16 +4507,16 @@ L1007	CALL	L1031		; routine ED-EDGE moves left if possible
 ; This acts on the cursor in the lower screen in both editing and input
 ; mode and moves it to the right.
 
-;; ED-RIGHT
-L100C	LD	A,(HL)		; fetch addressed character.
+;; $100C
+ED_RIGHT:	LD	A,(HL)		; fetch addressed character.
 		CP	$0D		; is it carriage return ?
-		RET	Z		; return if so to ED-LOOP
+		RET	Z		; return if so to ED_LOOP
 
 		INC	HL		; address next character
 
-;; ED-CUR
-L1011	LD	($5C5B),HL	; update K_CUR system variable
-		RET			; return to ED-LOOP
+;; $1011
+ED_CUR:		LD	(K_CUR),HL	; update K_CUR system variable
+		RET			; return to ED_LOOP
 
 ;---------------
 ; DELETE editing
@@ -4527,13 +4527,13 @@ L1011	LD	($5C5B),HL	; update K_CUR system variable
 ; case of chr$ 6 which is the comma control character. It is not mandatory
 ; to delete these second characters.
 
-;; ED-DELETE
-L1015	CALL	L1031		; routine ED-EDGE moves cursor to left.
+;; $1015
+ED_DELETE:	CALL	ED_EDGE		; routine ED_EDGE moves cursor to left.
 		LD	BC,$0001	; of character to be deleted.
 		JP	L19E8		; to RECLAIM-2 reclaim the character.
 
 ;-------------------------------------------
-; Ignore next 2 codes from key-input routine
+; Ignore next 2 codes from KEY_INPUT routine
 ;-------------------------------------------
 ; Since AT and TAB cannot be entered this point is never reached
 ; from the keyboard. If inputting from a tape device or network then
@@ -4542,8 +4542,8 @@ L1015	CALL	L1031		; routine ED-EDGE moves cursor to left.
 ; Here, perhaps, another Spectrum has said print #15; AT 0,0; "This is yellow"
 ; and this one is interpreting input #15; a$.
 
-;; ED-IGNORE
-L101E	CALL	L15D4		; routine WAIT-KEY to ignore keystroke.
+;; $101E
+ED_IGNORE:	CALL	L15D4		; routine WAIT-KEY to ignore keystroke.
 		CALL	L15D4		; routine WAIT-KEY to ignore next key.
 
 ;--------------
@@ -4551,12 +4551,12 @@ L101E	CALL	L15D4		; routine WAIT-KEY to ignore keystroke.
 ;--------------
 ; The enter key has been pressed to have basic line or input accepted.
 
-;; ED-ENTER
-L1024	POP	HL		; discard address ED-LOOP
-		POP	HL		; drop address ED-ERROR
+;; $1024
+ED_ENTER:	POP	HL		; discard address ED_LOOP
+		POP	HL		; drop address ED_ERROR
 
-;; ED-END
-L1026	POP	HL		; the previous value of ERR_SP
+;; $1026
+ED_END:		POP	HL		; the previous value of ERR_SP
 		LD	(ERR_SP),HL	; is restored to ERR_SP system variable
 		BIT	7,(IY+$00)	; is ERR_NR $FF (= 'OK') ?
 		RET	NZ		; return if so
@@ -4576,25 +4576,25 @@ L1026	POP	HL		; the previous value of ERR_SP
 ; position at each jump in DE. Once it arrives at the cursor then the next
 ; legitimate leftmost position is in DE.
 
-;; ED-EDGE
-L1031	SCF			; carry flag must be set to call the nested
-		CALL	L1195		; subroutine SET-DE.
-					; if input	then DE=WORKSP
+;; $1031
+ED_EDGE:	SCF			; carry flag must be set to call the nested
+		CALL	SET_DE		; subroutine SET_DE.
+					; if input   then DE=WORKSP
 					; if editing then DE=E_LINE
 		SBC	HL,DE		; subtract address from start of line
 		ADD	HL,DE		; and add back.
 		INC	HL		; adjust for carry.
 		POP	BC		; drop return address
-		RET	C		; return to ED-LOOP if already at left
+		RET	C		; return to ED_LOOP if already at left
 					; of line.
 
-		PUSH	BC		; resave return address - ED-LOOP.
+		PUSH	BC		; resave return address - ED_LOOP.
 		LD	B,H		; transfer HL - cursor address
 		LD	C,L		; to BC register pair.
 					; at this point DE addresses start of line.
 
-;; ED-EDGE-1
-L103E	LD	H,D		; transfer DE - leftmost pointer
+;; $103E
+ED_EDGE_1:	LD	H,D		; transfer DE - leftmost pointer
 		LD	L,E		; to HL
 		INC	HL		; address next leftmost character to
 					; advance position each time.
@@ -4602,25 +4602,25 @@ L103E	LD	H,D		; transfer DE - leftmost pointer
 		AND	$F0		; lose the low bits
 		CP	$10		; is it INK to TAB $10-$1F ?
 					; that is, is it followed by a parameter ?
-		JR	NZ,L1051	; to ED-EDGE-2 if not
+		JR	NZ,ED_EDGE_2	; to ED_EDGE_2 if not
 					; HL has been incremented once
 
 		INC	HL		; address next as at least one parameter.
 
-; in fact since 'tab' and 'at' cannot be entered the next section seems
-; superfluous.
-; The test will always fail and the jump to ED-EDGE-2 will be taken.
+					; in fact since 'tab' and 'at' cannot be entered the next section seems
+					; superfluous.
+					; The test will always fail and the jump to ED_EDGE_2 will be taken.
 
 		LD	A,(DE)		; reload leftmost character
 		SUB	$17		; decimal 23 ('tab')
 		ADC	A,$00		; will be 0 for 'tab' and 'at'.
-		JR	NZ,L1051	; forward to ED-EDGE-2 if not
+		JR	NZ,ED_EDGE_2	; forward to ED_EDGE_2 if not
 					; HL has been incremented twice
 
 		INC	HL		; increment a third time for 'at'/'tab'
 
-;; ED-EDGE-2
-L1051	AND	A		; prepare for true subtraction
+;; $1051
+ED_EDGE_2:	AND	A		; prepare for true subtraction
 		SBC	HL,BC		; subtract cursor address from pointer
 		ADD	HL,BC		; and add back
 					; Note when HL matches the cursor position BC,
@@ -4629,7 +4629,7 @@ L1051	AND	A		; prepare for true subtraction
 		EX	DE,HL		; transfer result to DE if looping again.
 					; transfer DE to HL to be used as K-CUR
 					; if exiting loop.
-		JR	C,L103E		; back to ED-EDGE-1 if cursor not matched.
+		JR	C,ED_EDGE_1	; back to ED_EDGE_1 if cursor not matched.
 
 		RET			; return.
 
@@ -4640,26 +4640,26 @@ L1051	AND	A		; prepare for true subtraction
 ; to move up one line scrolling if necessary.
 ; This has no alternative use in input mode.
 
-;; ED-UP
-L1059	BIT	5,(IY+$37)	; test FLAGX  - input mode ?
-		RET	NZ		; return if not in editor - to ED-LOOP.
+;; $1059
+ED_UP:		BIT	5,(IY+$37)	; test FLAGX  - input mode ?
+		RET	NZ		; return if not in editor - to ED_LOOP.
 
-		LD	HL,($5C49)	; get current line from E_PPC
+		LD	HL,(E_PPC)	; get current line from E_PPC
 		CALL	L196E		; routine LINE-ADDR gets address
 		EX	DE,HL		; and previous in DE
 		CALL	L1695		; routine LINE-NO gets prev line number
-		LD	HL,$5C4A	; set HL to E_PPC_hi as next routine stores
+		LD	HL,E_PPC_HI	; set HL to E_PPC_HI as next routine stores
 					; top first.
 		CALL	L191C		; routine LN-STORE loads DE value to HL
-					; high byte first - E_PPC_lo takes E
+					; high byte first - E_PPC_LO takes E
 
-; this branch is also taken from ed-down.
+					; this branch is also taken from ED_DOWN.
 
-;; ED-LIST
-L106E	CALL	L1795		; routine AUTO-LIST lists to upper screen
+;; $106E
+ED_LIST:	CALL	L1795		; routine AUTO-LIST lists to upper screen
 					; including adjusted current line.
 		LD	A,$00		; select lower screen again
-		JP	L1601		; exit via CHAN-OPEN to ED-LOOP
+		JP	L1601		; exit via CHAN-OPEN to ED_LOOP
 
 ;---------------------------------
 ; Use of symbol and graphics codes
@@ -4679,17 +4679,17 @@ L106E	CALL	L1795		; routine AUTO-LIST lists to upper screen
 ; chr$14 would have the same functionality.
 
 ; This is chr$ 14.
-;; ED-SYMBOL
-L1076	BIT	7,(IY+$37)	; test FLAGX - is this INPUT LINE ?
-		JR	Z,L1024		; back to ED-ENTER if not to treat as if
+;; $1076
+ED_SYMBOL:	BIT	7,(IY+$37)	; test FLAGX - is this INPUT LINE ?
+		JR	Z,ED_ENTER	; back to ED_ENTER if not to treat as if
 					; enter had been pressed.
 					; else continue and add code to buffer.
 
-; Next is chr$ 15
-; Note that ADD-CHAR precedes the table so we can't offset to it directly.
+					; Next is chr$ 15
+					; Note that ADD_CHAR precedes the table so we can't offset to it directly.
 
-;; ED-GRAPH
-L107C	JP	L0F81		; jump back to ADD-CHAR
+;; $107C
+ED_GRAPH:	JP	ADD_CHAR	; jump back to ADD_CHAR
 
 ;---------------------
 ; Editor error routine
@@ -4697,39 +4697,39 @@ L107C	JP	L0F81		; jump back to ADD-CHAR
 ; If an error occurs while editing, or inputting, then ERR_SP
 ; points to the stack location holding address ED_ERROR.
 
-;; ED-ERROR
-L107F	BIT	4,(IY+$30)	; test FLAGS2  - is K channel in use ?
-		JR	Z,L1026		; back to ED-END if not.
+;; $107F
+ED_ERROR:	BIT	4,(IY+$30)	; test FLAGS2  - is K channel in use ?
+		JR	Z,ED_END	; back to ED_END if not.
 
-; but as long as we're editing lines or inputting from the keyboard, then
-; we've run out of memory so give a short rasp.
+					; but as long as we're editing lines or inputting from the keyboard, then
+					; we've run out of memory so give a short rasp.
 
 		LD	(IY+$00),$FF	; reset ERR_NR to 'OK'.
 		LD	D,$00		; prepare for beeper.
 		LD	E,(IY-$02)	; use RASP value.
 		LD	HL,$1A90	; set a duration.
 		CALL	BEEPER		; routine BEEPER emits a warning rasp.
-		JP	L0F30		; to ED-AGAIN to re-stack address of
+		JP	ED_AGAIN	; to ED_AGAIN to re-stack address of
 					; this routine and make ERR_SP point to it.
 
 ;----------------------
 ; Clear edit/work space
 ;----------------------
 ; The editing area or workspace is cleared depending on context.
-; This is called from ED-EDIT to clear workspace if edit key is
+; This is called from ED_EDIT to clear workspace if edit key is
 ; used during input, to clear editing area if no program exists
 ; and to clear editing area prior to copying the edit line to it.
 ; It is also used by the error routine to clear the respective
 ; area depending on FLAGX.
 
-;; CLEAR-SP
-L1097	PUSH	HL		; preserve HL
-		CALL	L1190		; routine SET-HL
-					; if in edit	HL = WORKSP-1, DE = E_LINE
-					; if in input  HL = STKBOT,	DE = WORKSP
+;; $1097
+CLEAR_SP:	PUSH	HL		; preserve HL
+		CALL	SET_HL		; routine SET_HL
+					; if in edit   HL = WORKSP-1, DE = E_LINE
+					; if in input  HL = STKBOT,   DE = WORKSP
 		DEC	HL		; adjust
 		CALL	L19E5		; routine RECLAIM-1 reclaims space
-		LD	($5C5B),HL	; set K_CUR to start of empty area
+		LD	(K_CUR),HL	; set K_CUR to start of empty area
 		LD	(IY+$07),$00	; set MODE to 'KLC'
 		POP	HL		; restore HL.
 		RET			; return.
@@ -4740,10 +4740,10 @@ L1097	PUSH	HL		; preserve HL
 ; This is the service routine for the input stream of the keyboard
 ; channel 'K'.
 
-;; KEY-INPUT
-L10A8	BIT	3,(IY+$02)	; test TV_FLAG  - has a key been pressed in
+;; $10A8
+KEY_INPUT:	BIT	3,(IY+$02)	; test TV_FLAG  - has a key been pressed in
 					; editor ?
-		CALL	NZ,L111D	; routine ED-COPY if so to reprint the lower
+		CALL	NZ,ED_COPY	; routine ED_COPY if so to reprint the lower
 					; screen at every keystroke.
 		AND	A		; clear carry - required exit condition.
 		BIT	5,(IY+$01)	; test FLAGS  - has a new key been pressed ?
@@ -4758,17 +4758,17 @@ L10A8	BIT	3,(IY+$02)	; test TV_FLAG  - has a key been pressed in
 
 		POP	AF		; restore the character code.
 		CP	$20		; if space or higher then
-		JR	NC,L111B	; forward to KEY-DONE2 and return with carry
+		JR	NC,KEY_DONE2	; forward to KEY_DONE2 and return with carry
 					; set to signal key-found.
 
 		CP	$10		; with 16d INK and higher skip
-		JR	NC,L10FA	; forward to KEY-CONTR.
+		JR	NC,KEY_CONTR	; forward to KEY_CONTR.
 
 		CP	$06		; for 6 - 15d
-		JR	NC,L10DB	; skip forward to KEY-M-CL to handle Modes
+		JR	NC,KEY_M_CL	; skip forward to KEY_M_CL to handle Modes
 					; and CapsLock.
 
-; that only leaves 0-5, the flash bright inverse switches.
+					; that only leaves 0-5, the flash bright inverse switches.
 
 		LD	B,A		; save character in B
 		AND	$01		; isolate the embedded parameter (0/1).
@@ -4777,72 +4777,72 @@ L10A8	BIT	3,(IY+$02)	; test TV_FLAG  - has a key been pressed in
 		RRA			; halve it 0, 1 or 2.
 		ADD	A,$12		; add 18d gives 'flash', 'bright'
 					; and 'inverse'.
-		JR	L1105		; forward to KEY-DATA with the 
+		JR	KEY_DATA	; forward to KEY_DATA with the 
 					; parameter (0/1) in C.
 
-; Now separate capslock 06 from modes 7-15.
+					; Now separate capslock 06 from modes 7-15.
 
-;; KEY-M-CL
-L10DB	JR	NZ,L10E6		; forward to KEY-MODE if not 06 (capslock)
+;; $10DB
+KEY_M_CL:	JR	NZ,KEY_MODE	; forward to KEY_MODE if not 06 (capslock)
 
-		LD	HL,$5C6A	; point to FLAGS2
+		LD	HL,FLAGS2	; point to FLAGS2
 		LD	A,$08		; value 00000100
 		XOR	(HL)		; toggle BIT 2 of FLAGS2 the capslock bit
 		LD	(HL),A		; and store result in FLAGS2 again.
-		JR	L10F4		; forward to KEY-FLAG to signal no-key.
+		JR	KEY_FLAG	; forward to KEY_FLAG to signal no-key.
 
-;; KEY-MODE
-L10E6	CP	$0E		; compare with chr 14d
+;; $10E6
+KEY_MODE:	CP	$0E		; compare with chr 14d
 		RET	C		; return with carry set "key found" for
 					; codes 7 - 13d leaving 14d and 15d
 					; which are converted to mode codes.
 
 		SUB	$0D		; subtract 13d leaving 1 and 2
 					; 1 is 'E' mode, 2 is 'G' mode.
-		LD	HL,$5C41		; address the MODE system variable.
+		LD	HL,MODE		; address the MODE system variable.
 		CP	(HL)		; compare with existing value before
 		LD	(HL),A		; inserting the new value.
-		JR	NZ,L10F4	; forward to KEY-FLAG if it has changed.
+		JR	NZ,KEY_FLAG	; forward to KEY_FLAG if it has changed.
 
 		LD	(HL),$00	; else make MODE zero - KLC mode
 					; Note. while in Extended/Graphics mode,
 					; the Extended Mode/Graphics key is pressed
 					; again to get out.
 
-;; KEY-FLAG
-L10F4	SET	3,(IY+$02)	; update TV_FLAG  - show key state has changed
+;; $10F4
+KEY_FLAG:	SET	3,(IY+$02)	; update TV_FLAG  - show key state has changed
 		CP	A		; clear carry and reset zero flags -
 					; no actual key returned.
 		RET			; make the return.
 
-; now deal with colour controls - 16-23 ink, 24-31 paper
+					; now deal with colour controls - 16-23 ink, 24-31 paper
 
-;; KEY-CONTR
-L10FA	LD	B,A		; make a copy of character.
+;; $10FA
+KEY_CONTR:	LD	B,A		; make a copy of character.
 		AND	$07		; mask to leave bits 0-7
 		LD	C,A		; and store in C.
 		LD	A,$10		; initialize to 16d - INK.
 		BIT	3,B		; was it paper ?
-		JR	NZ,L1105	; forward to KEY-DATA with INK 16d and
+		JR	NZ,KEY_DATA	; forward to KEY_DATA with INK 16d and
 					; colour in C.
 
 		INC	A		; else change from INK to PAPER (17d) if so.
 
-;; KEY-DATA
-L1105	LD	(IY-$2D),C	; put the colour (0-7)/state(0/1) in KDATA
-		LD	DE,L110D	; address: KEY-NEXT will be next input stream
-		JR	L1113		; forward to KEY-CHAN to change it ...
+;; $1105
+KEY_DATA:	LD	(IY-$2D),C	; put the colour (0-7)/state(0/1) in KDATA
+		LD	DE,KEY_NEXT	; address: KEY_NEXT will be next input stream
+		JR	KEY_CHAN	; forward to KEY_CHAN to change it ...
 
-; ... so that INPUT_AD directs control to here at next call to WAIT-KEY
+					; ... so that INPUT_AD directs control to here at next call to WAIT-KEY
 
-;; KEY-NEXT
-L110D	LD	A,($5C0D)	; pick up the parameter stored in KDATA.
-		LD	DE,L10A8	; address: KEY-INPUT will be next input stream
+;; $110D
+KEY_NEXT:	LD	A,(KDATA)	; pick up the parameter stored in KDATA.
+		LD	DE,KEY_INPUT	; address: KEY_INPUT will be next input stream
 					; continue to restore default channel and
 					; make a return with the control code.
 
-;; KEY-CHAN
-L1113	LD	HL,($5C4F)	; address start of CHANNELS area using CHANS
+;; $1113
+KEY_CHAN:	LD	HL,(CHANS)	; address start of CHANNELS area using CHANS
 					; Note. One might have expected CURCHL to
 					; have been used.
 		INC	HL		; step over the
@@ -4851,8 +4851,8 @@ L1113	LD	HL,($5C4F)	; address start of CHANNELS area using CHANS
 		INC	HL		; routine address for
 		LD	(HL),D		; the next call to WAIT-KEY.
 
-;; KEY-DONE2
-L111B	SCF			; set carry flag to show a key has been found
+;; $111B
+KEY_DONE2:	SCF			; set carry flag to show a key has been found
 		RET			; and return.
 
 ;---------------------
@@ -4865,8 +4865,8 @@ L111B	SCF			; set carry flag to show a key has been found
 ; Remember the edit line will contain characters and tokens
 ; e.g. "1000 LET a = 1" is 12 characters.
 
-;; ED-COPY
-L111D	CALL	TEMPS		; routine TEMPS sets temporary attributes.
+;; $111D
+ED_COPY:	CALL	TEMPS		; routine TEMPS sets temporary attributes.
 		RES	3,(IY+$02)	; update TV_FLAG  - signal no change in mode
 		RES	5,(IY+$02)	; update TV_FLAG  - signal don't clear lower
 					; screen.
@@ -4875,15 +4875,15 @@ L111D	CALL	TEMPS		; routine TEMPS sets temporary attributes.
 
 		LD	HL,(ERR_SP)	; fetch ERR_SP
 		PUSH	HL		; and save also
-		LD	HL,L1167	; address: ED-FULL
+		LD	HL,ED_FULL	; address: ED_FULL
 		PUSH	HL		; is pushed as the error routine
 		LD	(ERR_SP),SP	; and ERR_SP made to point to it.
 
 		LD	HL,(ECHO_E)	; fetch ECHO_E
 		PUSH	HL		; and push also
 
-		SCF			; set carry flag to control SET-DE
-		CALL	L1195		; call routine SET-DE
+		SCF			; set carry flag to control SET_DE
+		CALL	SET_DE		; call routine SET_DE
 					; if in input DE = WORKSP
 					; if in edit  DE = E_LINE
 		EX	DE,HL		; start address to HL
@@ -4901,22 +4901,22 @@ L111D	CALL	TEMPS		; routine TEMPS sets temporary attributes.
 		CALL	TEMPS		; routine TEMPS to re-set attributes
 					; if altered.
 
-; the lower screen was not cleared, at the outset, so if deleting then old
-; text from a previous print may follow this line and requires blanking.
+					; the lower screen was not cleared, at the outset, so if deleting then old
+					; text from a previous print may follow this line and requires blanking.
 
-;; ED-BLANK
-L1150	LD	A,($5C8B)	; fetch SPOSNL_hi is current line
+;; $1150
+ED_BLANK:	LD	A,(SPOSNL_HI)	; fetch SPOSNL_HI is current line
 		SUB	D		; compare with old
-		JR	C,L117C		; forward to ED-C-DONE if no blanking
+		JR	C,ED_C_DONE	; forward to ED_C_DONE if no blanking
 
-		JR	NZ,L115E	; forward to ED-SPACES if line has changed
+		JR	NZ,ED_SPACES	; forward to ED_SPACES if line has changed
 
 		LD	A,E		; old column to A
 		SUB	(IY+$50)	; subtract new in SPOSNL_lo
-		JR	NC,L117C	; forward to ED-C-DONE if no backfilling.
+		JR	NC,ED_C_DONE	; forward to ED_C_DONE if no backfilling.
 
-;; ED-SPACES
-L115E	LD	A,$20		; prepare a space.
+;; $115E
+ED_SPACES:	LD	A,$20		; prepare a space.
 		PUSH	DE		; save old line/column.
 		CALL	PRINT_OUT	; routine PRINT_OUT prints a space over
 					; any text from previous print.
@@ -4925,38 +4925,36 @@ L115E	LD	A,$20		; prepare a space.
 					; there is no need to vector via a RST 10
 					; and we can use this alternate set.
 		POP	DE		; restore the old line column.
-		JR	L1150		; back to ED-BLANK until all old text blanked.
+		JR	ED_BLANK	; back to ED_BLANK until all old text blanked.
 
 ;--------
-; ED-FULL
+; ED_FULL
 ;--------
 ; this is the error routine addressed by ERR_SP. This is not for the out of
 ; memory situation as we're just printing. The pitch and duration are exactly
-; the same as used by ED-ERROR from which this has been augmented. The
+; the same as used by ED_ERROR from which this has been augmented. The
 ; situation is that the lower screen is full and a rasp is given to suggest
 ; that this is perhaps not the best idea you've had that day.
 
-;; ED-FULL
-L1167	LD	D,$00		; prepare to moan.
+;; $1167
+ED_FULL:	LD	D,$00		; prepare to moan.
 		LD	E,(IY-$02)	; fetch RASP value.
 		LD	HL,$1A90	; set duration.
 		CALL	BEEPER		; routine BEEPER.
 		LD	(IY+$00),$FF	; clear ERR_NR.
 		LD	DE,(SPOSNL)	; fetch SPOSNL.
-		JR	L117E		; forward to ED-C-END
+		JR	ED_C_END	; forward to ED_C_END
 
-; -------
+					; the exit point from line printing continues here.
 
-; the exit point from line printing continues here.
-
-;; ED-C-DONE
-L117C	POP	DE		; fetch new line/column.
+;; $117C
+ED_C_DONE:	POP	DE		; fetch new line/column.
 		POP	HL		; fetch the error address.
 
-; the error path rejoins here.
+					; the error path rejoins here.
 
-;; ED-C-END
-L117E	POP	HL		; restore the old value of ERR_SP.
+;; $117E
+ED_C_END:	POP	HL		; restore the old value of ERR_SP.
 		LD	(ERR_SP),HL	; update the system variable ERR_SP
 		POP	BC		; old value of SPOSN_L
 		PUSH	DE		; save new value
@@ -4964,7 +4962,7 @@ L117E	POP	HL		; restore the old value of ERR_SP.
 					; update ECHO_E and SPOSN_L from BC
 		POP	HL		; restore new value
 		LD	(ECHO_E),HL	; and update ECHO_E
-		LD	(IY+$26),$00	; make error pointer X_PTR_hi out of bounds
+		LD	(IY+$26),$00	; make error pointer X_PTR_HI out of bounds
 		RET			; return
 
 ;------------------------------------------------
@@ -4975,24 +4973,24 @@ L117E	POP	HL		; restore the old value of ERR_SP.
 ; these routines are designed to work on either area.
 
 ; this routine is called once
-;; SET-HL
-L1190	LD	HL,(WORKSP)	; fetch WORKSP to HL.
+;; $1190
+SET_HL:		LD	HL,(WORKSP)	; fetch WORKSP to HL.
 		DEC	HL		; point to last location of editing area.
 		AND	A		; clear carry to limit exit points to first
 					; or last.
 
-; this routine is called with carry set and exits at a conditional return.
+					; this routine is called with carry set and exits at a conditional return.
 
-;; SET-DE
-L1195	LD	DE,(E_LINE)	; fetch E_LINE to DE
+;; $1195
+SET_DE:		LD	DE,(E_LINE)	; fetch E_LINE to DE
 		BIT	5,(IY+$37)	; test FLAGX  - Input Mode ?
 		RET	Z		; return now if in editing mode
 
 		LD	DE,(WORKSP)	; fetch WORKSP to DE
-		RET	C		; return if carry set ( entry = set-de)
+		RET	C		; return if carry set ( entry = SET_DE)
 
-		LD	HL,($5C63)	; fetch STKBOT to HL as well
-		RET			; and return  (entry = set-hl (in input))
+		LD	HL,(STKBOT)	; fetch STKBOT to HL as well
+		RET			; and return  (entry = SET_HL (in input))
 
 ;--------------------------------
 ; Remove floating point from line
@@ -5004,15 +5002,15 @@ L1195	LD	DE,(E_LINE)	; fetch E_LINE to DE
 ; This routine removes these 'compiled' numbers from the edit line or
 ; input workspace.
 
-;; REMOVE-FP
-L11A7	LD	A,(HL)		; fetch character
+;; $11A7
+REMOVE_FP:	LD	A,(HL)		; fetch character
 		CP	$0E		; is it the number marker ?
 		LD	BC,$0006	; prepare for six bytes
 		CALL	Z,L19E8		; routine RECLAIM-2 reclaims space if $0E
 		LD	A,(HL)		; reload next (or same) character
 		INC	HL		; and advance address
 		CP	$0D		; end of line or input buffer ?
-		JR	NZ,L11A7	; back to REMOVE-FP until entire line done.
+		JR	NZ,REMOVE_FP	; back to REMOVE_FP until entire line done.
 
 		RET			; return
 
@@ -5190,7 +5188,7 @@ L1219	LD	($5CB2),HL	; set system variable RAMTOP to HL.
 
 		LD	HL,$5CB6	; the address of the channels - initially
 					; following system variables.
-		LD	($5C4F),HL	; set the CHANS system variable.
+		LD	(CHANS),HL	; set the CHANS system variable.
 
 		LD	DE,L15AF	; address: init-chan in ROM.
 		LD	BC,$0015	; there are 21 bytes of initial data in ROM.
@@ -5217,7 +5215,7 @@ L1219	LD	($5CB2),HL	; set system variable RAMTOP to HL.
 		LD	(HL),$80	; an end-marker.
 		INC	HL		; address the next location.
 		LD	(WORKSP),HL	; set WORKSP - empty workspace.
-		LD	($5C63),HL	; set STKBOT - bottom of the empty stack.
+		LD	(STKBOT),HL	; set STKBOT - bottom of the empty stack.
 		LD	($5C65),HL	; set STKEND to the end of the empty stack.
 					; --
 		LD	A,$38		; the colour system is set to white paper,
@@ -5275,7 +5273,7 @@ L12A9	CALL	L16B0		; routine SET-MIN clears work areas.
 ;; MAIN-2
 L12AC	LD	A,$00		; select channel 'K' the keyboard
 		CALL	L1601		; routine CHAN-OPEN opens it
-		CALL	L0F2C		; routine EDITOR is called.
+		CALL	EDITOR		; routine EDITOR is called.
 					; Note the above routine is where the Spectrum
 					; waits for user-interaction. Perhaps the
 					; most common input at this stage
@@ -5293,7 +5291,7 @@ L12AC	LD	A,$00		; select channel 'K' the keyboard
 ;
 
 		LD	HL,(E_LINE)	; an editing error so address E_LINE.
-		CALL	L11A7		; routine REMOVE-FP removes the hidden
+		CALL	REMOVE_FP	; routine REMOVE_FP removes the hidden
 					; floating-point forms.
 		LD	(IY+$00),$FF	; system variable ERR_NR is reset to 'OK'.
 		JR	L12AC		; back to MAIN-2 to allow user to correct.
@@ -5367,7 +5365,7 @@ L1313	PUSH	AF		; save the error number.
 
 		LD	HL,$0000		; prepare to clear some system variables.
 		LD	(IY+$37),H	; clear all the bits of FLAGX.
-		LD	(IY+$26),H	; blank X_PTR_hi to suppress error marker.
+		LD	(IY+$26),H	; blank X_PTR_HI to suppress error marker.
 		LD	($5C0B),HL	; blank DEFADD to signal that no defined
 					; function is currently being evaluated.
 
@@ -5413,7 +5411,7 @@ L133C	CALL	L15EF		; call routine OUT-CODE to print the code.
 		LD	B,$00		; limited to 127
 		CALL	L1A1B		; routine OUT-NUM-1
 
-		CALL	L1097		; routine CLEAR-SP clears editing area.
+		CALL	CLEAR_SP	; routine CLEAR_SP clears editing area.
 					; which probably contained 'RUN'.
 		LD	A,($5C3A)	; fetch ERR_NR again
 		INC	A		; test for no error originally $FF.
@@ -5527,7 +5525,7 @@ L1555	LD	A,$10		; i.e. 'G' -$30 -$07
 ; Entering a non-existent line allows the subsequent line to be edited next.
 
 ;; MAIN-ADD
-L155D	LD	($5C49),BC	; set E_PPC to extracted line number.
+L155D	LD	(E_PPC),BC	; set E_PPC to extracted line number.
 		LD	HL,(CH_ADD)	; fetch CH_ADD - points to location after the
 					; initial digits (set in E_LINE_NO).
 		EX	DE,HL		; save start of BASIC in DE.
@@ -5581,7 +5579,7 @@ L157D	POP	BC		; retrieve the length of the new line.
 		DEC	HL		; decrement to address carriage return.
 		LDDR			; copy the Basic line back to initial command.
 
-		LD	HL,($5C49)	; fetch E_PPC - line number.
+		LD	HL,(E_PPC)	; fetch E_PPC - line number.
 		EX	DE,HL		; swap it to DE, HL points to last of
 					; four locations.
 		POP	BC		; retrieve length of line.
@@ -5611,15 +5609,15 @@ L15AB	POP	AF		; drop the address of Report G
 
 ;; init-chan
 L15AF	DEFW	PRINT_OUT		; PRINT_OUT
-		DEFW	L10A8		; KEY-INPUT
+		DEFW	KEY_INPUT	; KEY_INPUT
 		DEFB	$4B		; 'K'
-		DEFW	PRINT_OUT		; PRINT_OUT
+		DEFW	PRINT_OUT	; PRINT_OUT
 		DEFW	L15C4		; REPORT-J
 		DEFB	$53		; 'S'
-		DEFW	L0F81		; ADD-CHAR
+		DEFW	ADD_CHAR	; ADD_CHAR
 		DEFW	L15C4		; REPORT-J
 		DEFB	$52		; 'R'
-		DEFW	PRINT_OUT		; PRINT_OUT
+		DEFW	PRINT_OUT	; PRINT_OUT
 		DEFW	L15C4		; REPORT-J
 		DEFB	$50		; 'P'
 
@@ -5755,7 +5753,7 @@ L160E	RST	08H		; ERROR_1
 
 ;; CHAN-OP-1
 L1610	DEC	DE		; reduce offset so it points to the channel.
-		LD	HL,($5C4F)	; Fetch CHANS the location of the base of
+		LD	HL,(CHANS)	; Fetch CHANS the location of the base of
 					; the channel information area
 		ADD	HL,DE		; and add the offset to address the channel.
 					; and continue to set flags.
@@ -5763,7 +5761,7 @@ L1610	DEC	DE		; reduce offset so it points to the channel.
 ;------------------
 ; Set channel flags
 ;------------------
-; This subroutine is used from ED-EDIT, str$ and read-in to reset the
+; This subroutine is used from ED_EDIT, str$ and read-in to reset the
 ; current channel when it has been temporarily altered.
 
 ;; CHAN-FLAG
@@ -5846,7 +5844,7 @@ L164D	SET	1,(IY+$01)	; update FLAGS  - signal printer in use
 ; Just one space required
 ;------------------------
 ; This routine is called once only to create a single space
-; in workspace by ADD-CHAR. It is slightly quicker than using a RST $30.
+; in workspace by ADD_CHAR. It is slightly quicker than using a RST $30.
 ; There are several instances in the calculator where the sequence
 ; ld bc, 1; rst $30 could be replaced by a call to this routine but it
 ; only gives a saving of one byte each time.
@@ -5976,7 +5974,7 @@ L1695	LD	A,(HL)		; fetch the high byte - max $2F
 ; This is a continuation of the restart BC_SPACES
 
 ;; RESERVE
-L169E	LD	HL,($5C63)	; STKBOT first location of calculator stack
+L169E	LD	HL,(STKBOT)	; STKBOT first location of calculator stack
 		DEC	HL		; make one less than new location
 		CALL	L1655		; routine MAKE-ROOM creates the room.
 		INC	HL		; address the first new location
@@ -6005,7 +6003,7 @@ L169E	LD	HL,($5C63)	; STKBOT first location of calculator stack
 ;; SET-MIN
 L16B0	LD	HL,(E_LINE)	; fetch E_LINE
 		LD	(HL),$0D		; insert carriage return
-		LD	($5C5B),HL	; make K_CUR keyboard cursor point there.
+		LD	(K_CUR),HL	; make K_CUR keyboard cursor point there.
 		INC	HL		; next location
 		LD	(HL),$80		; holds end-marker $80
 		INC	HL		; next location becomes
@@ -6016,13 +6014,13 @@ L16B0	LD	HL,(E_LINE)	; fetch E_LINE
 
 ;; SET-WORK
 L16BF	LD	HL,(WORKSP)	; fetch WORKSP value
-		LD	($5C63),HL	; and place in STKBOT
+		LD	(STKBOT),HL	; and place in STKBOT
 
 ; This entry point is used to move the stack back to it's normal place
 ; after temporary relocation during line entry and also from ERROR_3
 
 ;; SET-STK
-L16C5	LD	HL,($5C63)	; fetch STKBOT value 
+L16C5	LD	HL,(STKBOT)	; fetch STKBOT value 
 		LD	($5C65),HL	; and place in STKEND.
 
 		PUSH	HL		; perhaps an obsolete entry point.
@@ -6036,7 +6034,7 @@ L16C5	LD	HL,($5C63)	; fetch STKBOT value
 ;-------------------
 ; This seems to be legacy code from the ZX80/ZX81 as it is 
 ; not used in this ROM.
-; That task, in fact, is performed here by the dual-area routine CLEAR-SP.
+; That task, in fact, is performed here by the dual-area routine CLEAR_SP.
 ; This routine is designed to deal with something that is known to be in the
 ; edit buffer and not workspace.
 ; On entry, HL must point to the end of the something to be deleted.
@@ -6162,7 +6160,7 @@ L16FC	EX	DE,HL		; address of stream to HL.
 ;; CLOSE-2
 L1701	PUSH	HL		; * save address of stream data pointer
 					; in STRMS on the machine stack.
-		LD	HL,($5C4F)	; fetch CHANS address to HL
+		LD	HL,(CHANS)	; fetch CHANS address to HL
 		ADD	HL,BC		; add the offset to address the second
 					; byte of the output routine hopefully.
 		INC	HL		; step past
@@ -6274,7 +6272,7 @@ L1736	RST	28H		;; FP_CALC	;s,c.
 ; if it is a system channel then it can re-attached.
 
 		EX	DE,HL		; save STRMS address in DE.
-		LD	HL,($5C4F)	; fetch CHANS.
+		LD	HL,(CHANS)	; fetch CHANS.
 		ADD	HL,BC		; add the offset to address the second 
 					; byte of the channel.
 		INC	HL		; skip over the
@@ -6462,7 +6460,7 @@ L1795	LD	(LIST_SP),SP	; save stack pointer in LIST_SP
 		RES	0,(IY+$02)	; update TV_FLAG  - signal main screen in use
 		SET	0,(IY+$30)	; update FLAGS2  - signal unnecessary to
 					; clear main screen.
-		LD	HL,($5C49)	; fetch E_PPC current edit line to HL.
+		LD	HL,(E_PPC)	; fetch E_PPC current edit line to HL.
 		LD	DE,($5C6C)	; fetch S_TOP to DE, the current top line
 					; (initially zero)
 		AND	A		; prepare for true subtraction.
@@ -6595,7 +6593,7 @@ L1822	CALL	L1BEE		; routine CHECK-END quits if syntax OK >>>
 
 		LD	H,A		; transfer the modified
 		LD	L,C		; line number to HL.
-		LD	($5C49),HL	; update E_PPC to new line number.
+		LD	(E_PPC),HL	; update E_PPC to new line number.
 		CALL	L196E		; routine LINE-ADDR gets the address of the
 					; line.
 
@@ -6644,10 +6642,10 @@ L1835	CALL	L1855		; routine OUT-LINE outputs a BASIC line
 ;-------------------------
 ; This routine prints a whole basic line and it is called
 ; from LIST-ALL to output the line to current channel
-; and from ED-EDIT to 'sprint' the line to the edit buffer.
+; and from ED_EDIT to 'sprint' the line to the edit buffer.
 
 ;; OUT-LINE
-L1855	LD	BC,($5C49)	; fetch E_PPC the current line which may be
+L1855	LD	BC,(E_PPC)	; fetch E_PPC the current line which may be
 					; unchecked and not exist.
 		CALL	L1980		; routine CP-LINES finds match or line after.
 		LD	D,$3E		; prepare cursor '>' in D.
@@ -6678,7 +6676,7 @@ L1865	LD	(IY+$2D),E	; save flag in BREG which is spare.
 
 		RST	10H		; PRINT_A prints '>' the current line cursor.
 
-; this entry point is called from ED-COPY
+; this entry point is called from ED_COPY
 
 ;; OUT-LINE2
 L187D	SET	0,(IY+$01)	; update FLAGS - suppress leading space.
@@ -6797,15 +6795,15 @@ L18C1	EXX			; switch in alternate set
 ; performs another very important function also.
 
 ;; OUT-CURS
-L18E1	LD	HL,($5C5B)	; fetch K_CUR the current cursor address
+L18E1	LD	HL,(K_CUR)	; fetch K_CUR the current cursor address
 		AND	A		; prepare for true subtraction.
 		SBC	HL,DE		; test against pointer address in DE and
 		RET	NZ		; return if not at exact position.
 
-; the value of MODE, maintained by KEY-INPUT, is tested and if non-zero
+; the value of MODE, maintained by KEY_INPUT, is tested and if non-zero
 ; then this value 'E' or 'G' will take precedence.
 
-		LD	A,($5C41)	; fetch MODE  0='KLC', 1='E', 2='G'.
+		LD	A,(MODE)	; fetch MODE  0='KLC', 1='E', 2='G'.
 		RLC	A		; double the value and set flags.
 		JR	Z,L18F3		; to OUT-C-1 if still zero ('KLC').
 
@@ -6832,7 +6830,7 @@ L18F3	LD	HL,FLAGS		; Address FLAGS
 		INC	A		; augment from 'K' to 'L'.
 
 		BIT	3,(IY+$30)	; test FLAGS2 - consider caps lock ?
-					; which is maintained by KEY-INPUT.
+					; which is maintained by KEY_INPUT.
 		JR	Z,L1909		; forward to OUT-C-2 if not set to print.
 
 		LD	A,$43		; alter 'L' to 'C'.
@@ -6850,7 +6848,7 @@ L1909	PUSH	DE		; save address pointer but OK as OUT-FLASH
 ; Get line number of next line
 ;-----------------------------
 ; These two subroutines are called while editing.
-; This entry point is from ED-DOWN with HL addressing E_PPC
+; This entry point is from ED_DOWN with HL addressing E_PPC
 ; to fetch the next line number.
 ; Also from AUTO-LIST with HL addressing S_TOP just to update S_TOP
 ; with the value of the next line number. It gets fetched but is discarded.
@@ -6867,12 +6865,12 @@ L190F	LD	E,(HL)		; fetch low byte
 		CALL	L1695		; routine LINE-NO gets line number in DE.
 		POP	HL		; restore system variable hi pointer.
 
-; This entry point is from the ED-UP with HL addressing E_PPC_hi
+; This entry point is from the ED_UP with HL addressing E_PPC_HI
 
 ;; LN-STORE
 L191C	BIT	5,(IY+$37)	; test FLAGX - input mode ?
 		RET	NZ		; return if so.
-					; Note. above already checked by ED-UP/ED-DOWN.
+					; Note. above already checked by ED_UP/ED_DOWN.
 
 		LD	(HL),D		; save high byte of line number.
 		DEC	HL		; address lower
@@ -6963,9 +6961,9 @@ L195A	CP	$22		; is it quote character '"'  ?
 		JR	NZ,L1968		; to OUT-CH-2 with others to set 'L' mode.
 
 		PUSH	AF		; save character.
-		LD	A,($5C6A)	; fetch FLAGS2.
+		LD	A,(FLAGS2)	; fetch FLAGS2.
 		XOR	$04		; toggle the quotes flag.
-		LD	($5C6A),A	; update FLAGS2
+		LD	(FLAGS2),A	; update FLAGS2
 		POP	AF		; and restore character.
 
 ;; OUT-CH-2
@@ -8685,8 +8683,8 @@ L1E0A	CALL	TEMP_PTR1		; routine TEMP_PTR1 advances updating CH_ADD
 		RST	18H		; GET_CHAR fetches adjusted character position
 		LD	($5C57),HL	; store back in DATADD
 		LD	HL,(X_PTR)	; fetch X_PTR  the original READ CH_ADD
-		LD	(IY+$26),$00	; now nullify X_PTR_hi
-		CALL	TEMP_PTR2		; routine TEMP_PTR2 restores READ CH_ADD
+		LD	(IY+$26),$00	; now nullify X_PTR_HI
+		CALL	TEMP_PTR2	; routine TEMP_PTR2 restores READ CH_ADD
 
 ;; READ-2
 L1E1E	RST	18H		; GET_CHAR
@@ -9698,7 +9696,7 @@ L211C	RST	30H		; BC_SPACES opens 1 or 3 bytes in workspace
 		LD	(HL),A		; and place a quote in second location.
 
 ;; IN-PR-3
-L2129	LD	($5C5B),HL	; set keyboard cursor K_CUR to HL
+L2129	LD	(K_CUR),HL	; set keyboard cursor K_CUR to HL
 		BIT	7,(IY+$37)	; test FLAGX  - is this INPUT LINE ??
 		JR	NZ,L215E		; forward to IN-VAR-3 if so as input will
 					; be accepted without checking it's syntax.
@@ -9719,12 +9717,12 @@ L213A	LD	HL,L213A		; address: IN-VAR-1 - this address
 
 ;; IN-VAR-2
 L2148	LD	HL,(WORKSP)	; set HL to WORKSP - start of workspace.
-		CALL	L11A7		; routine REMOVE-FP removes floating point
+		CALL	REMOVE_FP	; routine REMOVE_FP removes floating point
 					; forms when looping in error condition.
 		LD	(IY+$00),$FF	; set ERR_NR to 'OK' cancelling the error.
 					; but X_PTR causes flashing error marker
 					; to be displayed at each call to the editor.
-		CALL	L0F2C		; routine EDITOR allows input to be entered
+		CALL	EDITOR		; routine EDITOR allows input to be entered
 					; or corrected if this is second time around.
 
 ; if we pass to next then there are no system errors
@@ -9746,7 +9744,7 @@ L2148	LD	HL,(WORKSP)	; set HL to WORKSP - start of workspace.
 ; the jump was to here when using INPUT LINE.
 
 ;; IN-VAR-3
-L215E	CALL	L0F2C		; routine EDITOR is called for input
+L215E	CALL	EDITOR		; routine EDITOR is called for input
 
 ; when ENTER received rejoin other route but with no syntax check.
 
@@ -9763,7 +9761,7 @@ L2161	LD	(IY+$22),$00	; set K_CUR_hi to a low value so that the cursor
 
 ; continue here if using the keyboard.
 
-		CALL	L111D		; routine ED-COPY overprints the edit line
+		CALL	ED_COPY		; routine ED_COPY overprints the edit line
 					; to the lower screen. The only visible
 					; affect is that the cursor disappears.
 					; if you're inputting more than one item in
@@ -9797,7 +9795,7 @@ L2174	LD	HL,$5C71		; point HL to FLAGX
 					; becomes "hatstand"
 
 		LD	HL,(X_PTR)	; fetch stored CH_ADD value from X_PTR.
-		LD	(IY+$26),$00	; set X_PTR_hi so that no longer relevant.
+		LD	(IY+$26),$00	; set X_PTR_HI so that no longer relevant.
 		LD	(CH_ADD),HL	; put restored value back in CH_ADD
 		JR	L21B2		; forward to IN-NEXT-2 to see if anything
 					; more in the INPUT list.
@@ -9805,7 +9803,7 @@ L2174	LD	HL,$5C71		; point HL to FLAGX
 ; the jump was to here with INPUT LINE only
 
 ;; IN-VAR-6
-L219B	LD	HL,($5C63)	; STKBOT points to the end of the input.
+L219B	LD	HL,(STKBOT)	; STKBOT points to the end of the input.
 		LD	DE,(WORKSP)	; WORKSP points to the beginning.
 		SCF			; prepare for true subtraction.
 		SBC	HL,DE		; subtract to get length
@@ -16891,7 +16889,7 @@ L360C	JP	NZ,L1C8A		; jump back to REPORT-C with a result mismatch.
 L361F	LD	BC,$0001		; create an initial byte in workspace
 		RST	30H		; using BC_SPACES restart.
 
-		LD	($5C5B),HL	; set system variable K_CUR to new location.
+		LD	(K_CUR),HL	; set system variable K_CUR to new location.
 		PUSH	HL		; and save start on machine stack also.
 
 		LD	HL,(CURCHL)	; fetch value of system variable CURCHL
@@ -16906,7 +16904,7 @@ L361F	LD	BC,$0001		; create an initial byte in workspace
 		CALL	L1615		; routine CHAN-FLAG resets flags.
 
 		POP	DE		; fetch saved start of string to DE.
-		LD	HL,($5C5B)	; load HL with end of string from K_CUR.
+		LD	HL,(K_CUR)	; load HL with end of string from K_CUR.
 
 		AND	A		; prepare for true subtraction.
 		SBC	HL,DE		; subtract start from end to give length.
