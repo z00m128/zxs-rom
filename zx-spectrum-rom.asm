@@ -1834,7 +1834,7 @@ SAVE_ETC:	POP	AF		; discard address STMT-RET.
 
 					; Now reduce the low byte of the Syntax table entry to give command.
 
-		SUB	L1ADF + 1 % 256 ; subtract the known offset.
+		SUB	P_SAVE + 1 % 256 ; subtract the known offset.
 					; ( is SUB $E0 in standard ROM )
 
 		LD	(T_ADDR),A	; and put back in T_ADDR as 0,1,2, or 3
@@ -7341,57 +7341,57 @@ OUT_NUM_4:	CALL	OUT_CODE	; routine OUT_CODE for final digit.
 ; where a list of class codes, separators and addresses relevant to the
 ; command exists.
 
-;; offst-tbl
-L1A48	DEFB	L1AF9 - $	; B1 offset to Address: P-DEF-FN
-		DEFB	L1B14 - $	; CB offset to Address: P-CAT
-		DEFB	L1B06 - $	; BC offset to Address: P-FORMAT
-		DEFB	L1B0A - $	; BF offset to Address: P-MOVE
-		DEFB	L1B10 - $	; C4 offset to Address: P-ERASE
-		DEFB	L1AFC - $	; AF offset to Address: P-OPEN
-		DEFB	L1B02 - $	; B4 offset to Address: P-CLOSE
-		DEFB	L1AE2 - $	; 93 offset to Address: P-MERGE
-		DEFB	L1AE1 - $	; 91 offset to Address: P-VERIFY
-		DEFB	L1AE3 - $	; 92 offset to Address: P-BEEP
-		DEFB	L1AE7 - $	; 95 offset to Address: P-CIRCLE
-		DEFB	L1AEB - $	; 98 offset to Address: P-INK
-		DEFB	L1AEC - $	; 98 offset to Address: P-PAPER
-		DEFB	L1AED - $	; 98 offset to Address: P-FLASH
-		DEFB	L1AEE - $	; 98 offset to Address: P-BRIGHT
-		DEFB	L1AEF - $	; 98 offset to Address: P-INVERSE
-		DEFB	L1AF0 - $	; 98 offset to Address: P-OVER
-		DEFB	L1AF1 - $	; 98 offset to Address: P-OUT
-		DEFB	L1AD9 - $	; 7F offset to Address: P-LPRINT
-		DEFB	L1ADC - $	; 81 offset to Address: P-LLIST
-		DEFB	L1A8A - $	; 2E offset to Address: P-STOP
-		DEFB	L1AC9 - $	; 6C offset to Address: P-READ
-		DEFB	L1ACC - $	; 6E offset to Address: P-DATA
-		DEFB	L1ACF - $	; 70 offset to Address: P-RESTORE
-		DEFB	L1AA8 - $	; 48 offset to Address: P-NEW
-		DEFB	L1AF5 - $	; 94 offset to Address: P-BORDER
-		DEFB	L1AB8 - $	; 56 offset to Address: P-CONT
-		DEFB	L1AA2 - $	; 3F offset to Address: P-DIM
-		DEFB	L1AA5 - $	; 41 offset to Address: P-REM
-		DEFB	L1A90 - $	; 2B offset to Address: P-FOR
-		DEFB	L1A7D - $	; 17 offset to Address: P-GO-TO
-		DEFB	L1A86 - $	; 1F offset to Address: P-GO-SUB
-		DEFB	L1A9F - $	; 37 offset to Address: P-INPUT
-		DEFB	L1AE0 - $	; 77 offset to Address: P-LOAD
-		DEFB	L1AAE - $	; 44 offset to Address: P-LIST
-		DEFB	L1A7A - $	; 0F offset to Address: P-LET
-		DEFB	L1AC5 - $	; 59 offset to Address: P-PAUSE
-		DEFB	L1A98 - $	; 2B offset to Address: P-NEXT
-		DEFB	L1AB1 - $	; 43 offset to Address: P-POKE
-		DEFB	L1A9C - $	; 2D offset to Address: P-PRINT
-		DEFB	L1AC1 - $	; 51 offset to Address: P-PLOT
-		DEFB	L1AAB - $	; 3A offset to Address: P-RUN
-		DEFB	L1ADF - $	; 6D offset to Address: P-SAVE
-		DEFB	L1AB5 - $	; 42 offset to Address: P-RANDOM
-		DEFB	L1A81 - $	; 0D offset to Address: P-IF
-		DEFB	L1ABE - $	; 49 offset to Address: P-CLS
-		DEFB	L1AD2 - $	; 5C offset to Address: P-DRAW
-		DEFB	L1ABB - $	; 44 offset to Address: P-CLEAR
-		DEFB	L1A8D - $	; 15 offset to Address: P-RETURN
-		DEFB	L1AD6 - $	; 5D offset to Address: P-COPY
+;; $1A48
+OFFST_TBL:	DEFB	P_DEF_FN - $	; B1 offset to Address: P_DEF_FN
+		DEFB	P_CAT - $	; CB offset to Address: P_CAT
+		DEFB	P_FORMAT - $	; BC offset to Address: P_FORMAT
+		DEFB	P_MOVE - $	; BF offset to Address: P_MOVE
+		DEFB	P_ERASE - $	; C4 offset to Address: P_ERASE
+		DEFB	P_OPEN - $	; AF offset to Address: P_OPEN
+		DEFB	P_CLOSE - $	; B4 offset to Address: P_CLOSE
+		DEFB	P_MERGE - $	; 93 offset to Address: P_MERGE
+		DEFB	P_VERIFY - $	; 91 offset to Address: P_VERIFY
+		DEFB	P_BEEP - $	; 92 offset to Address: P_BEEP
+		DEFB	P_CIRCLE - $	; 95 offset to Address: P_CIRCLE
+		DEFB	P_INK - $	; 98 offset to Address: P_INK
+		DEFB	P_PAPER - $	; 98 offset to Address: P_PAPER
+		DEFB	P_FLASH - $	; 98 offset to Address: P_FLASH
+		DEFB	P_BRIGHT - $	; 98 offset to Address: P_BRIGHT
+		DEFB	P_INVERSE - $	; 98 offset to Address: P_INVERSE
+		DEFB	P_OVER - $	; 98 offset to Address: P_OVER
+		DEFB	P_OUT - $	; 98 offset to Address: P_OUT
+		DEFB	P_LPRINT - $	; 7F offset to Address: P_LPRINT
+		DEFB	P_LLIST - $	; 81 offset to Address: P_LLIST
+		DEFB	P_STOP - $	; 2E offset to Address: P_STOP
+		DEFB	P_READ - $	; 6C offset to Address: P_READ
+		DEFB	P_DATA - $	; 6E offset to Address: P_DATA
+		DEFB	P_RESTORE - $	; 70 offset to Address: P_RESTORE
+		DEFB	P_NEW - $	; 48 offset to Address: P_NEW
+		DEFB	P_BORDER - $	; 94 offset to Address: P_BORDER
+		DEFB	P_CONT - $	; 56 offset to Address: P_CONT
+		DEFB	P_DIM - $	; 3F offset to Address: P_DIM
+		DEFB	P_REM - $	; 41 offset to Address: P_REM
+		DEFB	P_FOR - $	; 2B offset to Address: P_FOR
+		DEFB	P_GO_TO - $	; 17 offset to Address: P_GO_TO
+		DEFB	P_GO_SUB - $	; 1F offset to Address: P_GO_SUB
+		DEFB	P_INPUT - $	; 37 offset to Address: P_INPUT
+		DEFB	P_LOAD - $	; 77 offset to Address: P_LOAD
+		DEFB	P_LIST - $	; 44 offset to Address: P_LIST
+		DEFB	P_LET - $	; 0F offset to Address: P_LET
+		DEFB	P_PAUSE - $	; 59 offset to Address: P_PAUSE
+		DEFB	P_NEXT - $	; 2B offset to Address: P_NEXT
+		DEFB	P_POKE - $	; 43 offset to Address: P_POKE
+		DEFB	P_PRINT - $	; 2D offset to Address: P_PRINT
+		DEFB	P_PLOT - $	; 51 offset to Address: P_PLOT
+		DEFB	P_RUN - $	; 3A offset to Address: P_RUN
+		DEFB	P_SAVE - $	; 6D offset to Address: P_SAVE
+		DEFB	P_RANDOM - $	; 42 offset to Address: P_RANDOM
+		DEFB	P_IF - $	; 0D offset to Address: P_IF
+		DEFB	P_CLS - $	; 49 offset to Address: P_CLS
+		DEFB	P_DRAW - $	; 5C offset to Address: P_DRAW
+		DEFB	P_CLEAR - $	; 44 offset to Address: P_CLEAR
+		DEFB	P_RETURN - $	; 15 offset to Address: P_RETURN
+		DEFB	P_COPY - $	; 5D offset to Address: P_COPY
 
 
 ;--------------------------------
@@ -7412,39 +7412,39 @@ L1A48	DEFB	L1AF9 - $	; B1 offset to Address: P-DEF-FN
 ; The last few commands appear to have been added in a rush but their syntax
 ; is rather simple e.g. MOVE "M1","M2"
 
-;; P-LET
-L1A7A	DEFB	$01		; Class-01 - A variable is required.
+;; $1A7A
+P_LET:		DEFB	$01		; Class-01 - A variable is required.
 		DEFB	$3D		; Separator:  '='
 		DEFB	$02		; Class-02 - An expression, numeric or string,
 					; must follow.
 
-;; P-GO-TO
-L1A7D	DEFB	$06		; Class-06 - A numeric expression must follow.
+;; $1A7D
+P_GO_TO:	DEFB	$06		; Class-06 - A numeric expression must follow.
 		DEFB	$00		; Class-00 - No further operands.
-		DEFW	L1E67		; Address: $1E67; Address: GO-TO
+		DEFW	L1E67		; Address: $1E67; Address: GO_TO
 
-;; P-IF
-L1A81	DEFB	$06		; Class-06 - A numeric expression must follow.
+;; $1A81
+P_IF:		DEFB	$06		; Class-06 - A numeric expression must follow.
 		DEFB	$CB		; Separator:  'THEN'
 		DEFB	$05		; Class-05 - Variable syntax checked
 					; by routine.
 		DEFW	L1CF0		; Address: $1CF0; Address: IF
 
-;; P-GO-SUB
-L1A86	DEFB	$06		; Class-06 - A numeric expression must follow.
+;; $1A86
+P_GO_SUB:	DEFB	$06		; Class-06 - A numeric expression must follow.
 		DEFB	$00		; Class-00 - No further operands.
-		DEFW	L1EED		; Address: $1EED; Address: GO-SUB
+		DEFW	L1EED		; Address: $1EED; Address: GO_SUB
 
-;; P-STOP
-L1A8A	DEFB	$00		; Class-00 - No further operands.
+;; $1A8A
+P_STOP:		DEFB	$00		; Class-00 - No further operands.
 		DEFW	L1CEE		; Address: $1CEE; Address: STOP
 
-;; P-RETURN
-L1A8D	DEFB	$00		; Class-00 - No further operands.
+;; $1A8D
+P_RETURN:	DEFB	$00		; Class-00 - No further operands.
 		DEFW	L1F23		; Address: $1F23; Address: RETURN
 
-;; P-FOR
-L1A90	DEFB	$04		; Class-04 - A single character variable must
+;; $1A90
+P_FOR:		DEFB	$04		; Class-04 - A single character variable must
 					; follow.
 		DEFB	$3D		; Separator:  '='
 		DEFB	$06		; Class-06 - A numeric expression must follow.
@@ -7454,227 +7454,227 @@ L1A90	DEFB	$04		; Class-04 - A single character variable must
 					; by routine.
 		DEFW	L1D03		; Address: $1D03; Address: FOR
 
-;; P-NEXT
-L1A98	DEFB	$04		; Class-04 - A single character variable must
+;; $1A98
+P_NEXT:		DEFB	$04		; Class-04 - A single character variable must
 					; follow.
 		DEFB	$00		; Class-00 - No further operands.
 		DEFW	L1DAB		; Address: $1DAB; Address: NEXT
 
-;; P-PRINT
-L1A9C	DEFB	$05		; Class-05 - Variable syntax checked entirely
+;; $1A9C
+P_PRINT:	DEFB	$05		; Class-05 - Variable syntax checked entirely
 					; by routine.
 		DEFW	L1FCD		; Address: $1FCD; Address: PRINT
 
-;; P-INPUT
-L1A9F	DEFB	$05		; Class-05 - Variable syntax checked entirely
+;; $1A9F
+P_INPUT:	DEFB	$05		; Class-05 - Variable syntax checked entirely
 					; by routine.
 		DEFW	L2089		; Address: $2089; Address: INPUT
 
-;; P-DIM
-L1AA2	DEFB	$05		; Class-05 - Variable syntax checked entirely
+;; $1AA2
+P_DIM:		DEFB	$05		; Class-05 - Variable syntax checked entirely
 					; by routine.
 		DEFW	L2C02		; Address: $2C02; Address: DIM
 
-;; P-REM
-L1AA5	DEFB	$05		; Class-05 - Variable syntax checked entirely
+;; $1AA5
+P_REM:		DEFB	$05		; Class-05 - Variable syntax checked entirely
 					; by routine.
 		DEFW	L1BB2		; Address: $1BB2; Address: REM
 
-;; P-NEW
-L1AA8	DEFB	$00		; Class-00 - No further operands.
+;; $1AA8
+P_NEW:		DEFB	$00		; Class-00 - No further operands.
 		DEFW	NEW		; Address: $11B7; Address: NEW
 
-;; P-RUN
-L1AAB	DEFB	$03		; Class-03 - A numeric expression may follow
+;; $1AAB
+P_RUN:		DEFB	$03		; Class-03 - A numeric expression may follow
 					; else default to zero.
 		DEFW	L1EA1		; Address: $1EA1; Address: RUN
 
-;; P-LIST
-L1AAE	DEFB	$05		; Class-05 - Variable syntax checked entirely
+;; $1AAE
+P_LIST:		DEFB	$05		; Class-05 - Variable syntax checked entirely
 					; by routine.
 		DEFW	LIST		; Address: $17F9; Address: LIST
 
-;; P-POKE
-L1AB1	DEFB	$08		; Class-08 - Two comma-separated numeric
+;; $1AB1
+P_POKE:		DEFB	$08		; Class-08 - Two comma-separated numeric
 					; expressions required.
 		DEFB	$00		; Class-00 - No further operands.
 		DEFW	L1E80		; Address: $1E80; Address: POKE
 
-;; P-RANDOM
-L1AB5	DEFB	$03		; Class-03 - A numeric expression may follow
+;; $1AB5
+P_RANDOM:	DEFB	$03		; Class-03 - A numeric expression may follow
 					; else default to zero.
 		DEFW	L1E4F		; Address: $1E4F; Address: RANDOMIZE
 
-;; P-CONT
-L1AB8	DEFB	$00		; Class-00 - No further operands.
+;; $1AB8
+P_CONT:		DEFB	$00		; Class-00 - No further operands.
 		DEFW	L1E5F		; Address: $1E5F; Address: CONTINUE
 
-;; P-CLEAR
-L1ABB	DEFB	$03		; Class-03 - A numeric expression may follow
+;; $1ABB
+P_CLEAR:	DEFB	$03		; Class-03 - A numeric expression may follow
 					; else default to zero.
 		DEFW	L1EAC		; Address: $1EAC; Address: CLEAR
 
-;; P-CLS
-L1ABE	DEFB	$00		; Class-00 - No further operands.
+;; $1ABE
+P_CLS:		DEFB	$00		; Class-00 - No further operands.
 		DEFW	CLS		; Address: $0D6B; Address: CLS
 
-;; P-PLOT
-L1AC1	DEFB	$09		; Class-09 - Two comma-separated numeric
+;; $1AC1
+P_PLOT:		DEFB	$09		; Class-09 - Two comma-separated numeric
 					; expressions required with optional colour
 					; items.
 		DEFB	$00		; Class-00 - No further operands.
 		DEFW	L22DC		; Address: $22DC; Address: PLOT
 
-;; P-PAUSE
-L1AC5	DEFB	$06		; Class-06 - A numeric expression must follow.
+;; $1AC5
+P_PAUSE:	DEFB	$06		; Class-06 - A numeric expression must follow.
 		DEFB	$00		; Class-00 - No further operands.
 		DEFW	L1F3A		; Address: $1F3A; Address: PAUSE
 
-;; P-READ
-L1AC9	DEFB	$05		; Class-05 - Variable syntax checked entirely
+;; $1AC9
+P_READ:		DEFB	$05		; Class-05 - Variable syntax checked entirely
 					; by routine.
 		DEFW	L1DED		; Address: $1DED; Address: READ
 
-;; P-DATA
-L1ACC	DEFB	$05		; Class-05 - Variable syntax checked entirely
+;; $1ACC
+P_DATA:		DEFB	$05		; Class-05 - Variable syntax checked entirely
 					; by routine.
 		DEFW	L1E27		; Address: $1E27; Address: DATA
 
-;; P-RESTORE
-L1ACF	DEFB	$03		; Class-03 - A numeric expression may follow
+;; $1ACF
+P_RESTORE:	DEFB	$03		; Class-03 - A numeric expression may follow
 					; else default to zero.
 		DEFW	L1E42		; Address: $1E42; Address: RESTORE
 
-;; P-DRAW
-L1AD2	DEFB	$09		; Class-09 - Two comma-separated numeric
+;; $1AD2
+P_DRAW:		DEFB	$09		; Class-09 - Two comma-separated numeric
 					; expressions required with optional colour
 					; items.
 		DEFB	$05		; Class-05 - Variable syntax checked
 					; by routine.
 		DEFW	L2382		; Address: $2382; Address: DRAW
 
-;; P-COPY
-L1AD6	DEFB	$00		; Class-00 - No further operands.
+;; $1AD6
+P_COPY:		DEFB	$00		; Class-00 - No further operands.
 		DEFW	COPY		; Address: $0EAC; Address: COPY
 
-;; P-LPRINT
-L1AD9	DEFB	$05		; Class-05 - Variable syntax checked entirely
+;; $1AD9
+P_LPRINT:	DEFB	$05		; Class-05 - Variable syntax checked entirely
 					; by routine.
 		DEFW	L1FC9		; Address: $1FC9; Address: LPRINT
 
-;; P-LLIST
-L1ADC	DEFB	$05		; Class-05 - Variable syntax checked entirely
+;; $1ADC
+P_LLIST:	DEFB	$05		; Class-05 - Variable syntax checked entirely
 					; by routine.
 		DEFW	LLIST		; Address: $17F5; Address: LLIST
 
-;; P-SAVE
-L1ADF	DEFB	$0B		; Class-0B - Offset address converted to tape
+;; $1ADF
+P_SAVE:		DEFB	$0B		; Class-0B - Offset address converted to tape
 					; command.
 
-;; P-LOAD
-L1AE0	DEFB	$0B		; Class-0B - Offset address converted to tape
+;; $L1AE0
+P_LOAD:		DEFB	$0B		; Class-0B - Offset address converted to tape
 					; command.
 
-;; P-VERIFY
-L1AE1	DEFB	$0B		; Class-0B - Offset address converted to tape
+;; $1AE1
+P_VERIFY:	DEFB	$0B		; Class-0B - Offset address converted to tape
 					; command.
 
-;; P-MERGE
-L1AE2	DEFB	$0B		; Class-0B - Offset address converted to tape
+;; $1AE2
+P_MERGE:	DEFB	$0B		; Class-0B - Offset address converted to tape
 					; command.
 
-;; P-BEEP
-L1AE3	DEFB	$08		; Class-08 - Two comma-separated numeric
+;; $1AE3
+P_BEEP:		DEFB	$08		; Class-08 - Two comma-separated numeric
 					; expressions required.
 		DEFB	$00		; Class-00 - No further operands.
 		DEFW	BEEP		; Address: $03F8; Address: BEEP
 
-;; P-CIRCLE
-L1AE7	DEFB	$09		; Class-09 - Two comma-separated numeric
+;; $1AE7
+P_CIRCLE:	DEFB	$09		; Class-09 - Two comma-separated numeric
 					; expressions required with optional colour
 					; items.
 		DEFB	$05		; Class-05 - Variable syntax checked
 					; by routine.
 		DEFW	L2320		; Address: $2320; Address: CIRCLE
 
-;; P-INK
-L1AEB	DEFB	$07		; Class-07 - Offset address is converted to
+;; $1AEB
+P_INK:		DEFB	$07		; Class-07 - Offset address is converted to
 					; colour code.
 
-;; P-PAPER
-L1AEC	DEFB	$07		; Class-07 - Offset address is converted to
+;; $1AEC
+P_PAPER:	DEFB	$07		; Class-07 - Offset address is converted to
 					; colour code.
 
-;; P-FLASH
-L1AED	DEFB	$07		; Class-07 - Offset address is converted to
+;; $1AED
+P_FLASH:	DEFB	$07		; Class-07 - Offset address is converted to
 					; colour code.
 
-;; P-BRIGHT
-L1AEE	DEFB	$07		; Class-07 - Offset address is converted to
+;; $1AEE
+P_BRIGHT:	DEFB	$07		; Class-07 - Offset address is converted to
 					; colour code.
 
-;; P-INVERSE
-L1AEF	DEFB	$07		; Class-07 - Offset address is converted to
+;; $1AEF
+P_INVERSE:	DEFB	$07		; Class-07 - Offset address is converted to
 					; colour code.
 
-;; P-OVER
-L1AF0	DEFB	$07		; Class-07 - Offset address is converted to
+;; $1AF0
+P_OVER:		DEFB	$07		; Class-07 - Offset address is converted to
 					; colour code.
 
-;; P-OUT
-L1AF1	DEFB	$08		; Class-08 - Two comma-separated numeric
+;; $1AF1
+P_OUT:		DEFB	$08		; Class-08 - Two comma-separated numeric
 					; expressions required.
 		DEFB	$00		; Class-00 - No further operands.
 		DEFW	L1E7A		; Address: $1E7A; Address: OUT
 
-;; P-BORDER
-L1AF5	DEFB	$06		; Class-06 - A numeric expression must follow.
+;; $1AF5
+P_BORDER:	DEFB	$06		; Class-06 - A numeric expression must follow.
 		DEFB	$00		; Class-00 - No further operands.
 		DEFW	L2294		; Address: $2294; Address: BORDER
 
-;; P-DEF-FN
-L1AF9	DEFB	$05		; Class-05 - Variable syntax checked entirely
+;; $1AF9
+P_DEF_FN:	DEFB	$05		; Class-05 - Variable syntax checked entirely
 					; by routine.
-		DEFW	L1F60		; Address: $1F60; Address: DEF-FN
+		DEFW	L1F60		; Address: $1F60; Address: DEF_FN
 
-;; P-OPEN
-L1AFC	DEFB	$06		; Class-06 - A numeric expression must follow.
+;; $1AFC
+P_OPEN:		DEFB	$06		; Class-06 - A numeric expression must follow.
 		DEFB	$2C		; Separator:  ','		see Footnote *
 		DEFB	$0A		; Class-0A - A string expression must follow.
 		DEFB	$00		; Class-00 - No further operands.
 		DEFW	OPEN		; Address: $1736; Address: OPEN
 
-;; P-CLOSE
-L1B02	DEFB	$06		; Class-06 - A numeric expression must follow.
+;; $1B02
+P_CLOSE:	DEFB	$06		; Class-06 - A numeric expression must follow.
 		DEFB	$00		; Class-00 - No further operands.
 		DEFW	CLOSE		; Address: $16E5; Address: CLOSE
 
-;; P-FORMAT
-L1B06	DEFB	$0A		; Class-0A - A string expression must follow.
+;; $1B06
+P_FORMAT:	DEFB	$0A		; Class-0A - A string expression must follow.
 		DEFB	$00		; Class-00 - No further operands.
 		DEFW	CAT_ETC		; Address: $1793; Address: CAT_ETC
 
-;; P-MOVE
-L1B0A	DEFB	$0A		; Class-0A - A string expression must follow.
+;; $1B0A
+P_MOVE:		DEFB	$0A		; Class-0A - A string expression must follow.
 		DEFB	$2C		; Separator:  ','
 		DEFB	$0A		; Class-0A - A string expression must follow.
 		DEFB	$00		; Class-00 - No further operands.
 		DEFW	CAT_ETC		; Address: $1793; Address: CAT_ETC
 
-;; P-ERASE
-L1B10	DEFB	$0A		; Class-0A - A string expression must follow.
+;; $1B10
+P_ERASE:	DEFB	$0A		; Class-0A - A string expression must follow.
 		DEFB	$00		; Class-00 - No further operands.
 		DEFW	CAT_ETC		; Address: $1793; Address: CAT_ETC
 
-;; P-CAT
-L1B14	DEFB	$00		; Class-00 - No further operands.
+;; $1B14
+P_CAT:		DEFB	$00		; Class-00 - No further operands.
 		DEFW	CAT_ETC		; Address: $1793; Address: CAT_ETC
 
-; * Note that a comma is required as a separator with the OPEN command
-; but the Interface 1 programmers relaxed this allowing ';' as an
-; alternative for their channels creating a confusing mixture of
-; allowable syntax as it is this ROM which opens or re-opens the
-; normal channels.
+					; * Note that a comma is required as a separator with the OPEN command
+					; but the Interface 1 programmers relaxed this allowing ';' as an
+					; alternative for their channels creating a confusing mixture of
+					; allowable syntax as it is this ROM which opens or re-opens the
+					; normal channels.
 
 ;--------------------------------
 ; Main parser (BASIC interpreter)
@@ -7739,7 +7739,7 @@ L1B29	CALL	SET_WORK		; routine SET_WORK clears workspace etc.
 
 		LD	C,A		; put the valid command code back in C.
 					; register B is zero.
-		LD	HL,L1A48		; address: offst-tbl
+		LD	HL,OFFST_TBL	; address: OFFST_TBL
 		ADD	HL,BC		; index into table with one of 50 commands.
 		LD	C,(HL)		; pick up displacement to syntax table entry.
 		ADD	HL,BC		; add to address the relevant entry.
@@ -8225,7 +8225,7 @@ L1C96	BIT	7,(IY+$01)	; test FLAGS - checking syntax only ?
 
 ; Note if you move alter the syntax table next line may have to be altered.
 
-L1CA5	SUB	L1AEB-$D8 % 256 ; convert $EB to $D8 ('INK') etc.
+L1CA5	SUB	P_INK-$D8 % 256 ; convert $EB to $D8 ('INK') etc.
 					; ( is SUB $13 in standard ROM )
 
 		CALL	L21FC		; routine CO-TEMP-4
@@ -8838,7 +8838,7 @@ L1E67	CALL	L1E99		; routine FIND-INT2 puts operand in BC
 ;; GO-TO-2
 L1E73	LD	($5C42),HL	; save line number in NEWPPC
 		LD	(IY+$0A),D	; and statement in NSPPC
-		RET			; to STMT-RET (or GO-SUB command)
+		RET			; to STMT-RET (or GO_SUB command)
 
 ;-------------------
 ; Handle OUT command
