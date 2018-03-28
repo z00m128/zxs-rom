@@ -62,7 +62,7 @@ P_FLAG		equ	$5C91
 MEM_0		equ	$5C92
 NMIADD		equ	$5CB0
 RAMTOP		equ	$5CB2
-P-RAMT		equ	$5CB4
+P_RAMT		equ	$5CB4
 
 
 

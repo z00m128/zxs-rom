@@ -2420,7 +2420,7 @@ LD_DATA:	POP	HL		; pop destination
 		INC	BC		; include these
 		INC	BC		; three bytes also.
 		LD	(X_PTR),IX	; save header pointer in X_PTR.
-		CALL	L19E8		; routine RECLAIM-2 reclaims the old variable
+		CALL	RECLAIM_2	; routine RECLAIM_2 reclaims the old variable
 					; sliding workspace including the two headers 
 					; downwards.
 		LD	IX,(X_PTR)	; reload IX from X_PTR which will have been
@@ -2469,7 +2469,7 @@ LD_PROG:	EX	DE,HL		; transfer dest to DE.
 		LD	B,(IX+$0C)	; from 2nd header
 		PUSH	BC		; and save it.
 
-		CALL	L19E5		; routine RECLAIM-1 reclaims program and vars.
+		CALL	RECLAIM_1	; routine RECLAIM_1 reclaims program and vars.
 					; adjusting X_PTR.
 
 		POP	BC		; restore new length.
@@ -2557,7 +2557,7 @@ ME_OLD_L1:	DEC	DE		; point to start of
 
 		PUSH	HL		; else save workspace pointer. 
 		EX	DE,HL		; transfer prog pointer to HL
-		CALL	L19B8		; routine NEXT-ONE finds next line in DE.
+		CALL	NEXT_ONE	; routine NEXT_ONE finds next line in DE.
 		POP	HL		; restore workspace pointer
 		JR	ME_OLD_LP	; back to ME_OLD_LP until destination position 
 					; in program area found.
@@ -2594,7 +2594,7 @@ ME_OLD_VP:	LD	A,(HL)		; fetch first byte.
 
 ;; $0901
 ME_OLD_V1:	PUSH	BC		; save character in C.
-		CALL	L19B8		; routine NEXT-ONE gets following variable 
+		CALL	NEXT_ONE	; routine NEXT_ONE gets following variable 
 					; address in DE.
 		POP	BC		; restore character in C
 		EX	DE,HL		; transfer next address to HL.
@@ -2668,9 +2668,9 @@ ME_ENTER:	JR	NZ,ME_ENT_1	; forward to ME_ENT_1 for insertion only.
 		EX	AF,AF'		; save flag??
 		LD	(X_PTR),HL	; preserve workspace pointer in dynamic X_PTR
 		EX	DE,HL		; transfer program dest pointer to HL.
-		CALL	L19B8		; routine NEXT-ONE finds following location
+		CALL	NEXT_ONE	; routine NEXT_ONE finds following location
 					; in program or variables area.
-		CALL	L19E8		; routine RECLAIM-2 reclaims the space between.
+		CALL	RECLAIM_2	; routine RECLAIM_2 reclaims the space between.
 		EX	DE,HL		; transfer program dest pointer back to DE.
 		LD	HL,(X_PTR)	; fetch adjusted workspace pointer from X_PTR
 		EX	AF,AF'		; restore flags.
@@ -2680,7 +2680,7 @@ ME_ENTER:	JR	NZ,ME_ENT_1	; forward to ME_ENT_1 for insertion only.
 ;; $093E
 ME_ENT_1:	EX	AF,AF'		; save or re-save flags.
 		PUSH	DE		; save dest pointer in prog/vars area.
-		CALL	L19B8		; routine NEXT-ONE finds next in workspace.
+		CALL	NEXT_ONE	; routine NEXT_ONE finds next in workspace.
 					; gets next in DE, difference in BC.
 					; prev addr in HL
 		LD	(X_PTR),HL	; store pointer in X_PTR
@@ -2715,7 +2715,7 @@ ME_ENT_3:	INC	HL		; address next?
 		POP	HL		; restore workspace pointer.
 		POP	BC		; restore length.
 		PUSH	DE		; save new prog/vars pointer.
-		CALL	L19E8		; routine RECLAIM-2 reclaims the space used
+		CALL	RECLAIM_2	; routine RECLAIM_2 reclaims the space used
 					; by the line or variable in workspace block
 					; as no longer required and space could be 
 					; useful for adding more lines.
@@ -4529,7 +4529,7 @@ ED_CUR:		LD	(K_CUR),HL	; update K_CUR system variable
 ;; $1015
 ED_DELETE:	CALL	ED_EDGE		; routine ED_EDGE moves cursor to left.
 		LD	BC,$0001	; of character to be deleted.
-		JP	L19E8		; to RECLAIM-2 reclaim the character.
+		JP	RECLAIM_2	; to RECLAIM_2 reclaim the character.
 
 ;-------------------------------------------
 ; Ignore next 2 codes from KEY_INPUT routine
@@ -4727,7 +4727,7 @@ CLEAR_SP:	PUSH	HL		; preserve HL
 					; if in edit   HL = WORKSP-1, DE = E_LINE
 					; if in input  HL = STKBOT,   DE = WORKSP
 		DEC	HL		; adjust
-		CALL	L19E5		; routine RECLAIM-1 reclaims space
+		CALL	RECLAIM_1	; routine RECLAIM_1 reclaims space
 		LD	(K_CUR),HL	; set K_CUR to start of empty area
 		LD	(IY+$07),$00	; set MODE to 'KLC'
 		POP	HL		; restore HL.
@@ -5005,7 +5005,7 @@ SET_DE:		LD	DE,(E_LINE)	; fetch E_LINE to DE
 REMOVE_FP:	LD	A,(HL)		; fetch character
 		CP	$0E		; is it the number marker ?
 		LD	BC,$0006	; prepare for six bytes
-		CALL	Z,L19E8		; routine RECLAIM-2 reclaims space if $0E
+		CALL	Z,RECLAIM_2	; routine RECLAIM_2 reclaims space if $0E
 		LD	A,(HL)		; reload next (or same) character
 		INC	HL		; and advance address
 		CP	$0D		; end of line or input buffer ?
@@ -5063,7 +5063,7 @@ NEW:		DI			; disable interrupts - machine stack will be
 		LD	A,$FF		; flag coming from NEW.
 		LD	DE,(RAMTOP)	; fetch RAMTOP as top value.
 		EXX			; switch in alternate set.
-		LD	BC,(P-RAMT)	; fetch P-RAMT differs on 16K/48K machines.
+		LD	BC,(P_RAMT)	; fetch P_RAMT differs on 16K/48K machines.
 		LD	DE,(RASP_PIP)	; fetch RASP/PIP.
 		LD	HL,(UDG)	; fetch UDG    differs on 16K/48K machines.
 		EXX			; switch back to main set and continue into...
@@ -5129,7 +5129,7 @@ RAM_READ:	AND	A		; clear carry - prepare to subtract
 RAM_DONE:	DEC	HL		; step back to last valid location.
 		EXX			; regardless of state, set up possibly
 					; stored system variables in case from NEW.
-		LD	(P-RAMT),BC	; insert P-RAMT.
+		LD	(P_RAMT),BC	; insert P_RAMT.
 		LD	(RASP_PIP),DE	; insert RASP/PIP.
 		LD	(UDG),HL	; insert UDG.
 		EXX			; switch in main set.
@@ -5138,7 +5138,7 @@ RAM_DONE:	DEC	HL		; step back to last valid location.
 
 					; this section applies to START only.
 
-		LD	(P-RAMT),HL	; set P-RAMT to the highest working RAM
+		LD	(P_RAMT),HL	; set P_RAMT to the highest working RAM
 					; address.
 		LD	DE,$3EAF	; address of last byte of 'U' bitmap in ROM.
 		LD	BC,$00A8	; there are 21 user defined graphics.
@@ -5303,7 +5303,7 @@ MAIN_3:		LD	HL,(E_LINE)	; fetch the edit line address from E_LINE.
 					; at the start of the next subroutine and are 
 					; therefore not required above.
 
-		CALL	L19FB		; routine E-LINE-NO will fetch any line
+		CALL	E_LINE_NO	; routine E_LINE_NO will fetch any line
 					; number to BC if this is a program line.
 
 		LD	A,B		; test if the number of
@@ -5396,13 +5396,13 @@ MAIN_5:		CALL	OUT_CODE	; call routine OUT_CODE to print the code.
 					; be more succinct to use RST $10.
 
 		LD	BC,(PPC)	; fetch PPC the current line number.
-		CALL	L1A1B		; routine OUT-NUM-1 will print that
+		CALL	OUT_NUM_1	; routine OUT_NUM_1 will print that
 		LD	A,$3A		; then a ':'.
 		RST	10H		; PRINT_A
 
 		LD	C,(IY+$0D)	; then SUBPPC for statement
 		LD	B,$00		; limited to 127
-		CALL	L1A1B		; routine OUT-NUM-1
+		CALL	OUT_NUM_1	; routine OUT_NUM_1
 
 		CALL	CLEAR_SP	; routine CLEAR_SP clears editing area.
 					; which probably contained 'RUN'.
@@ -5538,8 +5538,8 @@ MAIN_ADD:	LD	(E_PPC),BC	; set E_PPC to extracted line number.
 					; a line with the same number exists.
 		JR	NZ,MAIN_ADD1	; forward if no existing line to MAIN_ADD1.
 
-		CALL	L19B8		; routine NEXT-ONE finds the existing line.
-		CALL	L19E8		; routine RECLAIM-2 reclaims it.
+		CALL	NEXT_ONE	; routine NEXT_ONE finds the existing line.
+		CALL	RECLAIM_2	; routine RECLAIM_2 reclaims it.
 
 ;; $157D
 MAIN_ADD1:	POP	BC		; retrieve the length of the new line.
@@ -6034,7 +6034,7 @@ SET_STK:	LD	HL,(STKBOT)	; fetch STKBOT value
 
 ;; $16D4
 REC_EDIT:	LD	DE,(E_LINE)	; fetch start of edit line from E_LINE.
-		JP	L19E5		; jump forward to RECLAIM-1.
+		JP	RECLAIM_1	; jump forward to RECLAIM_1.
 
 ;---------------------------
 ; The Table INDEXING routine
@@ -6476,7 +6476,7 @@ AUTO_LIST:	LD	(LIST_SP),SP	; save stack pointer in LIST_SP
 
 ;; $17CE
 AUTO_L_1:	PUSH	BC		; save the result.
-		CALL	L19B8		; routine NEXT-ONE gets address in HL of
+		CALL	NEXT_ONE	; routine NEXT_ONE gets address in HL of
 					; line after auto-line (in DE).
 		POP	BC		; restore result.
 		ADD	HL,BC		; compute back.
@@ -6576,7 +6576,7 @@ LIST_5:		CALL	L1BEE		; routine CHECK-END quits if syntax OK >>>
 		CALL	L1E99		; routine FIND-INT2 fetches the number
 					; from the calculator stack in run-time.
 		LD	A,B		; fetch high byte of line number and
-		AND	$3F		; make less than $40 so that NEXT-ONE
+		AND	$3F		; make less than $40 so that NEXT_ONE
 					; (from LINE_ADDR) doesn't lose context.
 					; Note. this is not satisfactory and the typo
 					; LIST 20000 will list an entirely different
@@ -6656,7 +6656,7 @@ OUT_LINE1:	LD	(IY+$2D),E	; save flag in BREG which is spare.
 		RET	NC		; make an early return if so >>>
 
 		PUSH	BC		; save return address
-		CALL	L1A28		; routine OUT-NUM-2 to print addressed number
+		CALL	OUT_NUM_2	; routine OUT_NUM_2 to print addressed number
 					; with leading space.
 		INC	HL		; skip low number byte.
 		INC	HL		; and the two
@@ -6989,7 +6989,7 @@ LINE_AD_1:	POP	BC		; restore the line number to BC
 					; if NZ, address of previous is in DE
 
 		PUSH	BC		; save the current line number
-		CALL	L19B8		; routine NEXT-ONE finds address of next
+		CALL	NEXT_ONE	; routine NEXT_ONE finds address of next
 					; line number in DE, previous in HL.
 		EX	DE,HL		; switch so next in HL
 		JR	LINE_AD_1	; back to LINE_AD_1 for another comparison
@@ -7018,59 +7018,59 @@ CP_LINES:	LD	A,(HL)		; Load the high byte of line number and
 ;--------------------
 ; Find each statement
 ;--------------------
-; The single entry point EACH-STMT is used to
+; The single entry point EACH_STMT is used to
 ; 1) To find the D'th statement in a line.
 ; 2) To find a token in held E.
 
-;; not-used
-L1988	INC	HL		;
-		INC	HL		;
-		INC	HL		;
+;; $1988
+NOT_USED:	INC	HL
+		INC	HL
+		INC	HL
 
-; -> entry point.
+					; -> entry point.
 
-;; EACH-STMT
-L198B	LD	(CH_ADD),HL	; save HL in CH_ADD
+;; $198B
+EACH_STMT:	LD	(CH_ADD),HL	; save HL in CH_ADD
 		LD	C,$00		; initialize quotes flag
 
-;; EACH-S-1
-L1990	DEC	D		; decrease statement count
+;; $1990
+EACH_S_1:	DEC	D		; decrease statement count
 		RET	Z		; return if zero
 
 
 		RST	20H		; NEXT_CHAR
 		CP	E		; is it the search token ?
-		JR	NZ,L199A		; forward to EACH-S-3 if not
+		JR	NZ,EACH_S_3	; forward to EACH_S_3 if not
 
 		AND	A		; clear carry
 		RET			; return signalling success.
 
-;; EACH-S-2
-L1998	INC	HL		; next address
+;; $1998
+EACH_S_2:	INC	HL		; next address
 		LD	A,(HL)		; next character
 
-;; EACH-S-3
-L199A	CALL	NUMBER		; routine NUMBER skips if number marker
+;; $199A
+EACH_S_3:	CALL	NUMBER		; routine NUMBER skips if number marker
 		LD	(CH_ADD),HL	; save in CH_ADD
 		CP	$22		; is it quotes '"' ?
-		JR	NZ,L19A5		; to EACH-S-4 if not
+		JR	NZ,EACH_S_4	; to EACH_S_4 if not
 
 		DEC	C		; toggle bit 0 of C
 
-;; EACH-S-4
-L19A5	CP	$3A		; is it ':'
-		JR	Z,L19AD		; to EACH-S-5
+;; $19A5
+EACH_S_4:	CP	$3A		; is it ':'
+		JR	Z,EACH_S_5	; to EACH_S_5
 
 		CP	$CB		; 'THEN'
-		JR	NZ,L19B1		; to EACH-S-6
+		JR	NZ,EACH_S_6	; to EACH_S_6
 
-;; EACH-S-5
-L19AD	BIT	0,C		; is it in quotes
-		JR	Z,L1990		; to EACH-S-1 if not
+;; $19AD
+EACH_S_5:	BIT	0,C		; is it in quotes
+		JR	Z,EACH_S_1	; to EACH_S_1 if not
 
-;; EACH-S-6
-L19B1	CP	$0D		; end of line ?
-		JR	NZ,L1998		; to EACH-S-2
+;; $19B1
+EACH_S_6:	CP	$0D		; end of line ?
+		JR	NZ,EACH_S_2	; to EACH_S_2
 
 		DEC	D		; decrease the statement counter
 					; which should be zero else
@@ -7086,14 +7086,14 @@ L19B1	CP	$0D		; end of line ?
 ; So any variable name is higher that $3F and can be distinguished
 ; also from the variables area end-marker $80.
 ;
-; 76543210 meaning				brief outline of format.
-; -------- ------------------------		-----------------------
-; 010	string variable.			2 byte length + contents.
-; 110	string array.			2 byte length + contents.
-; 100	array of numbers.			2 byte length + contents.
-; 011	simple numeric variable.		5 bytes.
-; 101	variable length named numeric.	5 bytes.
-; 111	for-next loop variable.		18 bytes.
+; 76543210 meaning                               brief outline of format.
+; -------- ------------------------              -----------------------
+; 010      string variable.                      2 byte length + contents.
+; 110      string array.                         2 byte length + contents.
+; 100      array of numbers.                     2 byte length + contents.
+; 011      simple numeric variable.              5 bytes.
+; 101      variable length named numeric.        5 bytes.
+; 111      for-next loop variable.               18 bytes.
 ; 10000000 the variables area end-marker.
 ;
 ; Note. any of the above seven will serve as a program end-marker.
@@ -7109,64 +7109,64 @@ L19B1	CP	$0D		; end of line ?
 ; is that it can be called indiscriminately when merging a line or a
 ; variable.
 
-;; NEXT-ONE
-L19B8	PUSH	HL		; save the pointer address.
+;; $19B8
+NEXT_ONE:	PUSH	HL		; save the pointer address.
 		LD	A,(HL)		; get first byte.
 		CP	$40		; compare with upper limit for line numbers.
-		JR	C,L19D5		; forward to NEXT-O-3 if within basic area.
+		JR	C,NEXT_O_3	; forward to NEXT_O_3 if within basic area.
 
-; the continuation here is for the next variable unless the supplied
-; line number was erroneously over 16383. see RESTORE command.
+					; the continuation here is for the next variable unless the supplied
+					; line number was erroneously over 16383. see RESTORE command.
 
 		BIT	5,A		; is it a string or an array variable ?
-		JR	Z,L19D6		; forward to NEXT-O-4 to compute length.
+		JR	Z,NEXT_O_4	; forward to NEXT_O_4 to compute length.
 
 		ADD	A,A		; test bit 6 for single-character variables.
-		JP	M,L19C7		; forward to NEXT-O-1 if so
+		JP	M,NEXT_O_1	; forward to NEXT_O_1 if so
 
 		CCF			; clear the carry for long-named variables.
 					; it remains set for for-next loop variables.
 
-;; NEXT-O-1
-L19C7	LD	BC,$0005		; set BC to 5 for floating point number
-		JR	NC,L19CE		; forward to NEXT-O-2 if not a for/next
+;; $19C7
+NEXT_O_1:	LD	BC,$0005	; set BC to 5 for floating point number
+		JR	NC,NEXT_O_2	; forward to NEXT_O_2 if not a for/next
 					; variable.
 
 		LD	C,$12		; set BC to eighteen locations.
 					; value, limit, step, line and statement.
 
-; now deal with long-named variables
+					; now deal with long-named variables
 
-;; NEXT-O-2
-L19CE	RLA			; test if character inverted. carry will also
+;; $19CE
+NEXT_O_2:	RLA			; test if character inverted. carry will also
 					; be set for single character variables
 		INC	HL		; address next location.
 		LD	A,(HL)		; and load character.
-		JR	NC,L19CE		; back to NEXT-O-2 if not inverted bit.
+		JR	NC,NEXT_O_2	; back to NEXT_O_2 if not inverted bit.
 					; forward immediately with single character
 					; variable names.
 
-		JR	L19DB		; forward to NEXT-O-5 to add length of
+		JR	NEXT_O_5	; forward to NEXT_O_5 to add length of
 					; floating point number(s etc.).
 
-; this branch is for line numbers.
+					; this branch is for line numbers.
 
-;; NEXT-O-3
-L19D5	INC	HL		; increment pointer to low byte of line no.
+;; $19D5
+NEXT_O_3:	INC	HL		; increment pointer to low byte of line no.
 
-; strings and arrays rejoin here
+					; strings and arrays rejoin here
 
-;; NEXT-O-4
-L19D6	INC	HL		; increment to address the length low byte.
+;; $19D6
+NEXT_O_4:	INC	HL		; increment to address the length low byte.
 		LD	C,(HL)		; transfer to C and
 		INC	HL		; point to high byte of length.
 		LD	B,(HL)		; transfer that to B
 		INC	HL		; point to start of basic/variable contents.
 
-; the three types of numeric variables rejoin here
+					; the three types of numeric variables rejoin here
 
-;; NEXT-O-5
-L19DB	ADD	HL,BC		; add the length to give address of next
+;; $19DB
+NEXT_O_5:	ADD	HL,BC		; add the length to give address of next
 					; line/variable in HL.
 		POP	DE		; restore previous address to DE.
 
@@ -7176,8 +7176,8 @@ L19DB	ADD	HL,BC		; add the length to give address of next
 ; This routine terminates the above routine and is also called from the
 ; start of the next routine to calculate the length to reclaim.
 
-;; DIFFER
-L19DD	AND	A		; prepare for true subtraction.
+;; $19DD
+DIFFER:		AND	A		; prepare for true subtraction.
 		SBC	HL,DE		; subtract the two pointers.
 		LD	B,H		; transfer result
 		LD	C,L		; to BC register pair.
@@ -7192,30 +7192,30 @@ L19DD	AND	A		; prepare for true subtraction.
 ;------------------------
 ;
 
-;; RECLAIM-1
-L19E5	CALL	L19DD		; routine DIFFER immediately above
+;; $19E5
+RECLAIM_1:	CALL	DIFFER		; routine DIFFER immediately above
 
-;; RECLAIM-2
-L19E8	PUSH	BC		;
+;; $19E8
+RECLAIM_2:	PUSH	BC
 
-		LD	A,B		;
-		CPL			;
-		LD	B,A		;
-		LD	A,C		;
-		CPL			;
-		LD	C,A		;
-		INC	BC		;
+		LD	A,B
+		CPL
+		LD	B,A
+		LD	A,C
+		CPL
+		LD	C,A
+		INC	BC
 
 		CALL	POINTERS	; routine POINTERS
-		EX	DE,HL		;
-		POP	HL		;
+		EX	DE,HL
+		POP	HL
 
-		ADD	HL,DE		;
-		PUSH	DE		;
+		ADD	HL,DE
+		PUSH	DE
 		LDIR			; copy bytes
 
-		POP	HL		;
-		RET			;
+		POP	HL
+		RET
 
 ;-----------------------------------------
 ; Read line number of line in editing area
@@ -7233,8 +7233,8 @@ L19E8	PUSH	BC		;
 ; by deleting lines. If the stack was in it's normal place then a situation
 ; arises whereby the Spectrum becomes locked with no means of reclaiming space.
 
-;; E-LINE-NO
-L19FB	LD	HL,(E_LINE)	; load HL from system variable E_LINE.
+;; $19FB
+E_LINE_NO:	LD	HL,(E_LINE)	; load HL from system variable E_LINE.
 
 		DEC	HL		; decrease so that NEXT_CHAR can be used
 					; without skipping the first digit.
@@ -7243,7 +7243,7 @@ L19FB	LD	HL,(E_LINE)	; load HL from system variable E_LINE.
 		RST	20H		; NEXT_CHAR skips any noise and white-space
 					; to point exactly at the first digit.
 
-		LD	HL,MEM_0		; use MEM_0 as a temporary calculator stack
+		LD	HL,MEM_0	; use MEM_0 as a temporary calculator stack
 					; an overhead of three locations are needed.
 		LD	(STKEND),HL	; set new STKEND.
 
@@ -7251,14 +7251,14 @@ L19FB	LD	HL,(E_LINE)	; load HL from system variable E_LINE.
 					; a non-digit found.
 		CALL	L2DA2		; routine FP-TO-BC will retrieve number
 					; from stack at membot.
-		JR	C,L1A15		; forward to E-L-1 if overflow i.e. > 65535.
+		JR	C,E_L_1		; forward to E_L_1 if overflow i.e. > 65535.
 					; 'Nonsense in basic'
 
-		LD	HL,$D8F0		; load HL with value -9999
+		LD	HL,$D8F0	; load HL with value -9999
 		ADD	HL,BC		; add to line number in BC
 
-;; E-L-1
-L1A15	JP	C,L1C8A		; to REPORT-C 'Nonsense in Basic' if over.
+;; $1A15
+E_L_1:		JP	C,L1C8A		; to REPORT-C 'Nonsense in Basic' if over.
 					; Note. As ERR_SP points to ED_ERROR
 					; the report is never produced although
 					; the RST $08 will update X_PTR leading to
@@ -7267,7 +7267,7 @@ L1A15	JP	C,L1C8A		; to REPORT-C 'Nonsense in Basic' if over.
 					; in fact, since it is immediately
 					; cancelled, any report will do.
 
-; a line in the range 0 - 9999 has been entered.
+					; a line in the range 0 - 9999 has been entered.
 
 		JP	SET_STK		; jump back to SET_STK to set the calculator 
 					; stack back to it's normal place and exit 
@@ -7276,32 +7276,32 @@ L1A15	JP	C,L1C8A		; to REPORT-C 'Nonsense in Basic' if over.
 ;----------------------------------
 ; Report and line number outputting
 ;----------------------------------
-; Entry point OUT-NUM-1 is used by the Error Reporting code to print
+; Entry point OUT_NUM_1 is used by the Error Reporting code to print
 ; the line number and later the statement number held in BC.
 ; If the statement was part of a direct command then -2 is used as a
 ; dummy line number so that zero will be printed in the report.
 ; This routine is also used to print the exponent of E-format numbers.
 ;
-; Entry point OUT-NUM-2 is used from OUT_LINE to output the line number
+; Entry point OUT_NUM_2 is used from OUT_LINE to output the line number
 ; addressed by HL with leading spaces if necessary.
 
-;; OUT-NUM-1
-L1A1B	PUSH	DE		; save the
+;; $1A1B
+OUT_NUM_1:	PUSH	DE		; save the
 		PUSH	HL		; registers.
 		XOR	A		; set A to zero.
 		BIT	7,B		; is the line number minus two ?
-		JR	NZ,L1A42		; forward to OUT-NUM-4 if so to print zero 
+		JR	NZ,OUT_NUM_4	; forward to OUT_NUM_4 if so to print zero 
 					; for a direct command.
 
 		LD	H,B		; transfer the
 		LD	L,C		; number to HL.
 		LD	E,$FF		; signal 'no leading zeros'.
-		JR	L1A30		; forward to continue at OUT-NUM-3
+		JR	OUT_NUM_3	; forward to continue at OUT_NUM_3
 
-; from OUT_LINE - HL addresses line number.
+					; from OUT_LINE - HL addresses line number.
 
-;; OUT-NUM-2
-L1A28	PUSH	DE		; save flags
+;; $1A28
+OUT_NUM_2:	PUSH	DE		; save flags
 		LD	D,(HL)		; high byte to D
 		INC	HL		; address next
 		LD	E,(HL)		; low byte to E
@@ -7309,17 +7309,17 @@ L1A28	PUSH	DE		; save flags
 		EX	DE,HL		; transfer number to HL
 		LD	E,$20		; signal 'output leading spaces'
 
-;; OUT-NUM-3
-L1A30	LD	BC,$FC18		; value -1000
-		CALL	OUT_SP_NO		; routine OUT_SP_NO outputs space or number
-		LD	BC,$FF9C		; value -100
-		CALL	OUT_SP_NO		; routine OUT_SP_NO
+;; $1A30
+OUT_NUM_3:	LD	BC,$FC18	; value -1000
+		CALL	OUT_SP_NO	; routine OUT_SP_NO outputs space or number
+		LD	BC,$FF9C	; value -100
+		CALL	OUT_SP_NO	; routine OUT_SP_NO
 		LD	C,$F6		; value -10 ( B is still $FF )
-		CALL	OUT_SP_NO		; routine OUT_SP_NO
+		CALL	OUT_SP_NO	; routine OUT_SP_NO
 		LD	A,L		; remainder to A.
 
-;; OUT-NUM-4
-L1A42	CALL	OUT_CODE		; routine OUT_CODE for final digit.
+;; $1A42
+OUT_NUM_4:	CALL	OUT_CODE	; routine OUT_CODE for final digit.
 					; else report code zero wouldn't get
 					; printed.
 		POP	HL		; restore the
@@ -7685,7 +7685,7 @@ L1B14	DEFB	$00		; Class-00 - No further operands.
 
 ;; LINE-SCAN
 L1B17	RES	7,(IY+$01)	; update FLAGS - signal checking syntax
-		CALL	L19FB		; routine E-LINE-NO		>>
+		CALL	E_LINE_NO	; routine E_LINE_NO		>>
 					; fetches the line number if in range.
 
 		XOR	A		; clear the accumulator.
@@ -7951,7 +7951,7 @@ L1BD1	LD	($5C55),HL	; store pointer in system variable NXTLIN
 
 		LD	D,A		; store statement in D.
 		LD	E,$00		; set E to zero to suppress token searching
-					; if EACH-STMT is to be called.
+					; if EACH_STMT is to be called.
 		LD	(IY+$0A),$FF	; set statement NSPPC to $FF signalling
 					; no jump to be made.
 		DEC	D		; decrement and test statement
@@ -7960,7 +7960,7 @@ L1BD1	LD	($5C55),HL	; store pointer in system variable NXTLIN
 					; at start of line and address is known.
 
 		INC	D		; else restore statement.
-		CALL	L198B		; routine EACH-STMT finds the D'th statement
+		CALL	EACH_STMT	; routine EACH_STMT finds the D'th statement
 					; address as E does not contain a token.
 		JR	Z,L1BF4		; forward to STMT-NEXT if address found.
 
@@ -8527,7 +8527,7 @@ L1D8B	INC	HL		; increment pointer to address
 
 ;; LOOK-P-2
 L1DA3	PUSH	BC		; save address of next line
-		CALL	L198B		; routine EACH-STMT searches current line.
+		CALL	EACH_STMT	; routine EACH_STMT searches current line.
 		POP	BC		; restore address.
 		RET	NC		; return if match was found. ->
 
@@ -8730,7 +8730,7 @@ L1E39	LD	B,A		; Give BC enough space to find token.
 					; HL points to location before keyword.
 		LD	DE,$0200		; count 1+1 statements, dummy value in E to
 					; inhibit searching for a token.
-		JP	L198B		; to EACH-STMT to find next statement
+		JP	EACH_STMT	; to EACH_STMT to find next statement
 
 ;------------------------------------------------------------------------
 ; A General Note on Invalid Line Numbers.
@@ -8748,7 +8748,7 @@ L1E39	LD	B,A		; Give BC enough space to find token.
 ; crash the machine when supplied with an inappropriate virtual line number.
 ; This is puzzling as very careful consideration must have been given to
 ; this point when the new variable types were allocated their masks and also
-; when the routine NEXT-ONE was successfully re-written to reflect this.
+; when the routine NEXT_ONE was successfully re-written to reflect this.
 ; An enigma.
 ;--------------------------------------------------------------------------
 
@@ -8831,7 +8831,7 @@ L1E67	CALL	L1E99		; routine FIND-INT2 puts operand in BC
 		LD	D,$00		; set statement to 0 - first.
 		LD	A,H		; compare high byte only
 		CP	$F0		; to $F0 i.e. 61439 in full.
-		JR	NC,L1E9F		; forward to REPORT_B if above.
+		JR	NC,L1E9F	; forward to REPORT_B if above.
 
 ; This call entry point is used to update the system variables e.g. by RETURN.
 
@@ -8926,7 +8926,7 @@ L1E9F	RST	08H		; ERROR_1
 ;; RUN
 L1EA1	CALL	L1E67		; routine GO-TO puts line number in
 					; system variables.
-		LD	BC,$0000		; prepare to set DATADD to first line.
+		LD	BC,$0000	; prepare to set DATADD to first line.
 		CALL	L1E45		; routine REST-RUN does the 'restore'.
 					; Note BC still holds zero.
 		JR	L1EAF		; forward to CLEAR-RUN to clear variables
@@ -8949,7 +8949,7 @@ L1EAC	CALL	L1E99		; routine FIND-INT2 fetches to BC.
 ;; CLEAR-RUN
 L1EAF	LD	A,B		; test for
 		OR	C		; zero.
-		JR	NZ,L1EB7		; skip to CLEAR-1 if not zero.
+		JR	NZ,L1EB7	; skip to CLEAR-1 if not zero.
 
 		LD	BC,(RAMTOP)	; use the existing value of RAMTOP if zero.
 
@@ -8959,22 +8959,22 @@ L1EB7	PUSH	BC		; save ramtop value.
 		LD	DE,(VARS)	; fetch VARS
 		LD	HL,(E_LINE)	; fetch E_LINE
 		DEC	HL		; adjust to point at variables end-marker.
-		CALL	L19E5		; routine RECLAIM-1 reclaims the space used by
+		CALL	RECLAIM_1	; routine RECLAIM_1 reclaims the space used by
 					; the variables.
 		CALL	CLS		; routine CLS to clear screen.
 		LD	HL,(STKEND)	; fetch STKEND the start of free memory.
-		LD	DE,$0032		; allow for another 50 bytes.
+		LD	DE,$0032	; allow for another 50 bytes.
 		ADD	HL,DE		; add the overhead to HL.
 
 		POP	DE		; restore the ramtop value.
 		SBC	HL,DE		; if HL is greater than the value then jump
-		JR	NC,L1EDA		; forward to REPORT-M
+		JR	NC,L1EDA	; forward to REPORT-M
 					; 'RAMTOP no good'
 
-		LD	HL,(P-RAMT)	; now P-RAMT ($7FFF on 16K RAM machine)
+		LD	HL,(P_RAMT)	; now P_RAMT ($7FFF on 16K RAM machine)
 		AND	A		; exact this time.
 		SBC	HL,DE		; new ramtop must be lower or the same.
-		JR	NC,L1EDC		; skip to CLEAR-2 if in actual RAM.
+		JR	NC,L1EDC	; skip to CLEAR-2 if in actual RAM.
 
 ;; REPORT-M
 L1EDA	RST	08H		; ERROR_1
@@ -8985,7 +8985,7 @@ L1EDC	EX	DE,HL		; transfer ramtop value to HL.
 		LD	(RAMTOP),HL	; update system variable RAMTOP.
 		POP	DE		; pop the return address STMT-RET.
 		POP	BC		; pop the Error Address.
-		LD	(HL),$3E		; now put the GO SUB end-marker at RAMTOP.
+		LD	(HL),$3E	; now put the GO SUB end-marker at RAMTOP.
 		DEC	HL		; leave a location beneath it.
 		LD	SP,HL		; initialize the machine stack pointer.
 		PUSH	BC		; push the error address.
@@ -11916,10 +11916,10 @@ L2814	PUSH	HL		; save address of DEF FN
 ;; SF-NOT-FD
 L2825	POP	HL		; restore search point.
 		DEC	HL		; make location before
-		LD	DE,$0200		; the search is to be for the end of the
+		LD	DE,$0200	; the search is to be for the end of the
 					; current definition - 2 statements forward.
 		PUSH	BC		; save the letter/type
-		CALL	L198B		; routine EACH-STMT steps past rejected
+		CALL	EACH_STMT	; routine EACH_STMT steps past rejected
 					; definition.
 		POP	BC		; restore letter/type
 		JR	L2808		; back to SF-FND-DF to continue search
@@ -12212,7 +12212,7 @@ L2929	POP	HL		; pop saved pointer to char 1
 
 ;; V-NEXT
 L292A	PUSH	BC		; save flags
-		CALL	L19B8		; routine NEXT-ONE gets next variable in DE
+		CALL	NEXT_ONE	; routine NEXT_ONE gets next variable in DE
 		EX	DE,HL		; transfer to HL.
 		POP	BC		; restore the flags
 		JR	L2900		; loop back to V-EACH
@@ -13157,7 +13157,7 @@ L2BAF	DEC	HL		; point to high byte of length.
 		INC	BC		; increase
 		INC	BC		; length by three
 		INC	BC		; to include character and length bytes.
-		JP	L19E8		; jump to indirect exit via RECLAIM-2
+		JP	RECLAIM_2	; jump to indirect exit via RECLAIM_2
 					; deleting old version and adjusting pointers.
 
 
@@ -13261,9 +13261,9 @@ L2C15	JR	C,L2C1F		; skip to D-LETTER if variable did not exist.
 					; else reclaim the old one.
 
 		PUSH	BC		; save type in C.
-		CALL	L19B8		; routine NEXT-ONE find following variable
+		CALL	NEXT_ONE	; routine NEXT_ONE find following variable
 					; or position of $80 end-marker.
-		CALL	L19E8		; routine RECLAIM-2 reclaims the 
+		CALL	RECLAIM_2	; routine RECLAIM_2 reclaims the 
 					; space between.
 		POP	BC		; pop the type.
 
@@ -14463,7 +14463,7 @@ L2F83	LD	A,$2B		; prepare character '+'
 L2F85	RST	10H		; PRINT_A outputs the sign
 
 		LD	B,$00		; make the high byte zero.
-		JP	L1A1B		; exit via OUT-NUM-1 to print exponent in BC
+		JP	OUT_NUM_1	; exit via OUT_NUM_1 to print exponent in BC
 
 ;-------------------------------
 ; Handle printing floating point
