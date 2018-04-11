@@ -599,7 +599,7 @@ E_DIGITS:	DEFB	$D0		; FORMAT
 ;------------------
 ; Keyboard scanning
 ;------------------
-; from keyboard and s-inkey$
+; from keyboard and S_INKEY
 ; returns 1 or 2 keys in DE, most significant shift first if any
 ; key values 0-39 else 255
 
@@ -781,7 +781,7 @@ K_REPEAT:	INC	HL		; advance
 ;---------------
 ; Test key value
 ;---------------
-; also called from s-inkey$
+; also called from S_INKEY
 ; begin by testing for a shift with no other.
 
 					;; $031E
@@ -811,7 +811,7 @@ K_MAIN:		LD	HL,MAIN_KEYS	; address: MAIN_KEYS
 ;------------------
 ; Keyboard decoding
 ;------------------
-; also called from s-inkey$
+; also called from S_INKEY
 
 					;; $0333
 K_DECODE:	LD	A,E		; pick up the stored main key
@@ -828,7 +828,7 @@ K_DECODE:	LD	A,E		; pick up the stored main key
 					; Note. should selectively drop return address if code > 'U' ($55).
 					; i.e. abort the KEYBOARD call.
 					; e.g. cp 'V'; jr c addit; pop af; ;;addit etc. (5 bytes of instruction).
-					; (s-inkey$ never gets into graphics mode.)
+					; (S_INKEY never gets into graphics mode.)
 
 					;; addit
 		ADD	A,$4F		; add offset to augment 'A' to graphics A say.
@@ -1294,7 +1294,7 @@ SEMI_TONE:	DEFB	$89, $02, $D0, $12, $86;  261.625565290	        C
 ; and is not used by the cassette handling routines in this ROM.
 
 					;; $04AA
-ZX81_NAME:	CALL	L24FB		; routine SCANNING to evaluate expression.
+ZX81_NAME:	CALL	SCANNING	; routine SCANNING to evaluate expression.
 		LD	A,(FLAGS)	; fetch system variable FLAGS.
 		ADD	A,A		; test bit 7 - syntax, bit 6 - result type.
 		JP	M,REPORT_C	; to REPORT_C if not string result
@@ -1304,7 +1304,7 @@ ZX81_NAME:	CALL	L24FB		; routine SCANNING to evaluate expression.
 		RET	NC		; return early if checking syntax.
 
 		PUSH	HL		; re-save return address.
-		CALL	L2BF1		; routine STK-FETCH fetches string parameters.
+		CALL	STK_FETCH	; routine STK_FETCH fetches string parameters.
 		LD	H,D		; transfer start of filename
 		LD	L,E		; to the HL register.
 		DEC	C		; adjust to point to last character and
@@ -1836,7 +1836,7 @@ SAVE_ETC:	POP	AF		; discard address STMT_RET.
 					; expression follows and stacks the
 					; parameters in run-time.
 
-		CALL	L2530		; routine SYNTAX-Z
+		CALL	SYNTAX_Z	; routine SYNTAX_Z
 		JR	Z,SA_DATA	; forward to SA_DATA if checking syntax.
 
 		LD	BC,$0011	; presume seventeen bytes for a header.
@@ -1866,7 +1866,7 @@ SA_BLANK:	LD	(DE),A		; set workspace location to space.
 		LD	(IX+$01),$FF	; set first byte of ten character filename
 					; to $FF as a default to signal null string.
 
-		CALL	L2BF1		; routine STK-FETCH fetches the filename
+		CALL	STK_FETCH	; routine STK_FETCH fetches the filename
 					; parameters from the calculator stack.
 					; length of string in BC.
 					; start of string in DE.
@@ -1934,7 +1934,7 @@ SA_DATA:	RST	18H		; GET_CHAR
 					; continue with SAVE, LOAD, MERGE of DATA.
 
 		RST	20H		; NEXT_CHAR
-		CALL	L28B2		; routine LOOK-VARS searches variables area
+		CALL	LOOK_VARS	; routine LOOK_VARS searches variables area
 					; returning with carry reset if found or
 					; checking syntax.
 		SET	7,C		; this converts a simple string to a 
@@ -1962,7 +1962,7 @@ SA_V_OLD:	JP	NZ,REPORT_C	; to REPORT_C if not an array variable.
 					; 'Nonsense in basic'
 
 
-		CALL	L2530		; routine SYNTAX-Z
+		CALL	SYNTAX_Z	; routine SYNTAX_Z
 		JR	Z,SA_DATA_1	; forward to SA_DATA_1 if checking syntax.
 
 		INC	HL		; step past single character variable name.
@@ -1976,7 +1976,7 @@ SA_V_OLD:	JP	NZ,REPORT_C	; to REPORT_C if not an array variable.
 					;; $0685
 SA_V_NEW:	LD	(IX+$0E),C	; place character array name in  header.
 		LD	A,$01		; default to type numeric.
-		BIT	6,C		; test result from look-vars.
+		BIT	6,C		; test result from LOOK_VARS.
 		JR	Z,SA_V_TYPE	; forward to SA_V_TYPE if numeric.
 
 		INC	A		; set type to 2 - string array.
@@ -6284,7 +6284,7 @@ OPEN_1:		CALL	OPEN_2		; routine OPEN_2 opens the stream.
 
 					;; $175D
 OPEN_2:		PUSH	HL		; * save the STRMS_FD data entry pointer.
-		CALL	L2BF1		; routine STK-FETCH now fetches the
+		CALL	STK_FETCH	; routine STK_FETCH now fetches the
 					; parameters of the channel string.
 					; start in DE, length in BC.
 
@@ -6514,7 +6514,7 @@ LIST:		LD	A,$02		; default is stream 2 - the upper screen.
 
 					;; $17FB
 LIST_1:		LD	(IY+$02),$00	; the TV_FLAG is initialized.
-		CALL	L2530		; routine SYNTAX-Z - checking syntax ?
+		CALL	SYNTAX_Z	; routine SYNTAX_Z - checking syntax ?
 		CALL	NZ,CHAN_OPEN	; routine CHAN_OPEN if in run-time.
 
 		RST	18H		; GET_CHAR
@@ -6894,7 +6894,7 @@ OUT_SP_1:	ADD	HL,BC		; add negative number to HL.
 ; This subroutine ...
 
 					;; $1937
-OUT_CHAR:	CALL	L2D1B		; routine NUMERIC tests if it is a digit ?
+OUT_CHAR:	CALL	NUMERIC		; routine NUMERIC tests if it is a digit ?
 		JR	NC,OUT_CH_3	; to OUT_CH_3 to print digit without
 					; changing mode. Will be 'K' mode if digits
 					; are at beginning of edit line.
@@ -7224,9 +7224,9 @@ E_LINE_NO:	LD	HL,(E_LINE)	; load HL from system variable E_LINE.
 					; an overhead of three locations are needed.
 		LD	(STKEND),HL	; set new STKEND.
 
-		CALL	L2D3B		; routine INT-TO-FP will read digits till
+		CALL	INT_TO_FP	; routine INT_TO_FP will read digits till
 					; a non-digit found.
-		CALL	L2DA2		; routine FP-TO-BC will retrieve number
+		CALL	L2DA2	; routine FP-TO-BC will retrieve number
 					; from stack at membot.
 		JR	C,E_L_1		; forward to E_L_1 if overflow i.e. > 65535.
 					; 'Nonsense in basic'
@@ -7441,7 +7441,7 @@ P_INPUT:	DEFB	$05		; CLASS_05 - Variable syntax checked entirely by routine.
 
 					;; $1AA2
 P_DIM:		DEFB	$05		; CLASS_05 - Variable syntax checked entirely by routine.
-		DEFW	L2C02		; Address: $2C02; Address: DIM
+		DEFW	DIM		; Address: $2C02; Address: DIM
 
 					;; $1AA5
 P_REM:		DEFB	$05		; CLASS_05 - Variable syntax checked entirely by routine.
@@ -7824,7 +7824,7 @@ REM:		POP	BC		; drop return address STMT_RET and
 ;-------------
 
 					;; $1BB3
-LINE_END:	CALL	L2530		; routine SYNTAX-Z  (UNSTACK_Z?)
+LINE_END:	CALL	SYNTAX_Z	; routine SYNTAX_Z  (UNSTACK_Z?)
 		RET	Z		; return if checking syntax.
 
 		LD	HL,(NXTLIN)	; fetch NXTLIN to HL.
@@ -7903,7 +7903,7 @@ REPORT_N:	RST	08H		; ERROR_1
 ; syntax is in order.
 
 					;; $1BEE
-CHECK_END:	CALL	L2530		; routine SYNTAX-Z
+CHECK_END:	CALL	SYNTAX_Z	; routine SYNTAX_Z
 		RET	NZ		; return immediately in runtime
 
 		POP	BC		; drop address of calling routine.
@@ -7988,7 +7988,7 @@ CLASS_05:	POP	BC		; drop address SCAN_LOOP.
 ; destination variable for an assignment.
 
 					;; $1C1F
-CLASS_01:	CALL	L28B2		; routine LOOK-VARS returns carry set if not
+CLASS_01:	CALL	LOOK_VARS	; routine LOOK_VARS returns carry set if not
 					; found in runtime.
 
 ;-----------------------
@@ -8008,13 +8008,13 @@ REPORT_2:	RST	08H		; ERROR_1
 		DEFB	$01		; Error Report: Variable not found
 
 					;; $1C30
-VAR_A_2:	CALL	Z,L2996		; routine STK-VAR considers a subscript/slice
+VAR_A_2:	CALL	Z,STK_VAR		; routine STK_VAR considers a subscript/slice
 		BIT	6,(IY+$01)	; test FLAGS  - Numeric or string result ?
 		JR	NZ,VAR_A_3	; to VAR_A_3 if numeric
 
 		XOR	A		; default to array/slice - to be retained.
-		CALL	L2530		; routine SYNTAX-Z
-		CALL	NZ,L2BF1	; routine STK-FETCH is called in runtime
+		CALL	SYNTAX_Z	; routine SYNTAX_Z
+		CALL	NZ,STK_FETCH	; routine STK_FETCH is called in runtime
 					; may overwrite A with 1.
 		LD	HL,FLAGX	; address system variable FLAGX
 		OR	(HL)		; set bit 0 if simple variable to be reclaimed
@@ -8046,7 +8046,7 @@ VAL_FET_1:	LD	A,(FLAGS)	; initial FLAGS to A
 
 					;; $LC59
 VAL_FET_2:	PUSH	AF		; save A briefly
-		CALL	L24FB		; routine SCANNING evaluates expression.
+		CALL	SCANNING	; routine SCANNING evaluates expression.
 		POP	AF		; restore A
 		LD	D,(IY+$01)	; post-SCANNING FLAGS to D
 		XOR	D		; xor the two sets of flags
@@ -8055,7 +8055,7 @@ VAL_FET_2:	PUSH	AF		; save A briefly
 					; 'Nonsense in Basic' - results don't agree.
 
 		BIT	7,D		; test FLAGS - is syntax being checked ?
-		JP	NZ,L2AFF	; jump forward to LET to make the assignment
+		JP	NZ,LET		; jump forward to LET to make the assignment
 					; in runtime.
 
 		RET			; but return from here if checking syntax.
@@ -8066,7 +8066,7 @@ VAL_FET_2:	PUSH	AF		; save A briefly
 ; CLASS_04 e.g. FOR i			; a single character variable must follow
 
 					;; $1C6C
-CLASS_04:	CALL	L28B2		; routine LOOK-VARS
+CLASS_04:	CALL	LOOK_VARS	; routine LOOK_VARS
 		PUSH	AF		; preserve flags.
 		LD	A,C		; fetch type - should be 011xxxxx
 		OR	$9F		; combine with 10011111.
@@ -8105,7 +8105,7 @@ EXPT_2NUM:	CALL	EXPT_1NUM	; routine EXPT_1NUM is called for first
 
 					;; $1C82
 CLASS_06:
-EXPT_1NUM:	CALL	L24FB		; routine SCANNING
+EXPT_1NUM:	CALL	SCANNING	; routine SCANNING
 		BIT	6,(IY+$01)	; test FLAGS  - Numeric or string result ?
 		RET	NZ		; return if result is numeric.
 
@@ -8121,7 +8121,7 @@ REPORT_C:	RST	08H		; ERROR_1
 
 					;; $1C8C
 CLASS_0A:
-EXPT_EXP:	CALL	L24FB		; routine SCANNING
+EXPT_EXP:	CALL	SCANNING	; routine SCANNING
 		BIT	6,(IY+$01)	; test FLAGS  - Numeric or string result ?
 		RET	Z		; return if string result.
 
@@ -8175,7 +8175,7 @@ CLASS_07:	BIT	7,(IY+$01)	; test FLAGS - checking syntax only ?
 ; Note. this command should ensure that current channel is 'S'.
 
 					;; $1CBE
-CLASS_09:	CALL	L2530		; routine SYNTAX-Z
+CLASS_09:	CALL	SYNTAX_Z	; routine SYNTAX_Z
 		JR	Z,CL_09_1	; forward to CL_09_1 if checking syntax.
 
 		RES	0,(IY+$02)	; update TV_FLAG - signal main screen in use
@@ -8228,7 +8228,7 @@ FETCH_NUM:	CP	$0D		; is character a carriage return ?
 ; calculator stack as a default value in runtime.
 
 					;; $1CE6
-USE_ZERO:	CALL	L2530		; routine SYNTAX-Z  (UNSTACK_Z?)
+USE_ZERO:	CALL	SYNTAX_Z	; routine SYNTAX_Z  (UNSTACK_Z?)
 		RET	Z		;
 
 		RST	28H		;; FP_CALC
@@ -8257,7 +8257,7 @@ STOP:		RST	08H		; ERROR_1
 
 					;; $1CF0
 IF_CMD:		POP	BC		; drop return address - STMT_RET
-		CALL	L2530		; routine SYNTAX-Z
+		CALL	SYNTAX_Z	; routine SYNTAX_Z
 		JR	Z,IF_1		; forward to IF_1 if checking syntax
 					; to check syntax of PRINT "You Win"
 
@@ -8310,7 +8310,7 @@ F_REORDER:	RST	28H		;; FP_CALC	v,l,s.
 		DEFB	$01		;;exchange	l,s,v.
 		DEFB	$38		;;end-calc
 
-		CALL	L2AFF		; routine LET assigns the initial value v to
+		CALL	LET		; routine LET assigns the initial value v to
 					; the variable altering type if necessary.
 		LD	(MEM),HL	; The system variable MEM is made to point to
 					; the variable instead of it's normal
@@ -8551,7 +8551,7 @@ READ_3:		RST	20H		; NEXT_CHAR
 					; -> Entry point.
 					;; $1DED
 READ:		CALL	CLASS_01	; routine CLASS_01 checks variable.
-		CALL	L2530		; routine SYNTAX-Z
+		CALL	SYNTAX_Z	; routine SYNTAX_Z
 		JR	Z,READ_2	; forward to READ_2 if checking syntax
 
 
@@ -8607,11 +8607,11 @@ READ_2:		RST	18H		; GET_CHAR
 ;		wages - tax, TRUE, The meaning of life
 
 					;; $1E27
-DATA:		CALL	L2530		; routine SYNTAX-Z to check status
+DATA:		CALL	SYNTAX_Z	; routine SYNTAX_Z to check status
 		JR	NZ,DATA_2	; forward to DATA_2 if in runtime
 
 					;; $1E2C
-DATA_1:		CALL	L24FB		; routine SCANNING to check syntax of expression
+DATA_1:		CALL	SCANNING	; routine SCANNING to check syntax of expression
 		CP	$2C		; is it a comma ?
 		CALL	NZ,CHECK_END	; routine CHECK_END checks that statement
 					; is complete. Will make an early exit if
@@ -9060,7 +9060,7 @@ BREAK_KEY:	LD	A,$7F		; Input address: $7FFE
 ; during line-entry.
 
 					;; $1F60
-DEF_FN:		CALL	L2530		; routine SYNTAX-Z
+DEF_FN:		CALL	SYNTAX_Z	; routine SYNTAX_Z
 		JR	Z,DEF_FN_1	; forward to DEF_FN_1 if parsing
 
 		LD	A,$CE		; else load A with 'DEF FN' and
@@ -9070,7 +9070,7 @@ DEF_FN:		CALL	L2530		; routine SYNTAX-Z
 
 					;; $1F6A
 DEF_FN_1:	SET	6,(IY+$01)	; set FLAGS  - Assume numeric result
-		CALL	L2C8D		; call routine ALPHA
+		CALL	ALPHA		; call routine ALPHA
 		JR	NC,DEF_FN_4	; if not then to DEF_FN_4 to jump to
 					; 'Nonsense in Basic'
 
@@ -9091,7 +9091,7 @@ DEF_FN_2:	CP	$28		; is it '(' ?
 		JR	Z,DEF_FN_6	; to DEF_FN_6 if null argument
 
 					;; $1F86
-DEF_FN_3:	CALL	L2C8D		; routine ALPHA checks that it is the expected  alphabetic character.
+DEF_FN_3:	CALL	ALPHA		; routine ALPHA checks that it is the expected  alphabetic character.
 
 					;; $1F89
 DEF_FN_4:	JP	NC,REPORT_C	; to REPORT_C  if not
@@ -9149,7 +9149,7 @@ DEF_FN_6:	CP	$29		; should close with a ')'
 		RST	20H		; address NEXT_CHAR
 		LD	A,(FLAGS)	; get FLAGS which has been set above
 		PUSH	AF		; and save while
-		CALL	L24FB		; routine SCANNING checks syntax of expression and sets flags also
+		CALL	SCANNING	; routine SCANNING checks syntax of expression and sets flags also
 		POP	AF		; restore previous flags
 		XOR	(IY+$01)	; xor with FLAGS - bit 6 should be same,  therefore will be reset. 
 		AND	$40		; isolate bit 6.
@@ -9173,7 +9173,7 @@ DEF_FN_7:	JP	NZ,REPORT_C	; jump back to REPORT_C if the expected result
 ; if checking syntax.
 
 					;; $1FC3
-UNSTACK_Z:	CALL	L2530		; routine SYNTAX-Z sets zero flag if syntax
+UNSTACK_Z:	CALL	SYNTAX_Z	; routine SYNTAX_Z sets zero flag if syntax
 					; is being checked.
 		POP	HL		; drop the return address.
 		RET	Z		; return to previous call in chain if checking
@@ -9206,7 +9206,7 @@ PRINT:		LD	A,$02		; the stream for the upper screen.
 					; The LPRINT command joins here.
 
 					;; $1FCF
-PRINT_1:	CALL	L2530		; routine SYNTAX-Z checks if program running
+PRINT_1:	CALL	SYNTAX_Z	; routine SYNTAX_Z checks if program running
 		CALL	NZ,CHAN_OPEN	; routine CHAN_OPEN if so
 		CALL	TEMPS		; routine TEMPS sets temporary colours.
 		CALL	PRINT_2		; routine PRINT_2 - the actual item
@@ -9311,11 +9311,11 @@ PR_ITEM_3:	CALL	CO_TEMP_3	; routine CO_TEMP_3 will print any colour
 		CALL	STR_ALTER	; routine STR_ALTER considers new stream
 		RET	NC		; return if altered.
 
-		CALL	L24FB		; routine SCANNING now to evaluate expression
+		CALL	SCANNING	; routine SCANNING now to evaluate expression
 		CALL	UNSTACK_Z	; routine UNSTACK_Z if not runtime.
 
 		BIT	6,(IY+$01)	; test FLAGS  - Numeric or string result ?
-		CALL	Z,L2BF1		; routine STK-FETCH if string.
+		CALL	Z,STK_FETCH	; routine STK_FETCH if string.
 					; note no flags affected.
 		JP	NZ,L2DE3	; to PRINT_FP to print if numeric >>>
 
@@ -9371,7 +9371,7 @@ PR_POSN_1:	RST	18H		; GET_CHAR
 					; i.e. print at next tabstop.
 		JR	NZ,PR_POSN_2	; forward to PR_POSN_2 if anything else.
 
-		CALL	L2530		; routine SYNTAX-Z
+		CALL	SYNTAX_Z	; routine SYNTAX_Z
 		JR	Z,PR_POSN_3	; forward to PR_POSN_3 if checking syntax.
 
 		LD	A,$06		; prepare the 'comma' control character.
@@ -9430,7 +9430,7 @@ STR_ALTER:	CP	$23		; is character '#' ?
 ;
 
 					;; $2089
-INPUT:		CALL	L2530		; routine SYNTAX-Z to check if in runtime.
+INPUT:		CALL	SYNTAX_Z	; routine SYNTAX_Z to check if in runtime.
 		JR	Z,INPUT_1	; forward to INPUT_1 if checking syntax.
 
 		LD	A,$01		; select channel 'K' the keyboard for input.
@@ -9519,7 +9519,7 @@ IN_ITEM_2:	CP	$CA		; is the character the token 'LINE' ?
 					; the jump was here for other variables.
 
 					;; $20ED
-IN_ITEM_3:	CALL	L2C8D		; routine ALPHA checks if character is
+IN_ITEM_3:	CALL	ALPHA		; routine ALPHA checks if character is
 					; a suitable variable name.
 		JP	NC,IN_NEXT_1	; forward to IN_NEXT_1 if not
 
@@ -9528,7 +9528,7 @@ IN_ITEM_3:	CALL	L2C8D		; routine ALPHA checks if character is
 		RES	7,(IY+$37)	; update FLAGX  - signal not INPUT LINE.
 
 					;; $20FA
-IN_PROMPT:	CALL	L2530		; routine SYNTAX-Z
+IN_PROMPT:	CALL	SYNTAX_Z	; routine SYNTAX_Z
 		JP	Z,IN_NEXT_2	; forward to IN_NEXT_2 if checking syntax.
 
 		CALL	SET_WORK	; routine SET_WORK clears workspace.
@@ -9673,9 +9673,9 @@ IN_VAR_6:	LD	HL,(STKBOT)	; STKBOT points to the end of the input.
 		SBC	HL,DE		; subtract to get length
 		LD	B,H		; transfer it to
 		LD	C,L		; the BC register pair.
-		CALL	L2AB2	; routine STK-STO-$ stores parameters on
+		CALL	STK_STO_D	; routine STK_STO_D stores parameters on
 					; the calculator stack.
-		CALL	L2AFF	; routine LET assigns it to destination.
+		CALL	LET		; routine LET assigns it to destination.
 		JR	IN_NEXT_2	; forward to IN_NEXT_2 as print items
 					; not allowed with INPUT LINE.
 					; Note. that "hat" + "stand" will, for
@@ -9731,7 +9731,7 @@ REPORT_CB:	RST	08H		; ERROR_1
 		DEFB	$0B		; Error Report: Nonsense in BASIC
 
 					;; $21D0
-IN_STOP:	CALL	L2530		; routine SYNTAX-Z (UNSTACK_Z?)
+IN_STOP:	CALL	SYNTAX_Z	; routine SYNTAX_Z (UNSTACK_Z?)
 		RET	Z		; return if checking syntax
 					; as user wouldn't see error report.
 					; but generate visible error report
@@ -10114,7 +10114,7 @@ PIXEL_ADD:	LD	A,$AF		; load with 175 decimal.
 ;-----------------
 ; Point Subroutine
 ;-----------------
-; The point subroutine is called from s-point via the scanning functions
+; The point subroutine is called from S_POINT via the scanning functions
 ; table.
 
 					;; $22CB
@@ -10129,7 +10129,7 @@ POINT_LP:	RLCA			; rotate and loop back
 		DJNZ	POINT_LP	; to POINT_LP until pixel at right.
 
 		AND	$01		; test to give zero or one.
-		JP	L2D28	; jump forward to STACK-A to save result.
+		JP	STACK_A		; jump forward to STACK_A to save result.
 
 ;--------------------
 ; Handle PLOT command
@@ -10465,7 +10465,7 @@ DR_PRMS:	CALL	CD_PRMS1	; routine CD_PRMS1
 		DEFB	$38		;;end-calc
 
 		LD	A,(COORDS)	; COORDS-x
-		CALL	L2D28	; routine STACK-A
+		CALL	STACK_A		; routine STACK_A
 
 		RST	28H		;; FP_CALC
 		DEFB	$C0		;;st-mem-0
@@ -10474,7 +10474,7 @@ DR_PRMS:	CALL	CD_PRMS1	; routine CD_PRMS1
 		DEFB	$38		;;end-calc
 
 		LD	A,(COORDS_Y)	; COORDS_Y
-		CALL	L2D28	; routine STACK-A
+		CALL	STACK_A		; routine STACK_A
 
 		RST	28H		;; FP_CALC
 		DEFB	$C5		;;st-mem-5
@@ -10525,7 +10525,7 @@ ARC_START:	PUSH	BC
 		DEFB	$38		;;end-calc
 
 		LD	A,(COORDS)	; COORDS-x
-		CALL	L2D28	; routine STACK-A
+		CALL	STACK_A		; routine STACK_A
 
 		RST	28H		;; FP_CALC
 		DEFB	$03		;;subtract
@@ -10538,7 +10538,7 @@ ARC_START:	PUSH	BC
 		DEFB	$38		;;end-calc
 
 		LD	A,(COORDS_Y)	; COORDS_Y
-		CALL	L2D28	; routine STACK-A
+		CALL	STACK_A		; routine STACK_A
 
 		RST	28H		;; FP_CALC
 		DEFB	$03		;;subtract
@@ -10557,7 +10557,7 @@ ARC_END:	RST	28H		;; FP_CALC
 		DEFB	$38		;;end-calc
 
 		LD	A,(COORDS)	; COORDS-x
-		CALL	L2D28	; routine STACK-A
+		CALL	STACK_A		; routine STACK_A
 
 		RST	28H		;; FP_CALC
 		DEFB	$03		;;subtract
@@ -10565,7 +10565,7 @@ ARC_END:	RST	28H		;; FP_CALC
 		DEFB	$38		;;end-calc
 
 		LD	A,(COORDS_Y)	; COORDS_Y
-		CALL	L2D28	; routine STACK-A
+		CALL	STACK_A		; routine STACK_A
 
 		RST	28H		;; FP_CALC
 		DEFB	$03		;;subtract
@@ -10607,7 +10607,7 @@ USE_252:	LD	A,$FC
 
 					;; $2497
 DRAW_SAVE:	PUSH	AF
-		CALL	L2D28	; routine STACK-A
+		CALL	STACK_A		; routine STACK_A
 
 		RST	28H		;; FP_CALC
 		DEFB	$E5		;;get-mem-5
@@ -10745,26 +10745,23 @@ REPORT_BC:	RST	08H		; ERROR_1
 ;----------------------------------
 ; Scan expression or sub-expression
 ;----------------------------------
-;
-;
 
-					;; SCANNING
-L24FB	RST	18H		; GET_CHAR
+					;; $24FB
+SCANNING:	RST	18H		; GET_CHAR
 		LD	B,$00		; priority marker zero is pushed on stack
-					; to signify end of expression when it is
-					; popped off again.
+					; to signify end of expression when it is  popped off again.
 		PUSH	BC		; put in on stack.
 					; and proceed to consider the first character
 					; of the expression.
 
-					;; S-LOOP-1
-L24FF	LD	C,A		; store the character while a look up is done.
-		LD	HL,L2596	; Address: scan-func
+					;; $24FF
+S_LOOP_1:	LD	C,A		; store the character while a look up is done.
+		LD	HL,SCAN_FUNC	; Address: SCAN_FUNC
 		CALL	INDEXER		; routine INDEXER is called to see if it is
 					; part of a limited range '+', '(', 'ATTR' etc.
 
 		LD	A,C		; fetch the character back
-		JP	NC,L2684	; jump forward to S-ALPHNUM if not in primary
+		JP	NC,S_ALPHNUM	; jump forward to S_ALPHNUM if not in primary
 					; operators and functions to consider in the
 					; first instance a digit or a variable and
 					; then anything else.			>>>
@@ -10772,17 +10769,16 @@ L24FF	LD	C,A		; store the character while a look up is done.
 		LD	B,$00		; but here if it was found in table so
 		LD	C,(HL)		; fetch offset from table and make B zero.
 		ADD	HL,BC		; add the offset to position found
-		JP	(HL)		; and jump to the routine e.g. S-BIN
+		JP	(HL)		; and jump to the routine e.g. S_BIN
 					; making an indirect exit from there.
 
 ;--------------------------------------------------------------------------
 ; The four service subroutines for routines in the scannings function table
 ;--------------------------------------------------------------------------
-
 ; PRINT """Hooray!"" he cried."
 
-					;; S-QUOTE-S
-L250F	CALL	CH_ADD_1		; routine CH_ADD_1 points to next character
+					;; $250F
+S_QUOTE_S:	CALL	CH_ADD_1	; routine CH_ADD_1 points to next character
 					; and fetches that character.
 		INC	BC		; increase length counter.
 		CP	$0D		; is it carriage return ?
@@ -10791,20 +10787,20 @@ L250F	CALL	CH_ADD_1		; routine CH_ADD_1 points to next character
 					; 'Nonsense in basic'.
 
 		CP	$22		; is it a quote '"' ?
-		JR	NZ,L250F		; back to S-QUOTE-S if not for more.
+		JR	NZ,S_QUOTE_S	; back to S_QUOTE_S if not for more.
 
-		CALL	CH_ADD_1		; routine CH_ADD_1
+		CALL	CH_ADD_1	; routine CH_ADD_1
 		CP	$22		; compare with possible adjacent quote
 		RET			; return. with zero set if two together.
 
-; This subroutine is used to get two coordinate expressions for the three
-; functions SCREEN$, ATTR and POINT that have two fixed parameters and
-; therefore require surrounding braces.
+					; This subroutine is used to get two coordinate expressions for the three
+					; functions SCREEN$, ATTR and POINT that have two fixed parameters and
+					; therefore require surrounding braces.
 
-					;; S-2-COORD
-L2522	RST	20H		; NEXT_CHAR
+					;; $2522
+S_2_COORD:	RST	20H		; NEXT_CHAR
 		CP	$28		; is it the opening '(' ?
-		JR	NZ,L252D		; forward to S-RPORT-C if not
+		JR	NZ,S_RPORT_C	; forward to S_RPORT_C if not
 					; 'Nonsense in Basic'.
 
 		CALL	NEXT_2NUM	; routine NEXT_2NUM gets two comma-separated
@@ -10816,8 +10812,8 @@ L2522	RST	20H		; NEXT_CHAR
 		RST	18H		; GET_CHAR
 		CP	$29		; is it the closing ')' ?
 
-					;; S-RPORT-C
-L252D	JP	NZ,REPORT_C		; jump back to REPORT_C if not.
+					;; S_RPORT_C
+S_RPORT_C:	JP	NZ,REPORT_C	; jump back to REPORT_C if not.
 					; 'Nonsense in Basic'.
 
 ;-------------
@@ -10827,8 +10823,8 @@ L252D	JP	NZ,REPORT_C		; jump back to REPORT_C if not.
 ; checked or if the program is being run. To test the flag inline would use
 ; four bytes of code, but a call instruction only uses 3 bytes of code.
 
-					;; SYNTAX-Z
-L2530	BIT	7,(IY+$01)	; test FLAGS  - checking syntax only ?
+					;; $2530
+SYNTAX_Z:	BIT	7,(IY+$01)	; test FLAGS  - checking syntax only ?
 		RET			; return.
 
 ;-----------------
@@ -10846,10 +10842,10 @@ L2530	BIT	7,(IY+$01)	; test FLAGS  - checking syntax only ?
 ; Interestingly, in the Pitman pocket guide, 1984, Vickers says that the
 ; range checking will be performed. 
 
-					;; S-SCRN$-S
-L2535	CALL	STK_TO_BC		; routine STK_TO_BC.
+					;; $2535
+S_SCRN_S:	CALL	STK_TO_BC	; routine STK_TO_BC.
 		LD	HL,(CHARS)	; fetch address of CHARS.
-		LD	DE,$0100		; fetch offset to chr$ 32
+		LD	DE,$0100	; fetch offset to chr$ 32
 		ADD	HL,DE		; and find start of bitmaps.
 					; Note. not inc h. ??
 		LD	A,C		; transfer line to A.
@@ -10865,38 +10861,38 @@ L2535	CALL	STK_TO_BC		; routine STK_TO_BC.
 		LD	D,A		; register DE now holds start address of cell.
 		LD	B,$60		; there are 96 characters in ascii set.
 
-					;; S-SCRN-LP
-L254F	PUSH	BC		; save count
+					;; $254F
+S_SCRN_LP:	PUSH	BC		; save count
 		PUSH	DE		; save screen start address
 		PUSH	HL		; save bitmap start
 		LD	A,(DE)		; first byte of screen to A
 		XOR	(HL)		; xor with corresponding character byte
-		JR	Z,L255A		; forward to S-SC-MTCH if they match
+		JR	Z,S_SC_MTCH	; forward to S_SC_MTCH if they match
 					; if inverse result would be $FF
 					; if any other then mismatch
 
 		INC	A		; set to $00 if inverse
-		JR	NZ,L2573		; forward to S-SCR-NXT if a mismatch
+		JR	NZ,S_SCR_NXT	; forward to S_SCR_NXT if a mismatch
 
 		DEC	A		; restore $FF
 
-; a match has been found so seven more to test.
+					; a match has been found so seven more to test.
 
-					;; S-SC-MTCH
-L255A	LD	C,A		; load C with inverse mask $00 or $FF
+					;; $255A
+S_SC_MTCH:	LD	C,A		; load C with inverse mask $00 or $FF
 		LD	B,$07		; count seven more bytes
 
-					;; S-SC-ROWS
-L255D	INC	D		; increment screen address.
+					;; $255D
+S_SC_ROWS:	INC	D		; increment screen address.
 		INC	HL		; increment bitmap address.
 		LD	A,(DE)		; byte to A
 		XOR	(HL)		; will give $00 or $FF (inverse)
 		XOR	C		; xor with inverse mask
-		JR	NZ,L2573		; forward to S-SCR-NXT if no match.
+		JR	NZ,S_SCR_NXT	; forward to S_SCR_NXT if no match.
 
-		DJNZ	L255D		; back to S-SC-ROWS until all eight matched.
+		DJNZ	S_SC_ROWS	; back to S_SC_ROWS until all eight matched.
 
-; continue if a match of all eight bytes was found
+					; continue if a match of all eight bytes was found
 
 		POP	BC		; discard the
 		POP	BC		; saved
@@ -10904,35 +10900,35 @@ L255D	INC	D		; increment screen address.
 		LD	A,$80		; the endpoint of character set
 		SUB	B		; subtract the counter
 					; to give the code 32-127
-		LD	BC,$0001		; make one space in workspace.
+		LD	BC,$0001	; make one space in workspace.
 
 		RST	30H		; BC_SPACES creates the space sliding
 					; the calculator stack upwards.
 		LD	(DE),A		; start is addressed by DE, so insert code
-		JR	L257D		; forward to S-SCR-STO
+		JR	S_SCR_STO	; forward to S_SCR_STO
 
-; the jump was here if no match and more bitmaps to test.
+					; the jump was here if no match and more bitmaps to test.
 
-					;; S-SCR-NXT
-L2573	POP	HL		; restore the last bitmap start
+					;; $2573
+S_SCR_NXT:	POP	HL		; restore the last bitmap start
 		LD	DE,$0008		; and prepare to add 8.
 		ADD	HL,DE		; now addresses next character bitmap.
 		POP	DE		; restore screen address
 		POP	BC		; and character counter in B
-		DJNZ	L254F		; back to S-SCRN-LP if more characters.
+		DJNZ	S_SCRN_LP	; back to S_SCRN_LP if more characters.
 
 		LD	C,B		; B is now zero, so BC now zero.
 
-					;; S-SCR-STO
-L257D	JP	L2AB2		; to STK-STO-$ to store the string in
+					;; $257D
+S_SCR_STO:	JP	STK_STO_D	; to STK_STO_D to store the string in
 					; workspace or a string with zero length.
 					; (value of DE doesn't matter in last case)
 
-; Note. this exit seems correct but the general-purpose routine S-STRING
-; that calls this one will also stack any of it's string results so this
-; leads to a double storing of the result in this case.
-; The instruction at L257D should just be a RET.
-; credit Stephen Kelly and others, 1982.
+					; Note. this exit seems correct but the general-purpose routine S_STRING
+					; that calls this one will also stack any of it's string results so this
+					; leads to a double storing of the result in this case.
+					; The instruction at S_SCR_STO should just be a RET.
+					; credit Stephen Kelly and others, 1982.
 
 ;--------------
 ; Scanning ATTR
@@ -10941,8 +10937,8 @@ L257D	JP	L2AB2		; to STK-STO-$ to store the string in
 ; a numeric result.
 ; Again it's up to the Basic programmer to supply valid values of line/column.
 
-					;; S-ATTR-S
-L2580	CALL	STK_TO_BC		; routine STK_TO_BC fetches line to C,
+					;; $2580
+S_ATTR_S:	CALL	STK_TO_BC	; routine STK_TO_BC fetches line to C,
 					; and column to B.
 		LD	A,C		; line to A $00 - $17	(max 00010111)
 		RRCA			; rotate
@@ -10960,7 +10956,7 @@ L2580	CALL	STK_TO_BC		; routine STK_TO_BC fetches line to C,
 		XOR	$58		; combine with base address.
 		LD	H,A		; high byte correct.
 		LD	A,(HL)		; pick up the colour attribute.
-		JP	L2D28		; forward to STACK-A to store result
+		JP	STACK_A		; forward to STACK_A to store result
 					; and make an indirect exit.
 
 ;------------------------
@@ -10989,55 +10985,54 @@ L2580	CALL	STK_TO_BC		; routine STK_TO_BC fetches line to C,
 ; In either case this is dealt with by recursive calls to SCANNING.
 ; An expression that begins with a quote requires special treatment.
 
-					;; scan-func
-L2596	DEFB	$22, L25B3-$-1  ; $1C offset to S-QUOTE
-		DEFB	'(', L25E8-$-1  ; $4F offset to S-BRACKET
-		DEFB	'.', L268D-$-1  ; $F2 offset to S-DECIMAL
-		DEFB	'+', L25AF-$-1  ; $12 offset to S-U-PLUS
+						;; $2596
+SCAN_FUNC:	DEFB	$22, S_QUOTE-$-1	; $1C offset to S_QUOTE
+		DEFB	'(', S_BRACKET-$-1	; $4F offset to S_BRACKET
+		DEFB	'.', S_DECIMAL-$-1	; $F2 offset to S_DECIMAL
+		DEFB	'+', S_U_PLUS-$-1	; $12 offset to S_U_PLUS
+		DEFB	$A8, S_FN-$-1		; $56 offset to S_FN
+		DEFB	$A5, S_RND-$-1		; $57 offset to S_RND
+		DEFB	$A7, S_PI-$-1		; $84 offset to S_PI
+		DEFB	$A6, S_INKEY-$-1	; $8F offset to S_INKEY
+		DEFB	$C4, S_BIN-$-1		; $E6 offset to S_BIN
+		DEFB	$AA, S_SCREEN-$-1	; $BF offset to S_SCREEN
+		DEFB	$AB, S_ATTR-$-1		; $C7 offset to S_ATTR
+		DEFB	$A9, S_POINT-$-1	; $CE offset to S_POINT
 
-		DEFB	$A8, L25F5-$-1  ; $56 offset to S-FN
-		DEFB	$A5, L25F8-$-1  ; $57 offset to S-RND
-		DEFB	$A7, L2627-$-1  ; $84 offset to S-PI
-		DEFB	$A6, L2634-$-1  ; $8F offset to S-INKEY$
-		DEFB	$C4, L268D-$-1  ; $E6 offset to S-BIN
-		DEFB	$AA, L2668-$-1  ; $BF offset to S-SCREEN$
-		DEFB	$AB, L2672-$-1  ; $C7 offset to S-ATTR
-		DEFB	$A9, L267B-$-1  ; $CE offset to S-POINT
-
-		DEFB	$00		; zero end marker
+		DEFB	$00			; zero end marker
 
 ;---------------------------
 ; Scanning function routines
 ;---------------------------
 ; These are the 11 subroutines accessed by the above table.
-; S-BIN and S-DECIMAL are the same
+; S_BIN and S_DECIMAL are the same
 ; The 1-byte offset limits their location to within 255 bytes of their
 ; entry in the table.
 
-; ->
-					;; S-U-PLUS
-L25AF	RST	20H		; NEXT_CHAR just ignore
-		JP	L24FF		; to S-LOOP-1
+					; ->
+					;; $25AF
+S_U_PLUS:	RST	20H		; NEXT_CHAR just ignore
+		JP	S_LOOP_1	; to S_LOOP_1
 
-; ->
-					;; S-QUOTE
-L25B3	RST	18H		; GET_CHAR
+					; ->
+					;; $25B3
+S_QUOTE:	RST	18H		; GET_CHAR
 		INC	HL		; address next character (first in quotes)
 		PUSH	HL		; save start of quoted text.
-		LD	BC,$0000		; initialize length of string to zero.
-		CALL	L250F		; routine S-QUOTE-S
-		JR	NZ,L25D9		; forward to S-Q-PRMS if
+		LD	BC,$0000	; initialize length of string to zero.
+		CALL	S_QUOTE_S	; routine S_QUOTE_S
+		JR	NZ,S_Q_PRMS	; forward to S_Q_PRMS if
 
-					;; S-Q-AGAIN
-L25BE	CALL	L250F		; routine S-QUOTE-S copies string until a
+					;; $25BE
+S_Q_AGAIN:	CALL	S_QUOTE_S	; routine S_QUOTE_S copies string until a
 					; quote is encountered
-		JR	Z,L25BE		; back to S-Q-AGAIN if two quotes WERE
+		JR	Z,S_Q_AGAIN	; back to S_Q_AGAIN if two quotes WERE
 					; together.
 
-; but if just an isolated quote then that terminates the string.
+					; but if just an isolated quote then that terminates the string.
 
-		CALL	L2530		; routine SYNTAX-Z
-		JR	Z,L25D9		; forward to S-Q-PRMS if checking syntax.
+		CALL	SYNTAX_Z	; routine SYNTAX_Z
+		JR	Z,S_Q_PRMS	; forward to S_Q_PRMS if checking syntax.
 
 
 		RST	30H		; BC_SPACES creates the space for true
@@ -11045,54 +11040,54 @@ L25BE	CALL	L250F		; routine S-QUOTE-S copies string until a
 		POP	HL		; re-fetch start of quoted text.
 		PUSH	DE		; save start in workspace.
 
-					;; S-Q-COPY
-L25CB	LD	A,(HL)		; fetch a character from source.
+					;; $25CB
+S_Q_COPY:	LD	A,(HL)		; fetch a character from source.
 		INC	HL		; advance source address.
 		LD	(DE),A		; place in destination.
 		INC	DE		; advance destination address.
 		CP	$22		; was it a '"' just copied ?
-		JR	NZ,L25CB		; back to S-Q-COPY to copy more if not
+		JR	NZ,S_Q_COPY	; back to S_Q_COPY to copy more if not
 
 		LD	A,(HL)		; fetch adjacent character from source.
 		INC	HL		; advance source address.
 		CP	$22		; is this '"' ? - i.e. two quotes together ?
-		JR	Z,L25CB		; to S-Q-COPY if so including just one of the
+		JR	Z,S_Q_COPY	; to S_Q_COPY if so including just one of the
 					; pair of quotes.
 
-; proceed when terminating quote encountered.
+					; proceed when terminating quote encountered.
 
-					;; S-Q-PRMS
-L25D9	DEC	BC		; decrease count by 1.
+					;; $25D9
+S_Q_PRMS:	DEC	BC		; decrease count by 1.
 		POP	DE		; restore start of string in workspace.
 
-					;; S-STRING
-L25DB	LD	HL,FLAGS		; Address FLAGS system variable.
+					;; $25DB
+S_STRING:	LD	HL,FLAGS	; Address FLAGS system variable.
 		RES	6,(HL)		; signal string result.
 		BIT	7,(HL)		; is syntax being checked.
-		CALL	NZ,L2AB2		; routine STK-STO-$ is called in runtime.
-		JP	L2712		; jump forward to S-CONT-2		===>
+		CALL	NZ,STK_STO_D	; routine STK_STO_D is called in runtime.
+		JP	S_CONT_2	; jump forward to S_CONT_2		===>
 
-; ->
-					;; S-BRACKET
-L25E8	RST	20H		; NEXT_CHAR
-		CALL	L24FB		; routine SCANNING is called recursively.
+					; ->
+					;; $25E8
+S_BRACKET:	RST	20H		; NEXT_CHAR
+		CALL	SCANNING	; routine SCANNING is called recursively.
 		CP	$29		; is it the closing ')' ?
 		JP	NZ,REPORT_C	; jump back to REPORT_C if not
 					; 'Nonsense in basic'
 
 		RST	20H		; NEXT_CHAR
-		JP	L2712		; jump forward to S-CONT-2		===>
-; ->
-					;; S-FN
-L25F5	JP	L27BD		; jump forward to S-FN-SBRN.
+		JP	S_CONT_2	; jump forward to S_CONT_2		===>
+					; ->
+					;;$25F5
+S_FN:		JP	S_FN_SBRN	; jump forward to S_FN_SBRN.
 
-; ->
-					;; S-RND
-L25F8	CALL	L2530		; routine SYNTAX-Z
-		JR	Z,L2625		; forward to S-RND-END if checking syntax.
+					; ->
+					;; $25F8
+S_RND:		CALL	SYNTAX_Z	; routine SYNTAX_Z
+		JR	Z,S_RND_END	; forward to S_RND_END if checking syntax.
 
 		LD	BC,(SEED)	; fetch system variable SEED
-		CALL	L2D2B		; routine STACK-BC places on calculator stack
+		CALL	STACK_BC	; routine STACK_BC places on calculator stack
 
 		RST	28H		;; FP_CALC		;s.
 		DEFB	$A1		;;stk-one		;s,1.
@@ -11113,24 +11108,24 @@ L25F8	CALL	L2530		; routine SYNTAX-Z
 		DEFB	$31		;;duplicate		;rnd,rnd.
 		DEFB	$38		;;end-calc
 
-		CALL	L2DA2		; routine FP-TO-BC
+		CALL	L2DA2	; routine FP-TO-BC
 		LD	(SEED),BC	; store in SEED for next starting point.
 		LD	A,(HL)		; fetch exponent
 		AND	A		; is it zero ?
-		JR	Z,L2625		; forward if so to S-RND-END
+		JR	Z,S_RND_END	; forward if so to S_RND_END
 
 		SUB	$10		; reduce exponent by 2^16
 		LD	(HL),A		; place back
 
-					;; S-RND-END
-L2625	JR	L2630		; forward to S-PI-END
+					;; $2625
+S_RND_END:	JR	S_PI_END	; forward to S_PI_END
 
-; the number PI 3.14159...
+					; the number PI 3.14159...
 
-; ->
-					;; S-PI
-L2627	CALL	L2530		; routine SYNTAX-Z
-		JR	Z,L2630		; to S-PI-END if checking syntax.
+					; ->
+					;; $2627
+S_PI:		CALL	SYNTAX_Z	; routine SYNTAX_Z
+		JR	Z,S_PI_END	; to S_PI_END if checking syntax.
 
 		RST	28H		;; FP_CALC
 		DEFB	$A3		;;stk-pi/2				pi/2.
@@ -11139,37 +11134,34 @@ L2627	CALL	L2530		; routine SYNTAX-Z
 		INC	(HL)		; increment the exponent leaving pi
 					; on the calculator stack.
 
-					;; S-PI-END
-L2630	RST	20H		; NEXT_CHAR
-		JP	L26C3		; jump forward to S-NUMERIC
+					;; $2630
+S_PI_END:	RST	20H		; NEXT_CHAR
+		JP	S_NUMERIC	; jump forward to S_NUMERIC
 
-; ->
-					;; S-INKEY$
-L2634	LD	BC,$105A		; priority $10, operation code $1A ('read-in')
+					; ->
+					;; $2634
+S_INKEY:	LD	BC,$105A	; priority $10, operation code $1A ('read-in')
 					; +$40 for string result, numeric operand.
-					; set this up now in case we need to use the
-					; calculator.
+					; set this up now in case we need to use the calculator.
 		RST	20H		; NEXT_CHAR
 		CP	$23		; '#' ?
-		JP	Z,L270D		; to S-PUSH-PO if so to use the calculator
+		JP	Z,S_PUSH_PO	; to S_PUSH_PO if so to use the calculator
 					; single operation
 					; to read from network/RS232 etc. .
 
-; else read a key from the keyboard.
+					; else read a key from the keyboard.
 
-		LD	HL,FLAGS		; fetch FLAGS
+		LD	HL,FLAGS	; fetch FLAGS
 		RES	6,(HL)		; signal string result.
 		BIT	7,(HL)		; checking syntax ?
-		JR	Z,L2665		; forward to S-INK$-EN if so
+		JR	Z,S_INK_EN	; forward to S_INK_EN if so
 
-		CALL	KEY_SCAN		; routine KEY_SCAN key in E, shift in D.
+		CALL	KEY_SCAN	; routine KEY_SCAN key in E, shift in D.
 		LD	C,$00		; the length of an empty string
-		JR	NZ,L2660		; to S-IK$-STK to store empty string if
-					; no key returned.
+		JR	NZ,S_IK_STK	; to S_IK_STK to store empty string if no key returned.
 
 		CALL	K_TEST		; routine K_TEST get main code in A
-		JR	NC,L2660		; to S-IK$-STK to stack null string if
-					; invalid
+		JR	NC,S_IK_STK	; to S_IK_STK to stack null string if invalid
 
 		DEC	D		; D is expected to be FLAGS so set bit 3 $FF
 					; 'L' Mode so no keywords.
@@ -11177,74 +11169,72 @@ L2634	LD	BC,$105A		; priority $10, operation code $1A ('read-in')
 					; C is MODE 0 'KLC' from above still.
 		CALL	K_DECODE	; routine K_DECODE
 		PUSH	AF		; save the code
-		LD	BC,$0001		; make room for one character
+		LD	BC,$0001	; make room for one character
 
 		RST	30H		; BC_SPACES
 		POP	AF		; bring the code back
 		LD	(DE),A		; put the key in workspace
 		LD	C,$01		; set C length to one
 
-					;; S-IK$-STK
-L2660	LD	B,$00		; set high byte of length to zero
-		CALL	L2AB2		; routine STK-STO-$
+					;; $2660
+S_IK_STK:	LD	B,$00		; set high byte of length to zero
+		CALL	STK_STO_D	; routine STK_STO_D
 
-					;; S-INK$-EN
-L2665	JP	L2712		; to S-CONT-2		===>
+					;; $2665
+S_INK_EN:	JP	S_CONT_2	; to S_CONT_2		===>
 
-; ->
-					;; S-SCREEN$
-L2668	CALL	L2522		; routine S-2-COORD
-		CALL	NZ,L2535		; routine S-SCRN$-S
-
-		RST	20H		; NEXT_CHAR
-		JP	L25DB		; forward to S-STRING to stack result
-
-; ->
-					;; S-ATTR
-L2672	CALL	L2522		; routine S-2-COORD
-		CALL	NZ,L2580		; routine S-ATTR-S
+					; ->
+					;; $2668
+S_SCREEN:	CALL	S_2_COORD	; routine S_2_COORD
+		CALL	NZ,S_SCRN_S	; routine S_SCRN_S
 
 		RST	20H		; NEXT_CHAR
-		JR	L26C3		; forward to S-NUMERIC
+		JP	S_STRING	; forward to S_STRING to stack result
 
-; ->
-					;; S-POINT
-L267B	CALL	L2522		; routine S-2-COORD
+					; ->
+					;; $2672
+S_ATTR:		CALL	S_2_COORD	; routine S_2_COORD
+		CALL	NZ,S_ATTR_S	; routine S_ATTR_S
+
+		RST	20H		; NEXT_CHAR
+		JR	S_NUMERIC	; forward to S_NUMERIC
+
+					; ->
+					;; $267B
+S_POINT:	CALL	S_2_COORD	; routine S_2_COORD
 		CALL	NZ,POINT_SUB	; routine POINT_SUB
 
 		RST	20H		; NEXT_CHAR
-		JR	L26C3		; forward to S-NUMERIC
+		JR	S_NUMERIC	; forward to S_NUMERIC
 
-;------------------------------
+					; ==> The branch was here if not in table.
 
-; ==> The branch was here if not in table.
-
-					;; S-ALPHNUM
-L2684	CALL	L2C88		; routine ALPHANUM checks if variable or
+					;; $2684
+S_ALPHNUM:	CALL	ALPHANUM	; routine ALPHANUM checks if variable or
 					; a digit.
-		JR	NC,L26DF		; forward to S-NEGATE if not to consider
+		JR	NC,S_NEGATE	; forward to S_NEGATE if not to consider
 					; a '-' character then functions.
 
 		CP	$41		; compare 'A'
-		JR	NC,L26C9		; forward to S-LETTER if alpha	->
+		JR	NC,S_LETTER	; forward to S_LETTER if alpha	->
 					; else must have been numeric so continue
 					; into that routine.
 
-; This important routine is called during runtime and from LINE_SCAN
-; when a BASIC line is checked for syntax. It is this routine that
-; inserts, during syntax checking, the invisible floating point numbers
-; after the numeric expression. During runtime it just picks these
-; numbers up. It also handles BIN format numbers.
+					; This important routine is called during runtime and from LINE_SCAN
+					; when a BASIC line is checked for syntax. It is this routine that
+					; inserts, during syntax checking, the invisible floating point numbers
+					; after the numeric expression. During runtime it just picks these
+					; numbers up. It also handles BIN format numbers.
 
-; ->
-					;; S-BIN
-					;; S-DECIMAL
-L268D	CALL	L2530		; routine SYNTAX-Z
-		JR	NZ,L26B5		; to S-STK-DEC in runtime
+					; ->
+					;; $268D
+S_DECIMAL:
+S_BIN:		CALL	SYNTAX_Z	; routine SYNTAX_Z
+		JR	NZ,S_STK_DEC	; to S_STK_DEC in runtime
 
-; this route is taken when checking syntax.
+					; this route is taken when checking syntax.
 
-		CALL	L2C9B		; routine DEC-TO-FP to evaluate number
+		CALL	DEC_TO_FP	; routine DEC_TO_FP to evaluate number
 
 		RST	18H		; GET_CHAR to fetch HL
 		LD	BC,$0006	; six locations required
@@ -11262,83 +11252,79 @@ L268D	CALL	L2530		; routine SYNTAX-Z
 		EX	DE,HL		; transfer pointer to HL
 		DEC	HL		; adjust
 		CALL	TEMP_PTR1	; routine TEMP_PTR1 sets CH-ADD
-		JR	L26C3		; to S-NUMERIC to record nature of result
+		JR	S_NUMERIC	; to S_NUMERIC to record nature of result
 
-; branch here in runtime.
+					; branch here in runtime.
 
-					;; S-STK-DEC
-L26B5	RST	18H		; GET_CHAR positions HL at digit.
+					;; $26B5
+S_STK_DEC:	RST	18H		; GET_CHAR positions HL at digit.
 
-					;; S-SD-SKIP
-L26B6	INC	HL		; advance pointer
+					;; $26B6
+S_SD_SKIP:	INC	HL		; advance pointer
 		LD	A,(HL)		; until we find
 		CP	$0E		; chr 14d - the number indicator
-		JR	NZ,L26B6		; to S-SD-SKIP until a match
-					; it has to be here.
+		JR	NZ,S_SD_SKIP	; to S_SD_SKIP until a match it has to be here.
 
 		INC	HL		; point to first byte of number
-		CALL	L33B4		; routine STACK-NUM stacks it
+		CALL	L33B4	; routine STACK-NUM stacks it
 		LD	(CH_ADD),HL	; update system variable CH_ADD
 
-					;; S-NUMERIC
-L26C3	SET	6,(IY+$01)	; update FLAGS  - Signal numeric result
-		JR	L26DD		; forward to S-CONT-1			===>
-					; actually S-CONT-2 is destination but why
+					;; $26C3
+S_NUMERIC:	SET	6,(IY+$01)	; update FLAGS  - Signal numeric result
+		JR	S_CONT_1	; forward to S_CONT_1			===>
+					; actually S_CONT_2 is destination but why
 					; waste a byte on a jump when a JR will do.
-					; actually a JR L2712 can be used. Rats.
+					; actually a JR S_CONT_2 can be used. Rats.
 
-; end of functions accessed from scanning functions table.
+					; end of functions accessed from scanning functions table.
 
 ;---------------------------
 ; Scanning variable routines
 ;---------------------------
-;
-;
 
-					;; S-LETTER
-L26C9	CALL	L28B2		; routine LOOK-VARS
+					;; $26C9
+S_LETTER:	CALL	LOOK_VARS	; routine LOOK_VARS
 		JP	C,REPORT_2	; jump back to REPORT_2 if not found
 					; 'Variable not found'
 					; but a variable is always 'found' if syntax
 					; is being checked.
 
-		CALL	Z,L2996		; routine STK-VAR considers a subscript/slice
+		CALL	Z,STK_VAR	; routine STK_VAR considers a subscript/slice
 		LD	A,(FLAGS)	; fetch FLAGS value
 		CP	$C0		; compare 11000000
-		JR	C,L26DD		; step forward to S-CONT-1 if string	===>
+		JR	C,S_CONT_1	; step forward to S_CONT_1 if string	===>
 
 		INC	HL		; advance pointer
-		CALL	L33B4		; routine STACK-NUM
+		CALL	L33B4	; routine STACK-NUM
 
-					;; S-CONT-1
-L26DD	JR	L2712		; forward to S-CONT-2			===>
+					;; $26DD
+S_CONT_1:	JR	S_CONT_2	; forward to S_CONT_2			===>
 
-;-----------------------------------------
-; -> the scanning branch was here if not alphanumeric.
-; All the remaining functions will be evaluated by a single call to the
-; calculator. The correct priority for the operation has to be placed in
-; the B register and the operation code, calculator literal in the C register.
-; the operation code has bit 7 set if result is numeric and bit 6 is
-; set if operand is numeric. so
-; $C0 = numeric result, numeric operand.	e.g. 'sin'
-; $80 = numeric result, string operand.		e.g. 'code'
-; $40 = string result, numeric operand.		e.g. 'str$'
-; $00 = string result, string operand.		e.g. 'val$'
+					;-----------------------------------------
+					; -> the scanning branch was here if not alphanumeric.
+					; All the remaining functions will be evaluated by a single call to the
+					; calculator. The correct priority for the operation has to be placed in
+					; the B register and the operation code, calculator literal in the C register.
+					; the operation code has bit 7 set if result is numeric and bit 6 is
+					; set if operand is numeric. so
+					; $C0 = numeric result, numeric operand.	e.g. 'sin'
+					; $80 = numeric result, string operand.		e.g. 'code'
+					; $40 = string result, numeric operand.		e.g. 'str$'
+					; $00 = string result, string operand.		e.g. 'val$'
 
-					;; S-NEGATE
-L26DF	LD	BC,$09DB		; prepare priority 09, operation code $C0 + 
+					;; $26DF
+S_NEGATE:	LD	BC,$09DB	; prepare priority 09, operation code $C0 + 
 					; 'negate' ($1B) - bits 6 and 7 set for numeric
 					; result and numeric operand.
 
 		CP	$2D		; is it '-' ?
-		JR	Z,L270D		; forward if so to S-PUSH-PO
+		JR	Z,S_PUSH_PO	; forward if so to S_PUSH_PO
 
-		LD	BC,$1018		; prepare priority $10, operation code 'val$' -
-					; bits 6 and 7 reset for string result and
-					; string operand.
+		LD	BC,$1018	; prepare priority $10, operation code 'val$' -
+					; bits 6 and 7 reset for string result and  string operand.
 		
 		CP	$AE		; is it 'VAL$' ?
-		JR	Z,L270D		; forward if so to S-PUSH-PO
+		JR	Z,S_PUSH_PO	; forward if so to S_PUSH_PO
 
 		SUB	$AF		; subtract token 'CODE' value to reduce
 					; functions 'CODE' to 'NOT' although the
@@ -11348,11 +11334,11 @@ L26DF	LD	BC,$09DB		; prepare priority 09, operation code $C0 +
 		JP	C,REPORT_C	; jump back to REPORT_C with anything else
 					; 'Nonsense in Basic'
 
-		LD	BC,$04F0		; prepare priority $04, operation $C0 + 
+		LD	BC,$04F0	; prepare priority $04, operation $C0 + 
 					; 'not' ($30)
 
 		CP	$14		; is it 'NOT'
-		JR	Z,L270D		; forward to S-PUSH-PO if so
+		JR	Z,S_PUSH_PO	; forward to S_PUSH_PO if so
 
 		JP	NC,REPORT_C	; to REPORT_C if higher
 					; 'Nonsense in Basic'
@@ -11363,69 +11349,66 @@ L26DF	LD	BC,$09DB		; prepare priority 09, operation code $C0 +
 
 		LD	C,A		; transfer 'function' to C
 		CP	$DF		; is it 'sin' ?
-		JR	NC,L2707		; forward to S-NO-TO-$  with 'sin' through
+		JR	NC,S_NO_TO	; forward to S_NO_TO  with 'sin' through
 					; 'chr$' as operand is numeric.
 
-; all the rest 'cos' through 'chr$' give a numeric result except 'str$'
-; and 'chr$'.
+					; all the rest 'cos' through 'chr$' give a numeric result except 'str$'
+					; and 'chr$'.
 
 		RES	6,C		; signal string operand for 'code', 'val' and
 					; 'len'.
 
-					;; S-NO-TO-$
-L2707	CP	$EE		; compare 'str$'
-		JR	C,L270D		; forward to S-PUSH-PO if lower as result
+					;; $2707
+S_NO_TO:	CP	$EE		; compare 'str$'
+		JR	C,S_PUSH_PO	; forward to S_PUSH_PO if lower as result
 					; is numeric.
 
 		RES	7,C		; reset bit 7 of op code for 'str$', 'chr$'
 					; as result is string.
 
-; >> This is where they were all headed for.
+					; >> This is where they were all headed for.
 
-					;; S-PUSH-PO
-L270D	PUSH	BC		; push the priority and calculator operation
+					;; $270D
+S_PUSH_PO:	PUSH	BC		; push the priority and calculator operation
 					; code.
 
 		RST	20H		; NEXT_CHAR
-		JP	L24FF		; jump back to S-LOOP-1 to go round the loop
+		JP	S_LOOP_1	; jump back to S_LOOP_1 to go round the loop
 					; again with the next character.
 
-; --------------------------------
+					; ===>  there were many branches forward to here
 
-; ===>  there were many branches forward to here
+					;; $2712
+S_CONT_2:	RST	18H		; GET_CHAR
 
-					;; S-CONT-2
-L2712	RST	18H		; GET_CHAR
-
-					;; S-CONT-3
-L2713	CP	$28		; is it '(' ?
-		JR	NZ,L2723		; forward to S-OPERTR if not	>
+					;; $2713
+S_CONT_3:	CP	$28		; is it '(' ?
+		JR	NZ,S_OPERTR	; forward to S_OPERTR if not	>
 
 		BIT	6,(IY+$01)	; test FLAGS - numeric or string result ?
-		JR	NZ,L2734		; forward to S-LOOP if numeric to evaluate  >
+		JR	NZ,S_LOOP	; forward to S_LOOP if numeric to evaluate  >
 
-; if a string preceded '(' then slice it.
+					; if a string preceded '(' then slice it.
 
-		CALL	L2A52		; routine SLICING
+		CALL	SLICING	; routine SLICING
 
 		RST	20H		; NEXT_CHAR
-		JR	L2713		; back to S-CONT-3
+		JR	S_CONT_3	; back to S_CONT_3
 
-;----------------------------
 
-; the branch was here when possibility of an operator '(' has been excluded.
+					; the branch was here when possibility of an operator '(' has been excluded.
 
-					;; S-OPERTR
-L2723	LD	B,$00		; prepare to add
+					;; $2723
+S_OPERTR:	LD	B,$00		; prepare to add
 		LD	C,A		; possible operator to C
-		LD	HL,L2795	; Address: $2795 - tbl-of-ops
+		LD	HL,TBL_OF_OPS	; Address: TBL_OF_OPS
 		CALL	INDEXER		; routine INDEXER
-		JR	NC,L2734	; forward to S-LOOP if not in table
+		JR	NC,S_LOOP	; forward to S_LOOP if not in table
 
-; but if found in table the priority has to be looked up.
+					; but if found in table the priority has to be looked up.
 
 		LD	C,(HL)		; operation code to C ( B is still zero )
-		LD	HL,L27B0 - $C3  ; $26ED is base of table
+		LD	HL,TBL_PRIORS-$C3 ; $26ED is base of table
 		ADD	HL,BC		; index into table.
 		LD	B,(HL)		; priority to B.
 
@@ -11434,15 +11417,15 @@ L2723	LD	B,$00		; prepare to add
 ;-------------------
 ; the juggling act
 
-					;; S-LOOP
-L2734	POP	DE		; fetch last priority and operation
+					;; $2734
+S_LOOP:		POP	DE		; fetch last priority and operation
 		LD	A,D		; priority to A
 		CP	B		; compare with this one
-		JR	C,L2773		; forward to S-TIGHTER to execute the
+		JR	C,S_TIGHTER	; forward to S_TIGHTER to execute the
 					; last operation before this one as it has
 					; higher priority.
 
-; the last priority was greater or equal this one.
+					; the last priority was greater or equal this one.
 
 		AND	A		; if it is zero then so is this
 		JP	Z,GET_CHAR	; jump to exit via GET_CHAR pointing at
@@ -11456,87 +11439,88 @@ L2734	POP	DE		; fetch last priority and operation
 					; as it has lower precedence than the one
 					; now in DE.
 
-; the 'USR' function is special in that it is overloaded to give two types
-; of result.
+					; the 'USR' function is special in that it is overloaded to give two types
+					; of result.
 
-		LD	HL,FLAGS		; address FLAGS
+		LD	HL,FLAGS	; address FLAGS
 		LD	A,E		; new operation to A register
 		CP	$ED		; is it $C0 + 'usr-no' ($2D)  ?
-		JR	NZ,L274C		; forward to S-STK-LST if not
+		JR	NZ,S_STK_LST	; forward to S_STK_LST if not
 
 		BIT	6,(HL)		; string result expected ?
 					; (from the lower priority operand we've
 					; just pushed on stack )
-		JR	NZ,L274C		; forward to S-STK-LST if numeric
+		JR	NZ,S_STK_LST	; forward to S_STK_LST if numeric
 					; as operand bits match.
 
 		LD	E,$99		; reset bit 6 and substitute $19 'usr-$'
 					; for string operand.
 
-					;; S-STK-LST
-L274C	PUSH	DE		; now stack this priority/operation
-		CALL	L2530		; routine SYNTAX-Z
-		JR	Z,L275B		; forward to S-SYNTEST if checking syntax.
+					;; $274C
+S_STK_LST:	PUSH	DE		; now stack this priority/operation
+		CALL	SYNTAX_Z	; routine SYNTAX_Z
+		JR	Z,S_SYNTEST	; forward to S_SYNTEST if checking syntax.
 
 		LD	A,E		; fetch the operation code
-		AND	$3F		; mask off the result/operand bits to leave
-					; a calculator literal.
+		AND	$3F		; mask off the result/operand bits to leave a calculator literal.
 		LD	B,A		; transfer to B register
 
-; now use the calculator to perform the single operation - operand is on
-; the calculator stack.
-; Note. although the calculator is performing a single operation most
-; functions e.g. TAN are written using other functions and literals and
-; these in turn are written using further strings of calculator literals so
-; another level of magical recursion joins the juggling act for a while
-; as the calculator too is calling itself.
+					; now use the calculator to perform the single operation - operand is on
+					; the calculator stack.
+					; Note. although the calculator is performing a single operation most
+					; functions e.g. TAN are written using other functions and literals and
+					; these in turn are written using further strings of calculator literals so
+					; another level of magical recursion joins the juggling act for a while
+					; as the calculator too is calling itself.
 
 		RST	28H		;; FP_CALC
-		DEFB	$3B		;;FP_CALC-2
-L2758	DEFB	$38		;;end-calc
+		DEFB	$3B		;;FP_CALC_2
 
-		JR	L2764		; forward to S-RUNTEST
+					;; $2758
+		DEFB	$38		;;end-calc
 
-; the branch was here if checking syntax only. 
+		JR	S_RUNTEST	; forward to S_RUNTEST
 
-					;; S-SYNTEST
-L275B	LD	A,E		; fetch the operation code to accumulator
-		XOR	(IY+$01)		; compare with bits of FLAGS
+					; the branch was here if checking syntax only. 
+
+					;; $275B
+S_SYNTEST:	LD	A,E		; fetch the operation code to accumulator
+		XOR	(IY+$01)	; compare with bits of FLAGS
 		AND	$40		; bit 6 will be zero now if operand
 					; matched expected result.
 
-					;; S-RPORT-C2
-L2761	JP	NZ,REPORT_C		; to REPORT_C if mismatch
+					;; $2761
+S_RPORT_C2:	JP	NZ,REPORT_C	; to REPORT_C if mismatch
 					; 'Nonsense in Basic'
 					; else continue to set flags for next
 
-; the branch is to here in runtime after a successful operation.
+					; the branch is to here in runtime after a successful operation.
 
-					;; S-RUNTEST
-L2764	POP	DE		; fetch the last operation from stack
-		LD	HL,FLAGS		; address FLAGS
+					;; $2764
+S_RUNTEST:	POP	DE		; fetch the last operation from stack
+		LD	HL,FLAGS	; address FLAGS
 		SET	6,(HL)		; set default to numeric result in FLAGS
 		BIT	7,E		; test the operational result
-		JR	NZ,L2770		; forward to S-LOOPEND if numeric
+		JR	NZ,S_LOOPEND	; forward to S_LOOPEND if numeric
 
 		RES	6,(HL)		; reset bit 6 of FLAGS to show string result.
 
-					;; S-LOOPEND
-L2770	POP	BC		; fetch the previous priority/operation
-		JR	L2734		; back to S-LOOP to perform these
+					;; $2770
+S_LOOPEND:	POP	BC		; fetch the previous priority/operation
+		JR	S_LOOP		; back to S_LOOP to perform these
 
-; the branch was here when a stacked priority/operator had higher priority
-; than the current one.
+					; the branch was here when a stacked priority/operator had higher priority
+					; than the current one.
 
-					;; S-TIGHTER
-L2773	PUSH	DE		; save high priority op on stack again
+					;; $2773
+S_TIGHTER:	PUSH	DE		; save high priority op on stack again
 		LD	A,C		; fetch lower priority operation code
 		BIT	6,(IY+$01)	; test FLAGS - Numeric or string result ?
-		JR	NZ,L2790		; forward to S-NEXT if numeric result
+		JR	NZ,S_NEXT	; forward to S_NEXT if numeric result
 
-; if this is lower priority yet has string then must be a comparison.
-; Since these can only be evaluated in context and were defaulted to
-; numeric in operator look up they must be changed to string equivalents.
+					; if this is lower priority yet has string then must be a comparison.
+					; Since these can only be evaluated in context and were defaulted to
+					; numeric in operator look up they must be changed to string equivalents.
 
 		AND	$3F		; mask to give true calculator literal
 		ADD	A,$08		; augment numeric literals to string
@@ -11551,27 +11535,27 @@ L2773	PUSH	DE		; save high priority op on stack again
 					; 'addition' => 'strs-add'
 		LD	C,A		; put modified comparison operator back
 		CP	$10		; is it now 'str-&-no' ?
-		JR	NZ,L2788		; forward to S-NOT-AND  if not.
+		JR	NZ,S_NOT_AND	; forward to S_NOT_AND  if not.
 
 		SET	6,C		; set numeric operand bit
-		JR	L2790		; forward to S-NEXT
+		JR	S_NEXT		; forward to S_NEXT
 
-					;; S-NOT-AND
-L2788	JR	C,L2761		; back to S-RPORT-C2 if less
+					;; $2788
+S_NOT_AND:	JR	C,S_RPORT_C2	; back to S_RPORT_C2 if less
 					; 'Nonsense in basic'.
 					; e.g. a$ * b$
 
 		CP	$17		; is it 'strs-add' ?
-		JR	Z,L2790		; forward to to S-NEXT if so
+		JR	Z,S_NEXT	; forward to to S_NEXT if so
 					; (bit 6 and 7 are reset)
 
 		SET	7,C		; set numeric (Boolean) result for all others
 
-					;; S-NEXT
-L2790	PUSH	BC		; now save this priority/operation on stack
+					;; $2790
+S_NEXT:		PUSH	BC		; now save this priority/operation on stack
 
 		RST	20H		; NEXT_CHAR
-		JP	L24FF		; jump back to S-LOOP-1
+		JP	S_LOOP_1	; jump back to S_LOOP_1
 
 ;-------------------
 ; Table of operators
@@ -11583,21 +11567,20 @@ L2790	PUSH	BC		; now save this priority/operation on stack
 ; a string comparison or operation.
 ; that is '+', '=', '>', '<', '<=', '>=' or '<>'.
 
-					;; tbl-of-ops
-L2795	DEFB	'+', $CF		;		$C0 + 'addition'
-		DEFB	'-', $C3		;		$C0 + 'subtract'
-		DEFB	'*', $C4		;		$C0 + 'multiply'
-		DEFB	'/', $C5		;		$C0 + 'division'
-		DEFB	'^', $C6		;		$C0 + 'to-power'
-		DEFB	'=', $CE		;		$C0 + 'nos-eql'
-		DEFB	'>', $CC		;		$C0 + 'no-grtr'
-		DEFB	'<', $CD		;		$C0 + 'no-less'
-
-		DEFB	$C7, $C9		; '<='	$C0 + 'no-l-eql'
-		DEFB	$C8, $CA		; '>='	$C0 + 'no-gr-eql'
-		DEFB	$C9, $CB		; '<>'	$C0 + 'nos-neql'
-		DEFB	$C5, $C7		; 'OR'	$C0 + 'or'
-		DEFB	$C6, $C8		; 'AND'  $C0 + 'no-&-no'
+					;; $2795
+TBL_OF_OPS:	DEFB	'+', $CF	;	$C0 + 'addition'
+		DEFB	'-', $C3	;	$C0 + 'subtract'
+		DEFB	'*', $C4	;	$C0 + 'multiply'
+		DEFB	'/', $C5	;	$C0 + 'division'
+		DEFB	'^', $C6	;	$C0 + 'to-power'
+		DEFB	'=', $CE	;	$C0 + 'nos-eql'
+		DEFB	'>', $CC	;	$C0 + 'no-grtr'
+		DEFB	'<', $CD	;	$C0 + 'no-less'
+		DEFB	$C7, $C9	; '<='	$C0 + 'no-l-eql'
+		DEFB	$C8, $CA	; '>='	$C0 + 'no-gr-eql'
+		DEFB	$C9, $CB	; '<>'	$C0 + 'nos-neql'
+		DEFB	$C5, $C7	; 'OR'	$C0 + 'or'
+		DEFB	$C6, $C8	; 'AND' $C0 + 'no-&-no'
 
 		DEFB	$00		; zero end-marker.
 
@@ -11608,8 +11591,8 @@ L2795	DEFB	'+', $CF		;		$C0 + 'addition'
 ; This table is indexed with the operation code obtained from the above
 ; table $C3 - $CF to obtain the priority for the respective operation.
 
-					;; tbl-priors
-L27B0	DEFB	$06		; '-'	opcode $C3
+					;; $27B0
+TBL_PRIORS:	DEFB	$06		; '-'	opcode $C3
 		DEFB	$08		; '*'	opcode $C4
 		DEFB	$08		; '/'	opcode $C5
 		DEFB	$0A		; '^'	opcode $C6
@@ -11655,13 +11638,13 @@ L27B0	DEFB	$06		; '-'	opcode $C3
 ; null string as the final addend.
 ; - from a turn of the century newsgroup discussion initiated by Mike Wynne.
 
-					;; S-FN-SBRN
-L27BD	CALL	L2530		; routine SYNTAX-Z
-		JR	NZ,L27F7		; forward to SF-RUN in runtime
+					;; $27BD
+S_FN_SBRN:	CALL	SYNTAX_Z	; routine SYNTAX_Z
+		JR	NZ,SF_RUN	; forward to SF_RUN in runtime
 
 
 		RST	20H		; NEXT_CHAR
-		CALL	L2C8D		; routine ALPHA check for letters A-Z a-z
+		CALL	ALPHA		; routine ALPHA check for letters A-Z a-z
 		JP	NC,REPORT_C	; jump back to REPORT_C if not
 					; 'Nonsense in Basic'
 
@@ -11669,223 +11652,221 @@ L27BD	CALL	L2530		; routine SYNTAX-Z
 		RST	20H		; NEXT_CHAR
 		CP	$24		; is it '$' ?
 		PUSH	AF		; save character and flags
-		JR	NZ,L27D0		; forward to SF-BRKT-1 with numeric function
+		JR	NZ,SF_BRKT_1	; forward to SF_BRKT_1 with numeric function
 
 
 		RST	20H		; NEXT_CHAR
 
-					;; SF-BRKT-1
-L27D0	CP	$28		; is '(' ?
-		JR	NZ,L27E6		; forward to SF-RPRT-C if not
+					;; $27D0
+SF_BRKT_1:	CP	$28		; is '(' ?
+		JR	NZ,SF_RPRT_C	; forward to SF_RPRT_C if not
 					; 'Nonsense in Basic'
 
 
 		RST	20H		; NEXT_CHAR
 		CP	$29		; is it ')' ?
-		JR	Z,L27E9		; forward to SF-FLAG-6 if no arguments.
+		JR	Z,SF_FLAG_6	; forward to SF_FLAG_6 if no arguments.
 
-					;; SF-ARGMTS
-L27D9	CALL	L24FB		; routine SCANNING checks each argument
+					;; $27D9
+SF_ARGMTS:	CALL	SCANNING	; routine SCANNING checks each argument
 					; which may be an expression.
 
 		RST	18H		; GET_CHAR
 		CP	$2C		; is it a ',' ?
-		JR	NZ,L27E4		; forward if not to SF-BRKT-2 to test bracket
+		JR	NZ,SF_BRKT_2	; forward if not to SF_BRKT_2 to test bracket
 
 
 		RST	20H		; NEXT_CHAR if a comma was found
-		JR	L27D9		; back to SF-ARGMTS to parse all arguments.
+		JR	SF_ARGMTS	; back to SF_ARGMTS to parse all arguments.
 
-					;; SF-BRKT-2
-L27E4	CP	$29		; is character the closing ')' ?
+					;; $27E4
+SF_BRKT_2:	CP	$29		; is character the closing ')' ?
 
-					;; SF-RPRT-C
-L27E6	JP	NZ,REPORT_C		; jump to REPORT_C
+					;; SF_RPRT_C
+SF_RPRT_C:	JP	NZ,REPORT_C	; jump to REPORT_C
 					; 'Nonsense in Basic'
 
-; at this point any optional arguments have had their syntax checked.
+					; at this point any optional arguments have had their syntax checked.
 
-					;; SF-FLAG-6
-L27E9	RST	20H		; NEXT_CHAR
-		LD	HL,FLAGS		; address system variable FLAGS
+					;; $27E9
+SF_FLAG_6:	RST	20H		; NEXT_CHAR
+		LD	HL,FLAGS	; address system variable FLAGS
 		RES	6,(HL)		; signal string result
 		POP	AF		; restore test against '$'.
-		JR	Z,L27F4		; forward to SF-SYN-EN if string function.
+		JR	Z,SF_SYN_EN	; forward to SF_SYN_EN if string function.
 
 		SET	6,(HL)		; signal numeric result
 
-					;; SF-SYN-EN
-L27F4	JP	L2712		; jump back to S-CONT-2 to continue scanning.
+					;; $27F4
+SF_SYN_EN:	JP	S_CONT_2	; jump back to S_CONT_2 to continue scanning.
 
-; the branch was here in runtime.
+					; the branch was here in runtime.
 
-					;; SF-RUN
-L27F7	RST	20H		; NEXT_CHAR fetches name
+					;; $27F7
+SF_RUN:		RST	20H		; NEXT_CHAR fetches name
 		AND	$DF		; AND 11101111 - reset bit 5 - upper-case.
 		LD	B,A		; save in B
 
 		RST	20H		; NEXT_CHAR
 		SUB	$24		; subtract '$'
 		LD	C,A		; save result in C
-		JR	NZ,L2802		; forward if not '$' to SF-ARGMT1
+		JR	NZ,SF_ARGMT1	; forward if not '$' to SF_ARGMT1
 
 		RST	20H		; NEXT_CHAR advances to bracket
 
-					;; SF-ARGMT1
-L2802	RST	20H		; NEXT_CHAR advances to start of argument
+					;; $2802
+SF_ARGMT1:	RST	20H		; NEXT_CHAR advances to start of argument
 		PUSH	HL		; save address
 		LD	HL,(PROG)	; fetch start of program area from PROG
 		DEC	HL		; the search starting point is the previous
 					; location.
 
-					;; SF-FND-DF
-L2808	LD	DE,$00CE		; search is for token 'DEF FN' in E,
+					;; $2808
+SF_FND_DF:	LD	DE,$00CE	; search is for token 'DEF FN' in E,
 					; statement count in D.
 		PUSH	BC		; save C the string test, and B the letter.
 		CALL	LOOK_PROG	; routine LOOK_PROG will search for token.
 		POP	BC		; restore BC.
-		JR	NC,L2814		; forward to SF-CP-DEF if a match was found.
+		JR	NC,SF_CP_DEF	; forward to SF_CP_DEF if a match was found.
 
 
-					;; REPORT-P
-L2812	RST	08H		; ERROR_1
+					;; $2812
+REPORT_P:	RST	08H		; ERROR_1
 		DEFB	$18		; Error Report: FN without DEF
 
-					;; SF-CP-DEF
-L2814	PUSH	HL		; save address of DEF FN
-		CALL	L28AB		; routine FN-SKPOVR skips over white-space etc.
+					;; $2814
+SF_CP_DEF:	PUSH	HL		; save address of DEF FN
+		CALL	FN_SKPOVR	; routine FN_SKPOVR skips over white-space etc.
 					; without disturbing CH-ADD.
 		AND	$DF		; make fetched character upper-case.
 		CP	B		; compare with FN name
-		JR	NZ,L2825		; forward to SF-NOT-FD if no match.
+		JR	NZ,SF_NOT_FD	; forward to SF_NOT_FD if no match.
 
-; the letters match so test the type.
+					; the letters match so test the type.
 
-		CALL	L28AB		; routine FN-SKPOVR skips white-space
+		CALL	FN_SKPOVR	; routine FN_SKPOVR skips white-space
 		SUB	$24		; subtract '$' from fetched character
 		CP	C		; compare with saved result of same operation
 					; on FN name.
-		JR	Z,L2831		; forward to SF-VALUES with a match.
+		JR	Z,SF_VALUES	; forward to SF_VALUES with a match.
 
-; the letters matched but one was string and the other numeric.
+					; the letters matched but one was string and the other numeric.
 
-					;; SF-NOT-FD
-L2825	POP	HL		; restore search point.
+					;; $2825
+SF_NOT_FD:	POP	HL		; restore search point.
 		DEC	HL		; make location before
 		LD	DE,$0200	; the search is to be for the end of the
 					; current definition - 2 statements forward.
 		PUSH	BC		; save the letter/type
-		CALL	EACH_STMT	; routine EACH_STMT steps past rejected
-					; definition.
+		CALL	EACH_STMT	; routine EACH_STMT steps past rejected definition.
 		POP	BC		; restore letter/type
-		JR	L2808		; back to SF-FND-DF to continue search
+		JR	SF_FND_DF	; back to SF_FND_DF to continue search
 
-; Success!
-; the branch was here with matching letter and numeric/string type.
+					; Success!
+					; the branch was here with matching letter and numeric/string type.
 
-					;; SF-VALUES
-L2831	AND	A		; test A ( will be zero if string '$' - '$' )
+					;; $2831
+SF_VALUES:	AND	A		; test A ( will be zero if string '$' - '$' )
 
-		CALL	Z,L28AB		; routine FN-SKPOVR advances HL past '$'.
+		CALL	Z,FN_SKPOVR	; routine FN_SKPOVR advances HL past '$'.
 
 		POP	DE		; discard pointer to 'DEF FN'.
 		POP	DE		; restore pointer to first FN argument.
 		LD	(CH_ADD),DE	; save in CH_ADD
 
-		CALL	L28AB		; routine FN-SKPOVR advances HL past '('
+		CALL	FN_SKPOVR	; routine FN_SKPOVR advances HL past '('
 		PUSH	HL		; save start address in DEF FN  ***
 		CP	$29		; is character a ')' ?
-		JR	Z,L2885		; forward to SF-R-BR-2 if no arguments.
+		JR	Z,SF_R_BR_2	; forward to SF_R_BR_2 if no arguments.
 
-					;; SF-ARG-LP
-L2843	INC	HL		; point to next character.
+					;; $2843
+SF_ARG_LP:	INC	HL		; point to next character.
 		LD	A,(HL)		; fetch it.
 		CP	$0E		; is it the number marker
 		LD	D,$40		; signal numeric in D.
-		JR	Z,L2852		; forward to SF-ARG-VL if numeric.
+		JR	Z,SF_ARG_VL	; forward to SF_ARG_VL if numeric.
 
 		DEC	HL		; back to letter
-		CALL	L28AB		; routine FN-SKPOVR skips any white-space
+		CALL	FN_SKPOVR	; routine FN_SKPOVR skips any white-space
 		INC	HL		; advance past the expected '$' to 
 					; the 'hidden' marker.
 		LD	D,$00		; signal string.
 
-					;; SF-ARG-VL
-L2852	INC	HL		; now address first of 5-byte location.
+					;; $2852
+SF_ARG_VL:	INC	HL		; now address first of 5-byte location.
 		PUSH	HL		; save address in DEF FN statement
 		PUSH	DE		; save D - result type
 
-		CALL	L24FB		; routine SCANNING evaluates expression in
+		CALL	SCANNING	; routine SCANNING evaluates expression in
 					; the FN statement setting FLAGS and leaving
 					; result as last value on calculator stack.
 
 		POP	AF		; restore saved result type to A
 
-		XOR	(IY+$01)		; xor with FLAGS
+		XOR	(IY+$01)	; xor with FLAGS
 		AND	$40		; and with 01000000 to test bit 6
-		JR	NZ,L288B		; forward to REPORT-Q if type mismatch.
+		JR	NZ,REPORT_Q	; forward to REPORT_Q if type mismatch.
 					; 'Parameter error'
 
 		POP	HL		; pop the start address in DEF FN statement
 		EX	DE,HL		; transfer to DE ?? pop straight into de ?
 
 		LD	HL,(STKEND)	; set HL to STKEND location after value
-		LD	BC,$0005		; five bytes to move
+		LD	BC,$0005	; five bytes to move
 		SBC	HL,BC		; decrease HL by 5 to point to start.
 		LD	(STKEND),HL	; set STKEND 'removing' value from stack.
 
 		LDIR			; copy value into DEF FN statement
 		EX	DE,HL		; set HL to location after value in DEF FN
 		DEC	HL		; step back one
-		CALL	L28AB		; routine FN-SKPOVR gets next valid character
+		CALL	FN_SKPOVR	; routine FN_SKPOVR gets next valid character
 		CP	$29		; is it ')' end of arguments ?
-		JR	Z,L2885		; forward to SF-R-BR-2 if so.
+		JR	Z,SF_R_BR_2	; forward to SF_R_BR_2 if so.
 
-; a comma separator has been encountered in the DEF FN argument list.
+					; a comma separator has been encountered in the DEF FN argument list.
 
 		PUSH	HL		; save position in DEF FN statement
 
 		RST	18H		; GET_CHAR from FN statement
 		CP	$2C		; is it ',' ?
-		JR	NZ,L288B		; forward to REPORT-Q if not
+		JR	NZ,REPORT_Q	; forward to REPORT_Q if not
 					; 'Parameter error'
 
 		RST	20H		; NEXT_CHAR in FN statement advances to next
 					; argument.
 
 		POP	HL		; restore DEF FN pointer
-		CALL	L28AB		; routine FN-SKPOVR advances to corresponding
+		CALL	FN_SKPOVR	; routine FN_SKPOVR advances to corresponding
 					; argument.
 
-		JR	L2843		; back to SF-ARG-LP looping until all
+		JR	SF_ARG_LP	; back to SF_ARG_LP looping until all
 					; arguments are passed into the DEF FN
 					; hidden locations.
 
-; the branch was here when all arguments passed.
+					; the branch was here when all arguments passed.
 
-					;; SF-R-BR-2
-L2885	PUSH	HL		; save location of ')' in DEF FN
+					;; $2885
+SF_R_BR_2:	PUSH	HL		; save location of ')' in DEF FN
 
 		RST	18H		; GET_CHAR gets next character in FN
 		CP	$29		; is it a ')' also ?
-		JR	Z,L288D		; forward to SF-VALUE if so.
+		JR	Z,SF_VALUE	; forward to SF_VALUE if so.
 
-
-					;; REPORT-Q
-L288B	RST	08H		; ERROR_1
+					;; $288B
+REPORT_Q:	RST	08H		; ERROR_1
 		DEFB	$19		; Error Report: Parameter error
 
-					;; SF-VALUE
-L288D	POP	DE		; location of ')' in DEF FN to DE.
+					;; $288D
+SF_VALUE:	POP	DE		; location of ')' in DEF FN to DE.
 		EX	DE,HL		; now to HL, FN ')' pointer to DE.
 		LD	(CH_ADD),HL	; initialize CH_ADD to this value.
 
-; At this point the start of the DEF FN argument list is on the machine stack.
-; We also have to consider that this defined function may form part of the
-; definition of another defined function (though not itself).
-; As this defined function may be part of a hierarchy of defined functions
-; currently being evaluated by recursive calls to SCANNING, then we have to
-; preserve the original value of DEFADD and not assume that it is zero.
+					; At this point the start of the DEF FN argument list is on the machine stack.
+					; We also have to consider that this defined function may form part of the
+					; definition of another defined function (though not itself).
+					; As this defined function may be part of a hierarchy of defined functions
+					; currently being evaluated by recursive calls to SCANNING, then we have to
+					; preserve the original value of DEFADD and not assume that it is zero.
 
 		LD	HL,(DEFADD)	; get original DEFADD address
 		EX	(SP),HL		; swap with DEF FN address on stack ***
@@ -11898,7 +11879,7 @@ L288D	POP	DE		; location of ')' in DEF FN to DE.
 
 		RST	20H		; NEXT_CHAR advances past '=' to expression
 
-		CALL	L24FB		; routine SCANNING evaluates but searches
+		CALL	SCANNING	; routine SCANNING evaluates but searches
 					; initially for variables at DEFADD
 
 		POP	HL		; pop the FN ')' pointer
@@ -11907,40 +11888,38 @@ L288D	POP	DE		; location of ')' in DEF FN to DE.
 		LD	(DEFADD),HL	; and re-insert into DEFADD system variable.
 
 		RST	20H		; NEXT_CHAR advances to character after ')'
-		JP	L2712		; to S-CONT-2 - to continue current
+		JP	S_CONT_2	; to S_CONT_2 - to continue current
 					; invocation of scanning
 
 ;---------------------
 ; Used to parse DEF FN
 ;---------------------
-; e.g. DEF FN	s $ ( x )	=  b	$ (  TO  x  ) : REM exaggerated
+; e.g. DEF FN     s $ ( x )     =  b     $ (  TO  x  ) : REM exaggerated
 ;
 ; This routine is used 10 times to advance along a DEF FN statement
-; skipping spaces and colour control codes. It is similar to NEXT_CHAR
+; skipping spaces and colour control codes. It is similar to NEXT-CHAR
 ; which is, at the same time, used to skip along the corresponding FN function
 ; except the latter has to deal with AT and TAB characters in string
 ; expressions. These cannot occur in a program area so this routine is
 ; simpler as both colour controls and their parameters are less than space.
 
-					;; FN-SKPOVR
-L28AB	INC	HL		; increase pointer
+					;; $28AB
+FN_SKPOVR:	INC	HL		; increase pointer
 		LD	A,(HL)		; fetch addressed character
 		CP	$21		; compare with space + 1
-		JR	C,L28AB		; back to FN-SKPOVR if less
+		JR	C,FN_SKPOVR	; back to FN_SKPOVR if less
 
 		RET			; return pointing to a valid character.
 
 ;----------
-; LOOK-VARS
+; LOOK_VARS
 ;----------
-;
-;
 
-					;; LOOK-VARS
-L28B2	SET	6,(IY+$01)	; update FLAGS - presume numeric result
+					;; $28B2
+LOOK_VARS:	SET	6,(IY+$01)	; update FLAGS - presume numeric result
 
 		RST	18H		; GET_CHAR
-		CALL	L2C8D		; routine ALPHA tests for A-Za-z
+		CALL	ALPHA		; routine ALPHA tests for A-Za-z
 		JP	NC,REPORT_C	; jump to REPORT_C if not.
 					; 'Nonsense in basic'
 
@@ -11951,174 +11930,172 @@ L28B2	SET	6,(IY+$01)	; update FLAGS - presume numeric result
 		RST	20H		; NEXT_CHAR
 		PUSH	HL		; save pointer to second character	^2
 		CP	$28		; is it '(' - an array ?
-		JR	Z,L28EF		; forward to V-RUN/SYN if so.
+		JR	Z,V_RUN_SYN	; forward to V_RUN_SYN if so.
 
 		SET	6,C		; set 6 signalling string if solitary	010
 		CP	$24		; is character a '$' ?
-		JR	Z,L28DE		; forward to V-STR-VAR
+		JR	Z,V_STR_VAR	; forward to V_STR_VAR
 
 		SET	5,C		; signal numeric			011
-		CALL	L2C88		; routine ALPHANUM sets carry if second
+		CALL	ALPHANUM	; routine ALPHANUM sets carry if second
 					; character is alphanumeric.
-		JR	NC,L28E3		; forward to V-TEST-FN if just one character
+		JR	NC,V_TEST_FN	; forward to V_TEST_FN if just one character
 
 
-; it is more than one character but re-test current character so that 6 reset
-; Note. this is a rare lack of elegance. Bit 6 could be reset once before
-; entering the loop. Another puzzle is that this loop renders the similar
-; loop at V-PASS redundant.
+					; it is more than one character but re-test current character so that 6 reset
+					; Note. this is a rare lack of elegance. Bit 6 could be reset once before
+					; entering the loop. Another puzzle is that this loop renders the similar
+					; loop at V_PASS redundant.
 
-					;; V-CHAR
-L28D4	CALL	L2C88		; routine ALPHANUM
-		JR	NC,L28EF		; to V-RUN/SYN when no more
+					;; $28D4
+V_CHAR:		CALL	ALPHANUM	; routine ALPHANUM
+		JR	NC,V_RUN_SYN	; to V_RUN_SYN when no more
 
 		RES	6,C		; make long named type			001
 
 		RST	20H		; NEXT_CHAR
-		JR	L28D4		; loop back to V-CHAR
+		JR	V_CHAR		; loop back to V_CHAR
 
 
-					;; V-STR-VAR
-L28DE	RST	20H		; NEXT_CHAR advances past '$'
+					;; $28DE
+V_STR_VAR:	RST	20H		; NEXT_CHAR advances past '$'
 		RES	6,(IY+$01)	; update FLAGS - signal string result.
 
-					;; V-TEST-FN
-L28E3	LD	A,($5C0C)	; load A with DEFADD_hi
+					;; $28E3
+V_TEST_FN:	LD	A,($5C0C)	; load A with DEFADD_hi
 		AND	A		; and test for zero.
-		JR	Z,L28EF		; forward to V-RUN/SYN if a defined function
+		JR	Z,V_RUN_SYN	; forward to V_RUN_SYN if a defined function
 					; is not being evaluated.
 
-; Note.
+					; Note.
 
-		CALL	L2530		; routine SYNTAX-Z
-		JP	NZ,L2951		; branch to STK-F-ARG in runtime and then
+		CALL	SYNTAX_Z	; routine SYNTAX_Z
+		JP	NZ,STK_F_ARG	; branch to STK_F_ARG in runtime and then
 					; back to this point if no variable found.
 
-					;; V-RUN/SYN
-L28EF	LD	B,C		; save flags in B
-		CALL	L2530		; routine SYNTAX-Z
-		JR	NZ,L28FD		; to V-RUN to look for the variable in runtime
+					;; $28EF
+V_RUN_SYN:	LD	B,C		; save flags in B
+		CALL	SYNTAX_Z	; routine SYNTAX_Z
+		JR	NZ,V_RUN	; to V_RUN to look for the variable in runtime
 
-; if checking syntax the letter is not returned
+					; if checking syntax the letter is not returned
 
 		LD	A,C		; copy letter/flags to A
 		AND	$E0		; and with 11100000 to get rid of the letter
 		SET	7,A		; use spare bit to signal checking syntax.
 		LD	C,A		; and transfer to C.
-		JR	L2934		; forward to V-SYNTAX
+		JR	V_SYNTAX	; forward to V_SYNTAX
 
-; but in runtime search for the variable.
+					; but in runtime search for the variable.
 
-					;; V-RUN
-L28FD	LD	HL,(VARS)	; set HL to start of variables from VARS
+					;; $28FD
+V_RUN:		LD	HL,(VARS)	; set HL to start of variables from VARS
 
-					;; V-EACH
-L2900	LD	A,(HL)		; get first character
+					;; $2900
+V_EACH:		LD	A,(HL)		; get first character
 		AND	$7F		; and with 01111111
 					; ignoring bit 7 which distinguishes
 					; arrays or for/next variables.
 
-		JR	Z,L2932		; to V-80-BYTE if zero as must be 10000000
+		JR	Z,V_80_BYTE	; to V_80_BYTE if zero as must be 10000000
 					; the variables end-marker.
 
 		CP	C		; compare with supplied value.
-		JR	NZ,L292A		; forward to V-NEXT if no match.
+		JR	NZ,V_NEXT	; forward to V_NEXT if no match.
 
 		RLA			; destructively test
 		ADD	A,A		; bits 5 and 6 of A
 					; jumping if bit 5 reset or 6 set
 
-		JP	P,L293F		; to V-FOUND-2  strings and arrays
+		JP	P,V_FOUND_2	; to V_FOUND_2  strings and arrays
 
-		JR	C,L293F		; to V-FOUND-2  simple and for next
+		JR	C,V_FOUND_2	; to V_FOUND_2  simple and for next
 
-; leaving long name variables.
+					; leaving long name variables.
 
 		POP	DE		; pop pointer to 2nd. char
 		PUSH	DE		; save it again
 		PUSH	HL		; save variable first character pointer
 
-					;; V-MATCHES
-L2912	INC	HL		; address next character in vars area
+					;; $2912
+V_MATCHES:	INC	HL		; address next character in vars area
 
-					;; V-SPACES
-L2913	LD	A,(DE)		; pick up letter from prog area
+					;; $2913
+V_SPACES:	LD	A,(DE)		; pick up letter from prog area
 		INC	DE		; and advance address
 		CP	$20		; is it a space
-		JR	Z,L2913		; back to V-SPACES until non-space
+		JR	Z,V_SPACES	; back to V_SPACES until non-space
 
 		OR	$20		; convert to range 1 - 26.
 		CP	(HL)		; compare with addressed variables character
-		JR	Z,L2912		; loop back to V-MATCHES if a match on an
+		JR	Z,V_MATCHES	; loop back to V_MATCHES if a match on an
 					; intermediate letter.
 
 		OR	$80		; now set bit 7 as last character of long
 					; names are inverted.
 		CP	(HL)		; compare again
-		JR	NZ,L2929		; forward to V-GET-PTR if no match
+		JR	NZ,V_GET_PTR	; forward to V_GET_PTR if no match
 
-; but if they match check that this is also last letter in prog area
+					; but if they match check that this is also last letter in prog area
 
 		LD	A,(DE)		; fetch next character
-		CALL	L2C88		; routine ALPHANUM sets carry if not alphanum
-		JR	NC,L293E		; forward to V-FOUND-1 with a full match.
+		CALL	ALPHANUM	; routine ALPHANUM sets carry if not alphanum
+		JR	NC,V_FOUND_1	; forward to V_FOUND_1 with a full match.
 
-					;; V-GET-PTR
-L2929	POP	HL		; pop saved pointer to char 1
+					;; $2929
+V_GET_PTR:	POP	HL		; pop saved pointer to char 1
 
-					;; V-NEXT
-L292A	PUSH	BC		; save flags
+					;; $292A
+V_NEXT:		PUSH	BC		; save flags
 		CALL	NEXT_ONE	; routine NEXT_ONE gets next variable in DE
 		EX	DE,HL		; transfer to HL.
 		POP	BC		; restore the flags
-		JR	L2900		; loop back to V-EACH
+		JR	V_EACH		; loop back to V_EACH
 					; to compare each variable
 
-					;; V-80-BYTE
-L2932	SET	7,B		; will signal not found
+					;; $2932
+V_80_BYTE:	SET	7,B		; will signal not found
 
-; the branch was here when checking syntax
+					; the branch was here when checking syntax
 
-					;; V-SYNTAX
-L2934	POP	DE		; discard the pointer to 2nd. character  v2
+					;; $2934
+V_SYNTAX:	POP	DE		; discard the pointer to 2nd. character  v2
 					; in basic line/workspace.
 
 		RST	18H		; GET_CHAR gets character after variable name.
 		CP	$28		; is it '(' ?
-		JR	Z,L2943		; forward to V-PASS
-					; Note. could go straight to V-END ?
+		JR	Z,V_PASS	; forward to V_PASS
+					; Note. could go straight to V_END ?
 
 		SET	5,B		; signal not an array
-		JR	L294B		; forward to V-END
+		JR	V_END		; forward to V_END
 
-; ---------------------------
+					; the jump was here when a long name matched and HL pointing to last character
+					; in variables area.
 
-; the jump was here when a long name matched and HL pointing to last character
-; in variables area.
+					;; $293E
+V_FOUND_1:	POP	DE		; discard pointer to first var letter
 
-					;; V-FOUND-1
-L293E	POP	DE		; discard pointer to first var letter
+					; the jump was here with all other matches HL points to first var char.
 
-; the jump was here with all other matches HL points to first var char.
-
-					;; V-FOUND-2
-L293F	POP	DE		; discard pointer to 2nd prog char	v2
+					;; $293F
+V_FOUND_2:	POP	DE		; discard pointer to 2nd prog char	v2
 		POP	DE		; drop pointer to 1st prog char		v1
 		PUSH	HL		; save pointer to last char in vars
 
 		RST	18H		; GET_CHAR
 
-					;; V-PASS
-L2943	CALL	L2C88		; routine ALPHANUM
-		JR	NC,L294B		; forward to V-END if not
+					;; $2943
+V_PASS:		CALL	ALPHANUM	; routine ALPHANUM
+		JR	NC,V_END	; forward to V_END if not
 
-; but it never will be as we advanced past long-named variables earlier.
+					; but it never will be as we advanced past long-named variables earlier.
 
 		RST	20H		; NEXT_CHAR
-		JR	L2943		; back to V-PASS
+		JR	V_PASS		; back to V_PASS
 
-					;; V-END
-L294B	POP	HL		; pop the pointer to first character in
+					;; $294B
+V_END:		POP	HL		; pop the pointer to first character in
 					; basic line/workspace.
 		RL	B		; rotate the B register left
 					; bit 7 to carry
@@ -12128,41 +12105,41 @@ L294B	POP	HL		; pop the pointer to first character in
 ;------------------------
 ; Stack function argument
 ;------------------------
-; This branch is taken from LOOK-VARS when a defined function is currently
+; This branch is taken from LOOK_VARS when a defined function is currently
 ; being evaluated.
 ; Scanning is evaluating the expression after the '=' and the variable
 ; found could be in the argument list to the left of the '=' or in the
 ; normal place after the program. Preference will be given to the former.
 ; The variable name to be matched is in C.
 
-					;; STK-F-ARG
-L2951	LD	HL,(DEFADD)	; set HL to DEFADD
+					;; $2951
+STK_F_ARG:	LD	HL,(DEFADD)	; set HL to DEFADD
 		LD	A,(HL)		; load the first character
 		CP	$29		; is it ')' ?
-		JP	Z,L28EF		; back to V-RUN/SYN, if so, as no arguments.
+		JP	Z,V_RUN_SYN	; back to V_RUN_SYN, if so, as no arguments.
 
-; but proceed to search argument list of defined function first if not empty.
+					; but proceed to search argument list of defined function first if not empty.
 
-					;; SFA-LOOP
-L295A	LD	A,(HL)		; fetch character again.
+					;; $295A
+SFA_LOOP:	LD	A,(HL)		; fetch character again.
 		OR	$60		; or with 01100000 presume a simple variable.
 		LD	B,A		; save result in B.
 		INC	HL		; address next location.
 		LD	A,(HL)		; pick up byte.
 		CP	$0E		; is it the number marker ?
-		JR	Z,L296B		; forward to SFA-CP-VR if so.
+		JR	Z,SFA_CP_VR	; forward to SFA_CP_VR if so.
 
-; it was a string. White-space may be present but syntax has been checked.
+					; it was a string. White-space may be present but syntax has been checked.
 
 		DEC	HL		; point back to letter.
-		CALL	L28AB		; routine FN-SKPOVR skips to the '$'
+		CALL	FN_SKPOVR	; routine FN_SKPOVR skips to the '$'
 		INC	HL		; now address the hidden marker.
 		RES	5,B		; signal a string variable.
 
-					;; SFA-CP-VR
-L296B	LD	A,B		; transfer found variable letter to A.
+					;; $296B
+SFA_CP_VR:	LD	A,B		; transfer found variable letter to A.
 		CP	C		; compare with expected.
-		JR	Z,L2981		; forward to SFA-MATCH with a match.
+		JR	Z,SFA_MATCH	; forward to SFA_MATCH with a match.
 
 		INC	HL		; step
 		INC	HL		; past
@@ -12170,32 +12147,30 @@ L296B	LD	A,B		; transfer found variable letter to A.
 		INC	HL		; five
 		INC	HL		; bytes.
 
-		CALL	L28AB		; routine FN-SKPOVR skips to next character
+		CALL	FN_SKPOVR	; routine FN_SKPOVR skips to next character
 		CP	$29		; is it ')' ?
-		JP	Z,L28EF		; jump back if so to V-RUN/SYN to look in
+		JP	Z,V_RUN_SYN	; jump back if so to V_RUN_SYN to look in
 					; normal variables area.
 
-		CALL	L28AB		; routine FN-SKPOVR skips past the ','
+		CALL	FN_SKPOVR	; routine FN_SKPOVR skips past the ','
 					; all syntax has been checked and these
 					; things can be taken as read.
-		JR	L295A		; back to SFA-LOOP while there are more
+		JR	SFA_LOOP	; back to SFA_LOOP while there are more
 					; arguments.
 
-;
-
-					;; SFA-MATCH
-L2981	BIT	5,C		; test if numeric
-		JR	NZ,L2991		; to SFA-END if so as will be stacked
+					;; $2981
+SFA_MATCH:	BIT	5,C		; test if numeric
+		JR	NZ,SFA_END	; to SFA_END if so as will be stacked
 					; by scanning
 
 		INC	HL		; point to start of string descriptor
 		LD	DE,(STKEND)	; set DE to STKEND
-		CALL	L33C0		; routine MOVE-FP puts parameters on stack.
+		CALL	L33C0	; routine MOVE-FP puts parameters on stack.
 		EX	DE,HL		; new free location to HL.
 		LD	(STKEND),HL	; use it to set STKEND system variable.
 
-					;; SFA-END
-L2991	POP	DE		; discard
+					;; $2991
+SFA_END:	POP	DE		; discard
 		POP	DE		; pointers.
 		XOR	A		; clear carry flag.
 		INC	A		; and zero flag.
@@ -12205,7 +12180,7 @@ L2991	POP	DE		; discard
 ; Stack variable component
 ;-------------------------
 ; This is called to evaluate a complex structure that has been found, in
-; runtime, by LOOK-VARS in the variables area.
+; runtime, by LOOK_VARS in the variables area.
 ; In this case HL points to the initial letter, bits 7-5
 ; of which indicate the type of variable.
 ; 010 - simple string, 110 - string array, 100 - array of numbers.
@@ -12233,201 +12208,196 @@ L2991	POP	DE		; discard
 ; expressions before a terminal ')', although, as above, it will still go
 ; through the motions of checking dummy dimension sizes.
 
-					;; STK-VAR
-L2996	XOR	A		; clear A
+					;; $2996
+STK_VAR:	XOR	A		; clear A
 		LD	B,A		; and B, the syntax dimension counter (256)
 		BIT	7,C		; checking syntax ?
-		JR	NZ,L29E7		; forward to SV-COUNT if so.
+		JR	NZ,SV_COUNT	; forward to SV_COUNT if so.
 
-; runtime evaluation.
+					; runtime evaluation.
 
 		BIT	7,(HL)		; will be reset if a simple string.
-		JR	NZ,L29AE		; forward to SV-ARRAYS otherwise
+		JR	NZ,SV_ARRAYS	; forward to SV_ARRAYS otherwise
 
 		INC	A		; set A to 1, simple string.
 
-					;; SV-SIMPLE$
-L29A1	INC	HL		; address length low
+					;; $29A1
+SV_SIMPLE:	INC	HL		; address length low
 		LD	C,(HL)		; place in C
 		INC	HL		; address length high
 		LD	B,(HL)		; place in B
 		INC	HL		; address start of string
 		EX	DE,HL		; DE = start now.
-		CALL	L2AB2		; routine STK-STO-$ stacks string parameters
+		CALL	STK_STO_D	; routine STK_STO_D stacks string parameters
 					; DE start in variables area,
 					; BC length, A=1 simple string
 
-; the only thing now is to consider if a slice is required.
+					; the only thing now is to consider if a slice is required.
 
 		RST	18H		; GET_CHAR puts character at CH_ADD in A
-		JP	L2A49		; jump forward to SV-SLICE? to test for '('
+		JP	SV_SLICE_EX	; jump forward to SV_SLICE_EX to test for '('
 
-; --------------------------------------------------------
+					; the branch was here with string and numeric arrays in runtime.
 
-; the branch was here with string and numeric arrays in runtime.
-
-					;; SV-ARRAYS
-L29AE	INC	HL		; step past
+					;; $29AE
+SV_ARRAYS:	INC	HL		; step past
 		INC	HL		; the total length
 		INC	HL		; to address Number of dimensions.
 		LD	B,(HL)		; transfer to B overwriting zero.
 		BIT	6,C		; a numeric array ?
-		JR	Z,L29C0		; forward to SV-PTR with numeric arrays
+		JR	Z,SV_PTR	; forward to SV_PTR with numeric arrays
 
 		DEC	B		; ignore the final element of a string array
 					; the fixed string size.
 
-		JR	Z,L29A1		; back to SV-SIMPLE$ if result is zero as has
+		JR	Z,SV_SIMPLE	; back to SV_SIMPLE if result is zero as has
 					; been created with DIM a$(10) for instance
 					; and can be treated as a simple string.
 
-; proceed with multi-dimensioned string arrays in runtime.
+					; proceed with multi-dimensioned string arrays in runtime.
 
 		EX	DE,HL		; save pointer to dimensions in DE
 
 		RST	18H		; GET_CHAR looks at the Basic line
 		CP	$28		; is character '(' ?
-		JR	NZ,L2A20		; to REPORT-3 if not
+		JR	NZ,REPORT_3	; to REPORT_3 if not
 					; 'Subscript wrong'
 
 		EX	DE,HL		; dimensions pointer to HL to synchronize
 					; with next instruction.
 
-; runtime numeric arrays path rejoins here.
+					; runtime numeric arrays path rejoins here.
 
-					;; SV-PTR
-L29C0	EX	DE,HL		; save dimension pointer in DE
-		JR	L29E7		; forward to SV-COUNT with true no of dims 
+					;; $29C0
+SV_PTR:		EX	DE,HL		; save dimension pointer in DE
+		JR	SV_COUNT	; forward to SV_COUNT with true no of dims 
 					; in B. As there is no initial comma the 
 					; loop is entered at the midpoint.
 
-; ----------------------------------------------------------
-; the dimension counting loop which is entered at mid-point.
+					; the dimension counting loop which is entered at mid-point.
 
-					;; SV-COMMA
-L29C3	PUSH	HL		; save counter
+					;; $29C3
+SV_COMMA:	PUSH	HL		; save counter
 
 		RST	18H		; GET_CHAR
 
 		POP	HL		; pop counter
 		CP	$2C		; is character ',' ?
-		JR	Z,L29EA		; forward to SV-LOOP if so
+		JR	Z,SV_LOOP	; forward to SV_LOOP if so
 
-; in runtime the variable definition indicates a comma should appear here
+					; in runtime the variable definition indicates a comma should appear here
 
 		BIT	7,C		; checking syntax ?
-		JR	Z,L2A20		; forward to REPORT-3 if not
+		JR	Z,REPORT_3	; forward to REPORT_3 if not
 					; 'Subscript error'
 
-; proceed if checking syntax of an array?
+					; proceed if checking syntax of an array?
 
 		BIT	6,C		; array of strings
-		JR	NZ,L29D8		; forward to SV-CLOSE if so
+		JR	NZ,SV_CLOSE	; forward to SV_CLOSE if so
 
-; an array of numbers.
+					; an array of numbers.
 
 		CP	$29		; is character ')' ?
-		JR	NZ,L2A12		; forward to SV-RPT-C if not
+		JR	NZ,SV_RPT_C	; forward to SV_RPT_C if not
 					; 'Nonsense in basic'
 
 		RST	20H		; NEXT_CHAR moves CH-ADD past the statement
 		RET			; return ->
 
-; the branch was here with an array of strings.
+					; the branch was here with an array of strings.
 
-					;; SV-CLOSE
-L29D8	CP	$29		; as above ')' could follow the expression
-		JR	Z,L2A48		; forward to SV-DIM if so
+					;; $29D8
+SV_CLOSE:	CP	$29		; as above ')' could follow the expression
+		JR	Z,SV_DIM	; forward to SV_DIM if so
 
 		CP	$CC		; is it 'TO' ?
-		JR	NZ,L2A12		; to SV-RPT-C with anything else
+		JR	NZ,SV_RPT_C	; to SV_RPT_C with anything else
 					; 'Nonsense in basic'
 
-; now backtrack CH_ADD to set up for slicing routine.
-; Note. in a basic line we can safely backtrack to a colour parameter.
+					; now backtrack CH_ADD to set up for slicing routine.
+					; Note. in a basic line we can safely backtrack to a colour parameter.
 
-					;; SV-CH-ADD
-L29E0	RST	18H		; GET_CHAR
+					;; $29E0
+SV_CH_ADD:	RST	18H		; GET_CHAR
 		DEC	HL		; backtrack HL
 		LD	(CH_ADD),HL	; to set CH_ADD up for slicing routine
-		JR	L2A45		; forward to SV-SLICE and make a return
+		JR	SV_SLICE	; forward to SV_SLICE and make a return
 					; when all slicing complete.
 
-; ----------------------------------------
-; -> the mid-point entry point of the loop
+					; -> the mid-point entry point of the loop
 
-					;; SV-COUNT
-L29E7	LD	HL,$0000		; initialize data pointer to zero.
+					;; $29E7
+SV_COUNT:	LD	HL,$0000	; initialize data pointer to zero.
 
 
-					;; SV-LOOP
-L29EA	PUSH	HL		; save the data pointer.
+					;; $29EA
+SV_LOOP:	PUSH	HL		; save the data pointer.
 
-		RST	20H		; NEXT_CHAR in Basic area points to an
-					; expression.
+		RST	20H		; NEXT_CHAR in Basic area points to an expression.
 
 		POP	HL		; restore the data pointer.
 		LD	A,C		; transfer name/type to A.
 		CP	$C0		; is it 11000000 ?
 					; Note. the letter component is absent if
 					; syntax checking.
-		JR	NZ,L29FB		; forward to SV-MULT if not an array of
+		JR	NZ,SV_MULT	; forward to SV_MULT if not an array of
 					; strings.
 
-; proceed to check string arrays during syntax.
+					; proceed to check string arrays during syntax.
 
 		RST	18H		; GET_CHAR
 		CP	$29		; ')'  end of subscripts ?
-		JR	Z,L2A48		; forward to SV-DIM to consider further slice
+		JR	Z,SV_DIM		; forward to SV_DIM to consider further slice
 
 		CP	$CC		; is it 'TO' ?
-		JR	Z,L29E0		; back to SV-CH-ADD to consider a slice.
-					; (no need to repeat GET_CHAR at L29E0)
+		JR	Z,SV_CH_ADD	; back to SV_CH_ADD to consider a slice.
+					; (no need to repeat GET_CHAR at SV_CH_ADD)
 
-; if neither, then an expression is required so rejoin runtime loop ??
-; registers HL and DE only point to somewhere meaningful in runtime so 
-; comments apply to that situation.
+					; if neither, then an expression is required so rejoin runtime loop ??
+					; registers HL and DE only point to somewhere meaningful in runtime so 
+					; comments apply to that situation.
 
-					;; SV-MULT
-L29FB	PUSH	BC		; save dimension number.
+					;; $29FB
+SV_MULT:	PUSH	BC		; save dimension number.
 		PUSH	HL		; push data pointer/rubbish.
 					; DE points to current dimension.
-		CALL	L2AEE		; routine DE,(DE+1) gets next dimension in DE
+		CALL	DE_DE_1		; routine DE_DE_1 gets next dimension in DE
 					; and HL points to it.
 		EX	(SP),HL		; dim pointer to stack, data pointer to HL (*)
 		EX	DE,HL		; data pointer to DE, dim size to HL.
 
-		CALL	L2ACC		; routine INT-EXP1 checks integer expression
+		CALL	INT_EXP1	; routine INT_EXP1 checks integer expression
 					; and gets result in BC in runtime.
-		JR	C,L2A20		; to REPORT-3 if > HL
+		JR	C,REPORT_3	; to REPORT_3 if > HL
 					; 'Subscript out of range'
 
 		DEC	BC		; adjust returned result from 1-x to 0-x
-		CALL	L2AF4		; routine GET-HL*DE multiplies data pointer by
+		CALL	GET_HL_DE	; routine GET_HL_DE multiplies data pointer by
 					; dimension size.
 		ADD	HL,BC		; add the integer returned by expression.
 		POP	DE		; pop the dimension pointer.			***
 		POP	BC		; pop dimension counter.
-		DJNZ	L29C3		; back to SV-COMMA if more dimensions
+		DJNZ	SV_COMMA	; back to SV_COMMA if more dimensions
 					; Note. during syntax checking, unless there
 					; are more than 256 subscripts, the branch
-					; back to SV-COMMA is always taken.
+					; back to SV_COMMA is always taken.
 
 		BIT	7,C		; are we checking syntax ?
 					; then we've got a joker here.
 
-					;; SV-RPT-C
-L2A12	JR	NZ,L2A7A		; forward to SL-RPT-C if so
+					;; SV_RPT_C
+SV_RPT_C:	JR	NZ,SL_RPT_C	; forward to SL_RPT_C if so
 					; 'Nonsense in Basic'
 					; more than 256 subscripts in Basic line.
 
-; but in runtime the number of subscripts are at least the same as dims
+					; but in runtime the number of subscripts are at least the same as dims
 
 		PUSH	HL		; save data pointer.
 		BIT	6,C		; is it a string array ?
-		JR	NZ,L2A2C		; forward to SV-ELEM$ if so.
+		JR	NZ,SV_ELEM	; forward to SV_ELEM if so.
 
-; a runtime numeric array subscript.
+					; a runtime numeric array subscript.
 
 		LD	B,D		; register DE has advanced past all dimensions
 		LD	C,E		; and points to start of data in variable.
@@ -12435,38 +12405,37 @@ L2A12	JR	NZ,L2A7A		; forward to SL-RPT-C if so
 
 		RST	18H		; GET_CHAR checks Basic line
 		CP	$29		; must be a ')' ?
-		JR	Z,L2A22		; skip to SV-NUMBER if so
+		JR	Z,SV_NUMBER	; skip to SV_NUMBER if so
 
-; else more subscripts in Basic line than the variable definition.
+					; else more subscripts in Basic line than the variable definition.
 
-					;; REPORT-3
-L2A20	RST	08H		; ERROR_1
+					;; $2A20
+REPORT_3:	RST	08H		; ERROR_1
 		DEFB	$02		; Error Report: Subscript wrong
 
-; continue if subscripts matched the numeric array.
+					; continue if subscripts matched the numeric array.
 
-					;; SV-NUMBER
-L2A22	RST	20H		; NEXT_CHAR moves CH_ADD to next statement
+					;; $2A22
+SV_NUMBER:	RST	20H		; NEXT_CHAR moves CH_ADD to next statement
 					; - finished parsing.
 
 		POP	HL		; pop the data pointer.
-		LD	DE,$0005		; each numeric element is 5 bytes.
-		CALL	L2AF4		; routine GET-HL*DE multiplies.
+		LD	DE,$0005	; each numeric element is 5 bytes.
+		CALL	GET_HL_DE	; routine GET_HL_DE multiplies.
 		ADD	HL,BC		; now add to start of data in the variable.
 
 		RET			; return with HL pointing at the numeric
 					; array subscript.			->
 
-; ---------------------------------------------------------------
 
-; the branch was here for string subscripts when the number of subscripts
-; in the basic line was one less than in variable definition.
+					; the branch was here for string subscripts when the number of subscripts
+					; in the basic line was one less than in variable definition.
 
-					;; SV-ELEM$
-L2A2C	CALL	L2AEE		; routine DE,(DE+1) gets final dimension
+					;; $2A2C
+SV_ELEM:	CALL	DE_DE_1		; routine DE_DE_1 gets final dimension
 					; the length of strings in this array.
 		EX	(SP),HL		; start pointer to stack, data pointer to HL.
-		CALL	L2AF4		; routine GET-HL*DE multiplies by element
+		CALL	GET_HL_DE	; routine GET_HL_DE multiplies by element
 					; size.
 		POP	BC		; the start of data pointer is added
 		ADD	HL,BC		; in - now points to location before.
@@ -12474,32 +12443,32 @@ L2A2C	CALL	L2AEE		; routine DE,(DE+1) gets final dimension
 		LD	B,D		; transfer the length (final dimension size)
 		LD	C,E		; from DE to BC.
 		EX	DE,HL		; put start in DE.
-		CALL	L2AB1		; routine STK-ST-0 stores the string parameters
+		CALL	STK_ST_0	; routine STK_ST_0 stores the string parameters
 					; with A=0 - a slice or subscript.
 
-; now check that there were no more subscripts in the Basic line.
+					; now check that there were no more subscripts in the Basic line.
 
 		RST	18H		; GET_CHAR
 		CP	$29		; is it ')' ?
-		JR	Z,L2A48		; forward to SV-DIM to consider a separate
+		JR	Z,SV_DIM	; forward to SV_DIM to consider a separate
 					; subscript or/and a slice.
 
 		CP	$2C		; a comma is allowed if the final subscript
 					; is to be sliced e.g a$(2,3,4 TO 6).
-		JR	NZ,L2A20		; to REPORT-3 with anything else
+		JR	NZ,REPORT_3	; to REPORT_3 with anything else
 					; 'Subscript error'
 
-					;; SV-SLICE
-L2A45	CALL	L2A52		; routine SLICING slices the string.
+					;; $2A45
+SV_SLICE:	CALL	SLICING	; routine SLICING slices the string.
 
-; but a slice of a simple string can itself be sliced.
+					; but a slice of a simple string can itself be sliced.
 
-					;; SV-DIM
-L2A48	RST	20H		; NEXT_CHAR
+					;; $2A48
+SV_DIM:		RST	20H		; NEXT_CHAR
 
-					;; SV-SLICE?
-L2A49	CP	$28		; is character '(' ?
-		JR	Z,L2A45		; loop back if so to SV-SLICE
+					;; $2A49
+SV_SLICE_EX:	CP	$28		; is character '(' ?
+		JR	Z,SV_SLICE	; loop back if so to SV_SLICE
 
 		RES	6,(IY+$01)	; update FLAGS  - Signal string result
 		RET			; and return.
@@ -12533,15 +12502,15 @@ L2A49	CP	$28		; is character '(' ?
 ; We arrived here from SCANNING with CH-ADD pointing to the initial '('
 ; or from above.
 
-					;; SLICING
-L2A52	CALL	L2530		; routine SYNTAX-Z
-		CALL	NZ,L2BF1		; routine STK-FETCH fetches parameters of
+					;; $2A52
+SLICING:	CALL	SYNTAX_Z	; routine SYNTAX_Z
+		CALL	NZ,STK_FETCH	; routine STK_FETCH fetches parameters of
 					; string at runtime, start in DE, length 
 					; in BC. This could be an array subscript.
 
 		RST	20H		; NEXT_CHAR
 		CP	$29		; is it ')' ?	e.g. a$()
-		JR	Z,L2AAD		; forward to SL-STORE to store entire string.
+		JR	Z,SL_STORE	; forward to SL_STORE to store entire string.
 
 		PUSH	DE		; else save start address of string
 
@@ -12549,7 +12518,7 @@ L2A52	CALL	L2530		; routine SYNTAX-Z
 		PUSH	AF		; and save on stack before any branching.
 
 		PUSH	BC		; save length of string to be sliced.
-		LD	DE,$0001		; default the start point to position 1.
+		LD	DE,$0001	; default the start point to position 1.
 
 		RST	18H		; GET_CHAR
 
@@ -12557,11 +12526,11 @@ L2A52	CALL	L2530		; routine SYNTAX-Z
 					; and limit.
 
 		CP	$CC		; is it 'TO' ?	e.g. a$( TO 10000)
-		JR	Z,L2A81		; to SL-SECOND to evaluate second parameter.
+		JR	Z,SL_SECOND	; to SL_SECOND to evaluate second parameter.
 
 		POP	AF		; pop the running flag.
 
-		CALL	L2ACD		; routine INT-EXP2 fetches first parameter.
+		CALL	INT_EXP2	; routine INT_EXP2 fetches first parameter.
 
 		PUSH	AF		; save flag (will be $FF if parameter>limit)
 
@@ -12572,32 +12541,30 @@ L2A52	CALL	L2530		; routine SYNTAX-Z
 		RST	18H		; GET_CHAR
 		POP	HL		; pop the limit length.
 		CP	$CC		; is it 'TO' after a start ?
-		JR	Z,L2A81		; to SL-SECOND to evaluate second parameter
+		JR	Z,SL_SECOND	; to SL_SECOND to evaluate second parameter
 
 		CP	$29		; is it ')' ?	e.g. a$(365)
 
-					;; SL-RPT-C
-L2A7A	JP	NZ,REPORT_C		; jump to REPORT_C with anything else
+					;; $2A7A
+SL_RPT_C:	JP	NZ,REPORT_C	; jump to REPORT_C with anything else
 					; 'Nonsense in basic'
 
 		LD	H,D		; copy start
 		LD	L,E		; to end - just a one character slice.
-		JR	L2A94		; forward to SL-DEFINE.
+		JR	SL_DEFINE	; forward to SL_DEFINE.
 
-; ---------------------
-
-					;; SL-SECOND
-L2A81	PUSH	HL		; save limit length.
+					;; $2A81
+SL_SECOND:	PUSH	HL		; save limit length.
 
 		RST	20H		; NEXT_CHAR
 
 		POP	HL		; pop the length.
 
 		CP	$29		; is character ')' ?		e.g a$(7 TO )
-		JR	Z,L2A94		; to SL-DEFINE using length as end point.
+		JR	Z,SL_DEFINE	; to SL_DEFINE using length as end point.
 
 		POP	AF		; else restore flag.
-		CALL	L2ACD		; routine INT-EXP2 gets second expression.
+		CALL	INT_EXP2	; routine INT_EXP2 gets second expression.
 
 		PUSH	AF		; save the running flag.
 
@@ -12606,55 +12573,55 @@ L2A81	PUSH	HL		; save limit length.
 		LD	H,B		; transfer second parameter
 		LD	L,C		; to HL.		e.g. a$(42 to 99)
 		CP	$29		; is character a ')' ?
-		JR	NZ,L2A7A		; to SL-RPT-C if not
+		JR	NZ,SL_RPT_C	; to SL_RPT_C if not
 					; 'Nonsense in basic'
 
-; we now have start in DE and an end in HL.
+					; we now have start in DE and an end in HL.
 
-					;; SL-DEFINE
-L2A94	POP	AF		; pop the running flag.
+					;; $2A94
+SL_DEFINE:	POP	AF		; pop the running flag.
 		EX	(SP),HL		; put end point on stack, start address to HL
 		ADD	HL,DE		; add address of string to the start point.
 		DEC	HL		; point to first character of slice.
 		EX	(SP),HL		; start address to stack, end point to HL (*)
 		AND	A		; prepare to subtract.
 		SBC	HL,DE		; subtract start point from end point.
-		LD	BC,$0000		; default the length result to zero.
-		JR	C,L2AA8		; forward to SL-OVER if start > end.
+		LD	BC,$0000	; default the length result to zero.
+		JR	C,SL_OVER	; forward to SL_OVER if start > end.
 
 		INC	HL		; increment the length for inclusive byte.
 
 		AND	A		; now test the running flag.
-		JP	M,L2A20		; jump back to REPORT-3 if $FF.
+		JP	M,REPORT_3	; jump back to REPORT_3 if $FF.
 					; 'Subscript out of range'
 
 		LD	B,H		; transfer the length
 		LD	C,L		; to BC.
 
-					;; SL-OVER
-L2AA8	POP	DE		; restore start address from machine stack ***
+					;; $2AA8
+SL_OVER:	POP	DE		; restore start address from machine stack ***
 		RES	6,(IY+$01)	; update FLAGS - signal string result for
 					; syntax.
 
-					;; SL-STORE
-L2AAD	CALL	L2530		; routine SYNTAX-Z  (UNSTACK_Z?)
+					;; $2AAD
+SL_STORE:	CALL	SYNTAX_Z	; routine SYNTAX_Z  (UNSTACK_Z?)
 		RET	Z		; return if checking syntax.
 					; but continue to store the string in runtime.
 
-; ------------------------------------
-; other than from above, this routine is called from STK-VAR to stack
-; a known string array element.
-; ------------------------------------
+					; ------------------------------------
+					; other than from above, this routine is called from STK_VAR to stack
+					; a known string array element.
+					; ------------------------------------
 
-					;; STK-ST-0
-L2AB1	XOR	A		; clear to signal a sliced string or element.
+					;; $2AB1
+STK_ST_0:	XOR	A		; clear to signal a sliced string or element.
 
-; -------------------------
-; this routine is called from chr$, scrn$ etc. to store a simple string result.
-; --------------------------
+					; -------------------------
+					; this routine is called from chr$, scrn$ etc. to store a simple string result.
+					; --------------------------
 
-					;; STK-STO-$
-L2AB2	RES	6,(IY+$01)	; update FLAGS - signal string result.
+					;; $2AB2
+STK_STO_D:	RES	6,(IY+$01)	; update FLAGS - signal string result.
 					; and continue to store parameters of string.
 
 ;----------------------------------------
@@ -12662,22 +12629,22 @@ L2AB2	RES	6,(IY+$01)	; update FLAGS - signal string result.
 ;----------------------------------------
 ; This subroutine puts five registers on the calculator stack.
 
-					;; STK-STORE
-L2AB6	PUSH	BC		; save two registers
-		CALL	L33A9		; routine TEST-5-SP checks room and puts 5 
+					;; $2AB6
+STK_STORE:	PUSH	BC		; save two registers
+		CALL	L33A9	; routine TEST-5-SP checks room and puts 5 
 					; in BC.
 		POP	BC		; fetch the saved registers.
 		LD	HL,(STKEND)	; make HL point to first empty location STKEND
 		LD	(HL),A		; place the 5 registers.
-		INC	HL		;
-		LD	(HL),E		;
-		INC	HL		;
-		LD	(HL),D		;
-		INC	HL		;
-		LD	(HL),C		;
-		INC	HL		;
-		LD	(HL),B		;
-		INC	HL		;
+		INC	HL
+		LD	(HL),E
+		INC	HL
+		LD	(HL),D
+		INC	HL
+		LD	(HL),C
+		INC	HL
+		LD	(HL),B
+		INC	HL
 		LD	(STKEND),HL	; update system variable STKEND.
 		RET			; and return.
 
@@ -12692,13 +12659,13 @@ L2AB6	PUSH	BC		; save two registers
 ; parameters, it is entered at the second entry point so as not to disturb
 ; the running flag A, which may be $00 or $FF from a previous invocation.
 
-					;; INT-EXP1
-L2ACC	XOR	A		; set result flag to zero.
+					;; $2ACC
+INT_EXP1:	XOR	A		; set result flag to zero.
 
-; -> The entry point is here if A is used as a running flag.
+					; -> The entry point is here if A is used as a running flag.
 
-					;; INT-EXP2
-L2ACD	PUSH	DE		; preserve DE register throughout.
+					;; $2ACD
+INT_EXP2:	PUSH	DE		; preserve DE register throughout.
 		PUSH	HL		; save the supplied limit.
 		PUSH	AF		; save the flag.
 
@@ -12707,13 +12674,13 @@ L2ACD	PUSH	DE		; preserve DE register throughout.
 					; with value on calculator stack.
 
 		POP	AF		; pop the flag.
-		CALL	L2530		; routine SYNTAX-Z
-		JR	Z,L2AEB		; forward to I-RESTORE if checking syntax so
+		CALL	SYNTAX_Z	; routine SYNTAX_Z
+		JR	Z,I_RESTORE	; forward to I_RESTORE if checking syntax so
 					; avoiding a comparison with supplied limit.
 
 		PUSH	AF		; save the flag.
 
-		CALL	FIND_INT2		; routine FIND_INT2 fetches value from
+		CALL	FIND_INT2	; routine FIND_INT2 fetches value from
 					; calculator stack to BC producing an error
 					; if too high.
 
@@ -12721,19 +12688,19 @@ L2ACD	PUSH	DE		; preserve DE register throughout.
 		LD	A,B		; test value for zero and reject
 		OR	C		; as arrays and strings begin at 1.
 		SCF			; set carry flag.
-		JR	Z,L2AE8		; forward to I-CARRY if zero.
+		JR	Z,I_CARRY	; forward to I_CARRY if zero.
 
 		POP	HL		; restore the limit.
 		PUSH	HL		; and save.
 		AND	A		; prepare to subtract.
 		SBC	HL,BC		; subtract value from limit.
 
-					;; I-CARRY
-L2AE8	LD	A,D		; move flag to accumulator $00 or $FF.
+					;; $2AE8
+I_CARRY:	LD	A,D		; move flag to accumulator $00 or $FF.
 		SBC	A,$00		; will set to $FF if carry set.
 
-					;; I-RESTORE
-L2AEB	POP	HL		; restore the limit.
+					;; $2AEB
+I_RESTORE:	POP	HL		; restore the limit.
 		POP	DE		; and DE register.
 		RET			; return.
 
@@ -12751,27 +12718,27 @@ L2AEB	POP	HL		; restore the limit.
 ; It probably had a zipier label though as the intention is to simplify the
 ; program.
 
-					;; DE,(DE+1)
-L2AEE	EX	DE,HL		;
-		INC	HL		;
-		LD	E,(HL)		;
-		INC	HL		;
-		LD	D,(HL)		;
-		RET			;
+					;; $2AEE
+DE_DE_1:	EX	DE,HL
+		INC	HL
+		LD	E,(HL)
+		INC	HL
+		LD	D,(HL)
+		RET
 
 ;--------------------
 ; HL=HL*DE Subroutine
 ;--------------------
 ; This routine calls the mathematical routine to multiply HL by DE in runtime.
-; It is called from STK-VAR and from DIM. In the latter case syntax is not
+; It is called from STK_VAR and from DIM. In the latter case syntax is not
 ; being checked so the entry point could have been at the second CALL
 ; instruction to save a few clock-cycles.
 
-					;; GET-HL*DE
-L2AF4	CALL	L2530		; routine SYNTAX-Z.
+					;; $2AF4
+GET_HL_DE:	CALL	SYNTAX_Z	; routine SYNTAX_Z.
 		RET	Z		; return if checking syntax.
 
-		CALL	L30A9		; routine HL-HL*DE.
+		CALL	L30A9	; routine HL-HL*DE.
 		JP	C,REPORT_4	; jump back to REPORT_4 if over 65535.
 
 		RET			; else return with 16-bit result in HL.
@@ -12791,54 +12758,53 @@ L2AF4	CALL	L2530		; routine SYNTAX-Z.
 ; does not give the 'Nonsense..' error if the three variables exist.
 ; I digress.
 
-					;; LET
-L2AFF	LD	HL,(DEST)	; fetch system variable DEST to HL.
+					;; $2AFF
+LET:		LD	HL,(DEST)	; fetch system variable DEST to HL.
 		BIT	1,(IY+$37)	; test FLAGX - handling a new variable ?
-		JR	Z,L2B66		; forward to L-EXISTS if not.
+		JR	Z,L_EXISTS	; forward to L_EXISTS if not.
 
-; continue for a new variable. DEST points to start in Basic line.
-; from the CLASS routines.
+					; continue for a new variable. DEST points to start in Basic line.
+					; from the CLASS routines.
 
-		LD	BC,$0005		; assume numeric and assign an initial 5 bytes
+		LD	BC,$0005	; assume numeric and assign an initial 5 bytes
 
-					;; L-EACH-CH
-L2B0B	INC	BC		; increase byte count for each relevant
+					;; $2B0B
+L_EACH_CH:	INC	BC		; increase byte count for each relevant
 					; character
 
-					;; L-NO-SP
-L2B0C	INC	HL		; increase pointer.
+					;; $2B0C
+L_NO_SP:	INC	HL		; increase pointer.
 		LD	A,(HL)		; fetch character.
 		CP	$20		; is it a space ?
-		JR	Z,L2B0C		; back to L-NO-SP is so.
+		JR	Z,L_NO_SP	; back to L_NO_SP is so.
 
-		JR	NC,L2B1F		; forward to L-TEST-CH if higher.
+		JR	NC,L_TEST_CH	; forward to L_TEST_CH if higher.
 
 		CP	$10		; is it $00 - $0F ?
-		JR	C,L2B29		; forward to L-SPACES if so.
+		JR	C,L_SPACES	; forward to L_SPACES if so.
 
 		CP	$16		; is it $16 - $1F ?
-		JR	NC,L2B29		; forward to L-SPACES if so.
+		JR	NC,L_SPACES	; forward to L_SPACES if so.
 
-; it was $10 - $15  so step over a colour code.
+					; it was $10 - $15  so step over a colour code.
 
 		INC	HL		; increase pointer.
-		JR	L2B0C		; loop back to L-NO-SP.
+		JR	L_NO_SP		; loop back to L_NO_SP.
 
-; the branch was here if higher than space
+					; the branch was here if higher than space
 
-					;; L-TEST-CH
-L2B1F	CALL	L2C88		; routine ALPHANUM sets carry if alphanumeric
-		JR	C,L2B0B		; loop back to L-EACH-CH for more if so.
+					;; $2B1F
+L_TEST_CH:	CALL	ALPHANUM	; routine ALPHANUM sets carry if alphanumeric
+		JR	C,L_EACH_CH	; loop back to L_EACH_CH for more if so.
 
 		CP	$24		; is it '$' ?
-		JP	Z,L2BC0		; jump forward if so, to L-NEW$
+		JP	Z,L_NEW		; jump forward if so, to L_NEW
 					; with a new string.
 
-					;; L-SPACES
-L2B29	LD	A,C		; save length lo in A.
+					;; $2B29
+L_SPACES:	LD	A,C		; save length lo in A.
 		LD	HL,(E_LINE)	; fetch E_LINE to HL.
-		DEC	HL		; point to location before, the variables
-					; end-marker.
+		DEC	HL		; point to location before, the variables end-marker.
 		CALL	MAKE_ROOM	; routine MAKE_ROOM creates BC spaces
 					; for name and numeric value.
 		INC	HL		; advance to first new location.
@@ -12849,92 +12815,91 @@ L2B29	LD	A,C		; save length lo in A.
 		DEC	DE		; point to first.
 		SUB	$06		; subtract six from length_lo.
 		LD	B,A		; save count in B.
-		JR	Z,L2B4F		; forward to L-SINGLE if it was just
-					; one character.
+		JR	Z,L_SINGLE	; forward to L_SINGLE if it was just one character.
 
-; HL points to start of variable name after 'LET' in Basic line.
+					; HL points to start of variable name after 'LET' in Basic line.
 
-					;; L-CHAR
-L2B3E	INC	HL		; increase pointer.
+					;; $2B3E
+L_CHAR:		INC	HL		; increase pointer.
 		LD	A,(HL)		; pick up character.
 		CP	$21		; is it space or higher ?
-		JR	C,L2B3E		; back to L-CHAR with space and less.
+		JR	C,L_CHAR	; back to L_CHAR with space and less.
 
 		OR	$20		; make variable lower-case.
 		INC	DE		; increase destination pointer.
 		LD	(DE),A		; and load to edit line.
-		DJNZ	L2B3E		; loop back to L-CHAR until B is zero.
+		DJNZ	L_CHAR		; loop back to L_CHAR until B is zero.
 
 		OR	$80		; invert the last character.
 		LD	(DE),A		; and overwrite that in edit line.
 
-; now consider first character which has bit 6 set
+					; now consider first character which has bit 6 set
 
 		LD	A,$C0		; set A 11000000 is xor mask for a long name.
 					; %101	is xor/or  result
 
-; single character numerics rejoin here with %00000000 in mask.
+					; single character numerics rejoin here with %00000000 in mask.
 					; %011	will be xor/or result
 
-					;; L-SINGLE
-L2B4F	LD	HL,(DEST)	; fetch DEST - HL addresses first character.
+					;; $2B4F
+L_SINGLE:	LD	HL,(DEST)	; fetch DEST - HL addresses first character.
 		XOR	(HL)		; apply variable type indicator mask (above).
 		OR	$20		; make lowercase - set bit 5.
 		POP	HL		; restore pointer to 2nd character.
-		CALL	L2BEA		; routine L-FIRST puts A in first character.
+		CALL	L_FIRST		; routine L_FIRST puts A in first character.
 					; and returns with HL holding
 					; new E_LINE-1  the $80 vars end-marker.
 
-					;; L-NUMERIC
-L2B59	PUSH	HL		; save the pointer.
+					;; $2B59
+L_NUMERIC:	PUSH	HL		; save the pointer.
 
-; the value of variable is deleted but remains after calculator stack.
+					; the value of variable is deleted but remains after calculator stack.
 
 		RST	28H		;; FP_CALC
 		DEFB	$02		;;delete	; delete variable value
 		DEFB	$38		;;end-calc
 
-; DE (STKEND) points to start of value.
+					; DE (STKEND) points to start of value.
 
 		POP	HL		; restore the pointer.
-		LD	BC,$0005		; start of number is five bytes before.
+		LD	BC,$0005	; start of number is five bytes before.
 		AND	A		; prepare for true subtraction.
 		SBC	HL,BC		; HL points to start of value.
-		JR	L2BA6		; forward to L-ENTER  ==>
+		JR	L_ENTER		; forward to L_ENTER  ==>
 
 
-; the jump was to here if the variable already existed.
+					; the jump was to here if the variable already existed.
 
-					;; L-EXISTS
-L2B66	BIT	6,(IY+$01)	; test FLAGS - numeric or string result ?
-		JR	Z,L2B72		; skip forward to L-DELETE$	-*->
+					;; $2B66
+L_EXISTS:	BIT	6,(IY+$01)	; test FLAGS - numeric or string result ?
+		JR	Z,L_DELETE	; skip forward to L_DELETE	-*->
 					; if string result.
 
-; A numeric variable could be simple or an array element.
-; They are treated the same and the old value is overwritten.
+					; A numeric variable could be simple or an array element.
+					; They are treated the same and the old value is overwritten.
 
-		LD	DE,$0006		; six bytes forward points to loc past value.
+		LD	DE,$0006	; six bytes forward points to loc past value.
 		ADD	HL,DE		; add to start of number.
-		JR	L2B59		; back to L-NUMERIC to overwrite value.
+		JR	L_NUMERIC	; back to L_NUMERIC to overwrite value.
 
-; -*-> the branch was here if a string existed.
+					; -*-> the branch was here if a string existed.
 
-					;; L-DELETE$
-L2B72	LD	HL,(DEST)	; fetch DEST to HL.
+					;; $2B72
+L_DELETE:	LD	HL,(DEST)	; fetch DEST to HL.
 					; (still set from first instruction)
 		LD	BC,(STRLEN)	; fetch STRLEN to BC.
 		BIT	0,(IY+$37)	; test FLAGX - handling a complete simple
 					; string ?
-		JR	NZ,L2BAF		; forward to L-ADD$ if so.
+		JR	NZ,L_ADD	; forward to L_ADD if so.
 
-; must be a string array or a slice in workspace.
-; Note. LET a$(3 TO 6) = h$	will assign "hat " if h$ = "hat"
-;					  and	"hats" if h$ = "hatstand".
-;
-; This is known as Procrustian lengthening and shortening after a
-; character Procrustes in Greek legend who made travellers sleep in his bed,
-; cutting off their feet or stretching them so they fitted the bed perfectly.
-; The bloke was hatstand and slain by Theseus.
+					; must be a string array or a slice in workspace.
+					; Note. LET a$(3 TO 6) = h$	will assign "hat " if h$ = "hat"
+					; and	"hats" if h$ = "hatstand".
+
+					; This is known as Procrustian lengthening and shortening after a
+					; character Procrustes in Greek legend who made travellers sleep in his bed,
+					; cutting off their feet or stretching them so they fitted the bed perfectly.
+					; The bloke was hatstand and slain by Theseus.
 
 		LD	A,B		; test if length
 		OR	C		; is zero and
@@ -12946,46 +12911,45 @@ L2B72	LD	HL,(DEST)	; fetch DEST to HL.
 		PUSH	DE		; save pointer to first new location.
 		PUSH	BC		; and length		(*)
 		LD	D,H		; set DE to point to last location.
-		LD	E,L		;
+		LD	E,L
 		INC	HL		; set HL to next location.
-		LD	(HL),$20		; place a space there.
+		LD	(HL),$20	; place a space there.
 		LDDR			; copy bytes filling with spaces.
 
 		PUSH	HL		; save pointer to start.
-		CALL	L2BF1		; routine STK-FETCH start to DE,
-					; length to BC.
+		CALL	STK_FETCH	; routine STK_FETCH start to DE, length to BC.
 		POP	HL		; restore the pointer.
 		EX	(SP),HL		; (*) length to HL, pointer to stack.
 		AND	A		; prepare for true subtraction.
 		SBC	HL,BC		; subtract old length from new.
 		ADD	HL,BC		; and add back.
-		JR	NC,L2B9B		; forward if it fits to L-LENGTH.
+		JR	NC,L_LENGTH	; forward if it fits to L_LENGTH.
 
 		LD	B,H		; otherwise set
 		LD	C,L		; length to old length.
 					; "hatstand" becomes "hats"
 
-					;; L-LENGTH
-L2B9B	EX	(SP),HL		; (*) length to stack, pointer to HL.
+					;; $2B9B
+L_LENGTH:	EX	(SP),HL		; (*) length to stack, pointer to HL.
 		EX	DE,HL		; pointer to DE, start of string to HL.
 		LD	A,B		; is the length zero ?
 		OR	C		;
-		JR	Z,L2BA3		; forward to L-IN-W/S if so
+		JR	Z,L_IN_W_S	; forward to L_IN_W_S if so
 					; leaving prepared spaces.
 
 		LDIR			; else copy bytes overwriting some spaces.
 
-					;; L-IN-W/S
-L2BA3	POP	BC		; pop the new length.  (*)
+					;; L_IN_W_S
+L_IN_W_S:	POP	BC		; pop the new length.  (*)
 		POP	DE		; pop pointer to new area.
 		POP	HL		; pop pointer to variable in assignment.
 					; and continue copying from workspace
 					; to variables area.
 
-; ==> branch here from  L-NUMERIC
+					; ==> branch here from  L_NUMERIC
 
-					;; L-ENTER
-L2BA6	EX	DE,HL		; exchange pointers HL=STKEND DE=end of vars.
+					;; $2BA6
+L_ENTER:	EX	DE,HL		; exchange pointers HL=STKEND DE=end of vars.
 		LD	A,B		; test the length
 		OR	C		; and make a 
 		RET	Z		; return if zero (strings only).
@@ -12995,17 +12959,17 @@ L2BA6	EX	DE,HL		; exchange pointers HL=STKEND DE=end of vars.
 		POP	HL		; address the start.
 		RET			; and return.
 
-; the branch was here from L-DELETE$ if an existing simple string.
-; register HL addresses start of string in variables area.
+					; the branch was here from L_DELETE if an existing simple string.
+					; register HL addresses start of string in variables area.
 
-					;; L-ADD$
-L2BAF	DEC	HL		; point to high byte of length.
+					;; $2BAF
+L_ADD:		DEC	HL		; point to high byte of length.
 		DEC	HL		; to low byte.
 		DEC	HL		; to letter.
 		LD	A,(HL)		; fetch masked letter to A.
 		PUSH	HL		; save the pointer on stack.
 		PUSH	BC		; save new length.
-		CALL	L2BC6		; routine L-STRING adds new string at end
+		CALL	L_STRING	; routine L_STRING adds new string at end
 					; of variables area.
 					; if no room we still have old one.
 		POP	BC		; restore length.
@@ -13016,19 +12980,17 @@ L2BAF	DEC	HL		; point to high byte of length.
 		JP	RECLAIM_2	; jump to indirect exit via RECLAIM_2
 					; deleting old version and adjusting pointers.
 
+					; the jump was here with a new string variable.
 
-
-; the jump was here with a new string variable.
-
-					;; L-NEW$
-L2BC0	LD	A,$DF		; indicator mask %11011111 for
+					;; $2BC0
+L_NEW:		LD	A,$DF		; indicator mask %11011111 for
 					;		%010xxxxx will be result
 		LD	HL,(DEST)	; address DEST first character.
 		AND	(HL)		; combine mask with character.
 
-					;; L-STRING
-L2BC6	PUSH	AF		; save first character and mask.
-		CALL	L2BF1		; routine STK-FETCH fetches parameters of
+					;; $2BC6
+L_STRING:	PUSH	AF		; save first character and mask.
+		CALL	STK_FETCH	; routine STK_FETCH fetches parameters of
 					; the string.
 		EX	DE,HL		; transfer start to HL.
 		ADD	HL,BC		; add to length.
@@ -13056,8 +13018,8 @@ L2BC6	PUSH	AF		; save first character and mask.
 		LD	(HL),C		; insert that byte
 		POP	AF		; restore character and mask
 
-					;; L-FIRST
-L2BEA	DEC	HL		; address variable name
+					;; $2BEA
+L_FIRST:	DEC	HL		; address variable name
 		LD	(HL),A		; and insert character.
 		LD	HL,(E_LINE)	; load HL with E_LINE.
 		DEC	HL		; now end of VARS area.
@@ -13066,23 +13028,21 @@ L2BEA	DEC	HL		; address variable name
 ;-------------------------------------
 ; Get last value from calculator stack
 ;-------------------------------------
-;
-;
 
-					;; STK-FETCH
-L2BF1	LD	HL,(STKEND)	; STKEND
-		DEC	HL		;
-		LD	B,(HL)		;
-		DEC	HL		;
-		LD	C,(HL)		;
-		DEC	HL		;
-		LD	D,(HL)		;
-		DEC	HL		;
-		LD	E,(HL)		;
-		DEC	HL		;
-		LD	A,(HL)		;
+					;; $2BF1
+STK_FETCH:	LD	HL,(STKEND)	; STKEND
+		DEC	HL
+		LD	B,(HL)
+		DEC	HL
+		LD	C,(HL)
+		DEC	HL
+		LD	D,(HL)
+		DEC	HL
+		LD	E,(HL)
+		DEC	HL
+		LD	A,(HL)
 		LD	(STKEND),HL	; STKEND
-		RET			;
+		RET
 
 ;-------------------
 ; Handle DIM command
@@ -13094,26 +13054,26 @@ L2BF1	LD	HL,(STKEND)	; STKEND
 ; It is not possible to erase an array, but it can be re-dimensioned to
 ; a minimal size of 1, after use, to free up memory.
 
-					;; DIM
-L2C02	CALL	L28B2		; routine LOOK-VARS
+					;; $2C02
+DIM:		CALL	LOOK_VARS	; routine LOOK_VARS
 
-					;; D-RPORT-C
-L2C05	JP	NZ,REPORT_C		; jump to REPORT_C if a long-name variable.
+					;; $2C05
+D_RPORT_C:	JP	NZ,REPORT_C	; jump to REPORT_C if a long-name variable.
 					; DIM lottery numbers(49) doesn't work.
 
-		CALL	L2530		; routine SYNTAX-Z
-		JR	NZ,L2C15		; forward to D-RUN in runtime.
+		CALL	SYNTAX_Z	; routine SYNTAX_Z
+		JR	NZ,D_RUN	; forward to D_RUN in runtime.
 
 		RES	6,C		; signal 'numeric' array even if string as
 					; this simplifies the syntax checking.
 
-		CALL	L2996		; routine STK-VAR checks syntax.
+		CALL	STK_VAR		; routine STK_VAR checks syntax.
 		CALL	CHECK_END	; routine CHECK_END performs early exit ->
 
-; the branch was here in runtime.
+					; the branch was here in runtime.
 
-					;; D-RUN
-L2C15	JR	C,L2C1F		; skip to D-LETTER if variable did not exist.
+					;; $2C15
+D_RUN:		JR	C,D_LETTER	; skip to D_LETTER if variable did not exist.
 					; else reclaim the old one.
 
 		PUSH	BC		; save type in C.
@@ -13123,26 +13083,26 @@ L2C15	JR	C,L2C1F		; skip to D-LETTER if variable did not exist.
 					; space between.
 		POP	BC		; pop the type.
 
-					;; D-LETTER
-L2C1F	SET	7,C		; signal array.
+					;; $2C1F
+D_LETTER:	SET	7,C		; signal array.
 		LD	B,$00		; initialize dimensions to zero and
 		PUSH	BC		; save with the type.
-		LD	HL,$0001		; make elements one character presuming string
+		LD	HL,$0001	; make elements one character presuming string
 		BIT	6,C		; is it a string ?
-		JR	NZ,L2C2D		; forward to D-SIZE if so.
+		JR	NZ,D_SIZE	; forward to D_SIZE if so.
 
 		LD	L,$05		; make elements 5 bytes as is numeric.
 
-					;; D-SIZE
-L2C2D	EX	DE,HL		; save the element size in DE.
+					;; $2C2D
+D_SIZE:		EX	DE,HL		; save the element size in DE.
 
-; now enter a loop to parse each of the integers in the list.
+					; now enter a loop to parse each of the integers in the list.
 
-					;; D-NO-LOOP
-L2C2E	RST	20H		; NEXT_CHAR
+					;; $2C2E
+D_NO_LOOP:	RST	20H		; NEXT_CHAR
 		LD	H,$FF		; disable limit check by setting HL high
-		CALL	L2ACC		; routine INT-EXP1
-		JP	C,L2A20		; to REPORT-3 if > 65280 and then some
+		CALL	INT_EXP1	; routine INT_EXP1
+		JP	C,REPORT_3	; to REPORT_3 if > 65280 and then some
 					; 'Subscript out of range'
 
 		POP	HL		; pop dimension counter, array type
@@ -13151,20 +13111,20 @@ L2C2E	RST	20H		; NEXT_CHAR
 		PUSH	HL		; save the dimension counter
 		LD	H,B		; transfer size
 		LD	L,C		; to HL
-		CALL	L2AF4		; routine GET-HL*DE multiplies dimension by
+		CALL	GET_HL_DE	; routine GET_HL_DE multiplies dimension by
 					; running total of size required initially
 					; 1 or 5.
 		EX	DE,HL		; save running total in DE
 
 		RST	18H		; GET_CHAR
 		CP	$2C		; is it ',' ?
-		JR	Z,L2C2E		; loop back to D-NO-LOOP until all dimensions
+		JR	Z,D_NO_LOOP	; loop back to D_NO_LOOP until all dimensions
 					; have been considered
 
-; when loop complete continue.
+					; when loop complete continue.
 
 		CP	$29		; is it ')' ?
-		JR	NZ,L2C05		; to D-RPORT-C with anything else
+		JR	NZ,D_RPORT_C	; to D_RPORT_C with anything else
 					; 'Nonsense in basic'
 
 
@@ -13173,14 +13133,14 @@ L2C2E	RST	20H		; NEXT_CHAR
 		POP	BC		; pop dimension counter/type
 		LD	A,C		; type to A
 
-; now calculate space required for array variable
+					; now calculate space required for array variable
 
 		LD	L,B		; dimensions to L since these require 16 bits
 					; then this value will be doubled
 		LD	H,$00		; set high byte to zero
 
-; another four bytes are required for letter(1), total length(2), number of
-; dimensions(1) but since we have yet to double allow for two
+					; another four bytes are required for letter(1), total length(2), number of
+					; dimensions(1) but since we have yet to double allow for two
 
 		INC	HL		; increment
 		INC	HL		; increment
@@ -13225,27 +13185,27 @@ L2C2E	RST	20H		; NEXT_CHAR
 		DEC	DE		; set DE to next location down.
 		LD	(HL),$00	; presume numeric and insert a zero
 		BIT	6,C		; test bit 6 of C. numeric or string ?
-		JR	Z,L2C7C		; skip to DIM-CLEAR if numeric
+		JR	Z,DIM_CLEAR	; skip to DIM_CLEAR if numeric
 
 		LD	(HL),$20	; place a space character in HL
 
-					;; DIM-CLEAR
-L2C7C	POP	BC		; pop the data length
+					;; $2C7C
+DIM_CLEAR:	POP	BC		; pop the data length
 
 		LDDR			; LDDR sets to zeros or spaces
 
-; The number of dimensions is still in A.
-; A loop is now entered to insert the size of each dimension that was pushed
-; during the D-NO-LOOP working downwards from position before start of data.
+					; The number of dimensions is still in A.
+					; A loop is now entered to insert the size of each dimension that was pushed
+					; during the D_NO_LOOP working downwards from position before start of data.
 
-					;; DIM-SIZES
-L2C7F	POP	BC		; pop a dimension size			***
+					;; $2C7F
+DIM_SIZES:	POP	BC		; pop a dimension size			***
 		LD	(HL),B		; insert high byte at position
 		DEC	HL		; next location down
 		LD	(HL),C		; insert low byte
 		DEC	HL		; next location down
 		DEC	A		; decrement dimension counter
-		JR	NZ,L2C7F		; back to DIM-SIZES until all done.
+		JR	NZ,DIM_SIZES	; back to DIM_SIZES until all done.
 
 		RET			; return.
 
@@ -13255,16 +13215,16 @@ L2C7F	POP	BC		; pop a dimension size			***
 ; This routine checks that the character in A is alphanumeric
 ; returning with carry set if so.
 
-					;; ALPHANUM
-L2C88	CALL	L2D1B		; routine NUMERIC will reset carry if so.
+					;; $2C88
+ALPHANUM:	CALL	NUMERIC		; routine NUMERIC will reset carry if so.
 		CCF			; Complement Carry Flag
 		RET	C		; Return if numeric else continue into
 					; next routine.
 
-; This routine checks that the character in A is alphabetic
+					; This routine checks that the character in A is alphabetic
 
-					;; ALPHA
-L2C8D	CP	$41		; less than 'A' ?
+					;; $2C8D
+ALPHA:		CP	$41		; less than 'A' ?
 		CCF			; Complement Carry Flag
 		RET	NC		; return if so
 
@@ -13286,18 +13246,18 @@ L2C8D	CP	$41		; less than 'A' ?
 ; Note that BIN need not have any '0's or '1's after it.
 ; BIN is really just a notational symbol and not a function.
 
-					;; DEC-TO-FP
-L2C9B	CP	$C4		; 'BIN' token ?
-		JR	NZ,L2CB8		; to NOT-BIN if not
+					;; $2C9B
+DEC_TO_FP:	CP	$C4		; 'BIN' token ?
+		JR	NZ,NOT_BIN	; to NOT_BIN if not
 
-		LD	DE,$0000		; initialize 16 bit buffer register.
+		LD	DE,$0000	; initialize 16 bit buffer register.
 
-					;; BIN-DIGIT
-L2CA2	RST	20H		; NEXT_CHAR
+					;; $2CA2
+BIN_DIGIT:	RST	20H		; NEXT_CHAR
 		SUB	$31		; '1'
 		ADC	A,$00		; will be zero if '1' or '0'
 					; carry will be set if was '0'
-		JR	NZ,L2CB3		; forward to BIN-END if result not zero
+		JR	NZ,BIN_END	; forward to BIN_END if result not zero
 
 		EX	DE,HL		; buffer to HL
 		CCF			; Carry now set if originally '1'
@@ -13308,69 +13268,68 @@ L2CA2	RST	20H		; NEXT_CHAR
 					; 'Number too big' - raise an error
 
 		EX	DE,HL		; save the buffer
-		JR	L2CA2		; back to BIN-DIGIT for more digits
+		JR	BIN_DIGIT	; back to BIN_DIGIT for more digits
 
-					;; BIN-END
-L2CB3	LD	B,D		; transfer 16 bit buffer
+					;; $2CB3
+BIN_END:	LD	B,D		; transfer 16 bit buffer
 		LD	C,E		; to BC register pair.
-		JP	L2D2B		; to STACK-BC to put on calculator stack
+		JP	STACK_BC	; to STACK_BC to put on calculator stack
 
-; continue here with .1,  42, 3.14, 5., 2.3 E -4
+					; continue here with .1,  42, 3.14, 5., 2.3 E -4
 
-					;; NOT-BIN
-L2CB8	CP	$2E		; '.' - leading decimal point ?
-		JR	Z,L2CCB		; skip to DECIMAL if so.
+					;; $2CB8
+NOT_BIN:	CP	$2E		; '.' - leading decimal point ?
+		JR	Z,DECIMAL	; skip to DECIMAL if so.
 
-		CALL	L2D3B		; routine INT-TO-FP to evaluate all digits
+		CALL	INT_TO_FP	; routine INT_TO_FP to evaluate all digits
 					; This number 'x' is placed on stack.
 		CP	$2E		; '.' - mid decimal point ?
 
-		JR	NZ,L2CEB		; to E-FORMAT if not to consider that format
+		JR	NZ,E_FORMAT	; to E_FORMAT if not to consider that format
 
 		RST	20H		; NEXT_CHAR
-		CALL	L2D1B		; routine NUMERIC returns carry reset if 0-9
+		CALL	NUMERIC		; routine NUMERIC returns carry reset if 0-9
 
-		JR	C,L2CEB		; to E-FORMAT if not a digit e.g. '1.'
+		JR	C,E_FORMAT	; to E_FORMAT if not a digit e.g. '1.'
 
-		JR	L2CD5		; to DEC-STO-1 to add the decimal part to 'x'
+		JR	DEC_STO_1	; to DEC_STO_1 to add the decimal part to 'x'
 
-; a leading decimal point has been found in a number.
+					; a leading decimal point has been found in a number.
 
-					;; DECIMAL
-L2CCB	RST	20H		; NEXT_CHAR
-		CALL	L2D1B		; routine NUMERIC will reset carry if digit
+					;; $2CCB
+DECIMAL:	RST	20H		; NEXT_CHAR
+		CALL	NUMERIC		; routine NUMERIC will reset carry if digit
 
-					;; DEC-RPT-C
-L2CCF	JP	C,REPORT_C		; to REPORT_C if just a '.'
+					;; $2CCF
+DEC_RPT_C:	JP	C,REPORT_C	; to REPORT_C if just a '.'
 					; raise 'Nonsense in Basic'
 
-; since there is no leading zero put one on the calculator stack.
+					; since there is no leading zero put one on the calculator stack.
 
 		RST	28H		;; FP_CALC
 		DEFB	$A0		;;stk-zero  ; 0.
 		DEFB	$38		;;end-calc
 
-; If rejoining from earlier there will be a value 'x' on stack.
-; If continuing from above the value zero.
-; Now store 1 in mem-0.
-; Note. At each pass of the digit loop this will be divided by ten.
+					; If rejoining from earlier there will be a value 'x' on stack.
+					; If continuing from above the value zero.
+					; Now store 1 in mem-0.
+					; Note. At each pass of the digit loop this will be divided by ten.
 
-					;; DEC-STO-1
-L2CD5	RST	28H		;; FP_CALC
+					;; $2CD5
+DEC_STO_1:	RST	28H		;; FP_CALC
 		DEFB	$A1		;;stk-one	;x or 0,1.
-		DEFB	$C0		;;st-mem-0  ;x or 0,1.
+		DEFB	$C0		;;st-mem-0	;x or 0,1.
 		DEFB	$02		;;delete	;x or 0.
 		DEFB	$38		;;end-calc
 
 
-					;; NXT-DGT-1
-L2CDA	RST	18H		; GET_CHAR
-		CALL	L2D22		; routine STK-DIGIT stacks single digit 'd'
-		JR	C,L2CEB		; exit to E-FORMAT when digits exhausted  >
+					;; $2CDA
+NXT_DGT_1:	RST	18H		; GET_CHAR
+		CALL	STK_DIGIT	; routine STK_DIGIT stacks single digit 'd'
+		JR	C,E_FORMAT	; exit to E_FORMAT when digits exhausted  >
 
-
-		RST	28H		;; FP_CALC	;x or 0,d.		first pass.
-		DEFB	$E0		;;get-mem-0  ;x or 0,d,1.
+		RST	28H		;; FP_CALC	;x or 0,d.	first pass.
+		DEFB	$E0		;;get-mem-0	;x or 0,d,1.
 		DEFB	$A4		;;stk-ten	;x or 0,d,1,10.
 		DEFB	$05		;;division	;x or 0,d,1/10.
 		DEFB	$C0		;;st-mem-0	;x or 0,d,1/10.
@@ -13379,55 +13338,55 @@ L2CDA	RST	18H		; GET_CHAR
 		DEFB	$38		;;end-calc	last value.
 
 		RST	20H		; NEXT_CHAR  moves to next character
-		JR	L2CDA		; back to NXT-DGT-1
+		JR	NXT_DGT_1	; back to NXT_DGT_1
 
-; although only the first pass is shown it can be seen that at each pass
-; the new less significant digit is multiplied by an increasingly smaller
-; factor (1/100, 1/1000, 1/10000 ... ) before being added to the previous
-; last value to form a new last value.
+					; although only the first pass is shown it can be seen that at each pass
+					; the new less significant digit is multiplied by an increasingly smaller
+					; factor (1/100, 1/1000, 1/10000 ... ) before being added to the previous
+					; last value to form a new last value.
 
-; Finally see if an exponent has been input.
+					; Finally see if an exponent has been input.
 
-					;; E-FORMAT
-L2CEB	CP	$45		; is character 'E' ?
-		JR	Z,L2CF2		; to SIGN-FLAG if so
+					;; $2CEB
+E_FORMAT:	CP	$45		; is character 'E' ?
+		JR	Z,SIGN_FLAG	; to SIGN_FLAG if so
 
 		CP	$65		; 'e' is acceptable as well.
 		RET	NZ		; return as no exponent.
 
-					;; SIGN-FLAG
-L2CF2	LD	B,$FF		; initialize temporary sign byte to $FF
+					;; $2CF2
+SIGN_FLAG:	LD	B,$FF		; initialize temporary sign byte to $FF
 
 		RST	20H		; NEXT_CHAR
 		CP	$2B		; is character '+' ?
-		JR	Z,L2CFE		; to SIGN-DONE
+		JR	Z,SIGN_DONE	; to SIGN_DONE
 
 		CP	$2D		; is character '-' ?
-		JR	NZ,L2CFF		; to ST-E-PART as no sign
+		JR	NZ,ST_E_PART	; to ST_E_PART as no sign
 
 		INC	B		; set sign to zero
 
-; now consider digits of exponent.
-; Note. incidentally this is the only occasion in Spectrum Basic when an
-; expression may not be used when a number is expected.
+					; now consider digits of exponent.
+					; Note. incidentally this is the only occasion in Spectrum Basic when an
+					; expression may not be used when a number is expected.
 
-					;; SIGN-DONE
-L2CFE	RST	20H		; NEXT_CHAR
+					;; $2CFE
+SIGN_DONE:	RST	20H		; NEXT_CHAR
 
-					;; ST-E-PART
-L2CFF	CALL	L2D1B		; routine NUMERIC
-		JR	C,L2CCF		; to DEC-RPT-C if not
+					;; $2CFF
+ST_E_PART:	CALL	NUMERIC		; routine NUMERIC
+		JR	C,DEC_RPT_C	; to DEC_RPT_C if not
 					; raise 'Nonsense in Basic'.
 
 		PUSH	BC		; save sign (in B)
-		CALL	L2D3B		; routine INT-TO-FP places exponent on stack
-		CALL	L2DD5		; routine FP-TO-A  transfers it to A
+		CALL	INT_TO_FP	; routine INT_TO_FP places exponent on stack
+		CALL	L2DD5	; routine FP-TO-A  transfers it to A
 		POP	BC		; restore sign
-		JP	C,L31AD		; to REPORT-6 if overflow (over 255)
+		JP	C,L31AD	; to REPORT-6 if overflow (over 255)
 					; raise 'Number too big'.
 
 		AND	A		; set flags
-		JP	M,L31AD		; to REPORT-6 if over '127'.
+		JP	M,L31AD	; to REPORT-6 if over '127'.
 					; raise 'Number too big'.
 					; 127 is still way too high and it is
 					; impossible to enter an exponent greater
@@ -13436,12 +13395,12 @@ L2CFF	CALL	L2D1B		; routine NUMERIC
 					; error messages depending how high A is.
 
 		INC	B		; $FF to $00 or $00 to $01 - expendable now.
-		JR	Z,L2D18		; forward to E-FP-JUMP if exponent positive
+		JR	Z,E_FP_JUMP	; forward to E_FP_JUMP if exponent positive
 
 		NEG			; Negate the exponent.
 
-					;; E-FP-JUMP
-L2D18	JP	L2D4F		; jump forward to E-TO-FP to assign to
+					;; $2D18
+E_FP_JUMP:	JP	L2D4F	; jump forward to E-TO-FP to assign to
 					; last value x on stack x * 10 to power A
 					; a relative jump would have done.
 
@@ -13451,8 +13410,8 @@ L2D18	JP	L2D4F		; jump forward to E-TO-FP to assign to
 ; This routine checks that the ascii character in A is numeric
 ; returning with carry reset if so.
 
-					;; NUMERIC
-L2D1B	CP	$30		; '0'
+					;; $2D1B
+NUMERIC:	CP	$30		; '0'
 		RET	C		; return if less than zero character.
 
 		CP	$3A		; The upper test is '9'
@@ -13462,11 +13421,11 @@ L2D1B	CP	$30		; '0'
 ;------------
 ; Stack Digit
 ;------------
-; This subroutine is called from INT-TO-FP and DEC-TO-FP to stack a digit
+; This subroutine is called from INT_TO_FP and DEC_TO_FP to stack a digit
 ; on the calculator stack.
 
-					;; STK-DIGIT
-L2D22	CALL	L2D1B		; routine NUMERIC
+					;; $2D22
+STK_DIGIT:	CALL	NUMERIC		; routine NUMERIC
 		RET	C		; return if not numeric character
 
 		SUB	$30		; convert from ascii to digit
@@ -13474,27 +13433,24 @@ L2D22	CALL	L2D1B		; routine NUMERIC
 ;------------------
 ; Stack accumulator
 ;------------------
-;
-;
 
-					;; STACK-A
-L2D28	LD	C,A		; transfer to C
+					;; $2D28
+STACK_A:	LD	C,A		; transfer to C
 		LD	B,$00		; and make B zero
 
 ;-----------------------
 ; Stack BC register pair
 ;-----------------------
-;
 
-					;; STACK-BC
-L2D2B	LD	IY,ERR_NR		; re-initialize ERR_NR
+					;; $2D2B
+STACK_BC:	LD	IY,ERR_NR	; re-initialize ERR_NR
 
 		XOR	A		; clear to signal small integer
 		LD	E,A		; place in E for sign
 		LD	D,C		; LSB to D
 		LD	C,B		; MSB to C
 		LD	B,A		; last byte not used
-		CALL	L2AB6		; routine STK-STORE
+		CALL	STK_STORE	; routine STK_STORE
 
 		RST	28H		;; FP_CALC
 		DEFB	$38		;;end-calc  make HL = STKEND-5
@@ -13509,8 +13465,8 @@ L2D2B	LD	IY,ERR_NR		; re-initialize ERR_NR
 ; on the calculator stack multiplying the previous value by ten each time
 ; before adding in the new digit to form a last value on calculator stack.
 
-					;; INT-TO-FP
-L2D3B	PUSH	AF		; save first character
+					;; $2D3B
+INT_TO_FP:	PUSH	AF		; save first character
 
 		RST	28H		;; FP_CALC
 		DEFB	$A0		;;stk-zero	; v=0. initial value
@@ -13518,8 +13474,8 @@ L2D3B	PUSH	AF		; save first character
 
 		POP	AF		; fetch first character back.
 
-					;; NXT-DGT-2
-L2D40	CALL	L2D22		; routine STK-DIGIT puts 0-9 on stack
+					;; $2D40
+NXT_DGT_2:	CALL	STK_DIGIT	; routine STK_DIGIT puts 0-9 on stack
 		RET	C		; will return when character is not numeric >
 
 		RST	28H		;; FP_CALC	; v, d.
@@ -13529,8 +13485,8 @@ L2D40	CALL	L2D22		; routine STK-DIGIT puts 0-9 on stack
 		DEFB	$0F		;;addition	; d + v*10 = newvalue
 		DEFB	$38		;;end-calc	; v.
 
-		CALL	CH_ADD_1		; routine CH_ADD_1 get next character
-		JR	L2D40		; back to NXT-DGT-2 to process as a digit
+		CALL	CH_ADD_1	; routine CH_ADD_1 get next character
+		JR	NXT_DGT_2	; back to NXT_DGT_2 to process as a digit
 
 
 ;*********************************
@@ -13771,7 +13727,7 @@ L2DC1	LD	D,A		;
 		LD	C,A		;
 		XOR	A		;
 		LD	B,A		;
-		CALL	L2AB6		; routine STK-STORE
+		CALL	STK_STORE	; routine STK_STORE
 
 		RST	28H		;; FP_CALC
 		DEFB	$34		;;stk-data
@@ -14689,7 +14645,7 @@ L30A5	XOR	A		;
 ; literal to perform an integer multiplication in preference to
 ; 32-bit multiplication to which it will resort if this overflows.
 ;
-; It is also used by STK-VAR to calculate array subscripts and by DIM to
+; It is also used by STK_VAR to calculate array subscripts and by DIM to
 ; calculate the space required for multi-dimensional arrays.
 
 					;; HL-HL*DE
@@ -15469,7 +15425,7 @@ L32D7	DEFW	L368F		; $00 Address: $368F - jump-true
 		DEFW	L369B		; $38 Address: $369B - end-calc
 		DEFW	L3783		; $39 Address: $3783 - get-argt
 		DEFW	L3214		; $3A Address: $3214 - truncate
-		DEFW	L33A2		; $3B Address: $33A2 - FP_CALC-2
+		DEFW	L33A2		; $3B Address: $33A2 - FP_CALC_2
 		DEFW	L2D4F		; $3C Address: $2D4F - e-to-fp
 		DEFW	L3297		; $3D Address: $3297 - re-stack
 
@@ -15610,18 +15566,18 @@ L33A1	RET			; return - indirect jump if from above.
 ; this single operation is used, in the first instance, to evaluate most
 ; of the mathematical and string functions found in Basic expressions.
 
-					;; FP_CALC-2
+					;; FP_CALC_2
 L33A2	POP	AF		; drop return address.
 		LD	A,($5C67)	; load accumulator from system variable BREG
 					; value will be literal eg. 'tan'
 		EXX			; switch to alt
 		JR	L336C		; back to SCAN-ENT
-					; next literal will be end-calc at L2758
+					; next literal will be end-calc at $2758
 
 ;-----------------
 ; Test five-spaces
 ;-----------------
-; This routine is called from MOVE-FP, STK-CONST and STK-STORE to
+; This routine is called from MOVE-FP, STK-CONST and STK_STORE to
 ; test that there is enough space between the calculator stack and the
 ; machine stack for another five-byte value. It returns with BC holding
 ; the value 5 ready for any subsequent LDIR.
@@ -16062,7 +16018,7 @@ L34A5	CALL	FIND_INT2		; routine FIND_INT2 puts port address in BC.
 					; all 16 bits are put on the address line.
 		IN	A,(C)		; read the port.
 
-		JR	L34B0		; exit to STACK-A (via IN-PK-STK to save a byte 
+		JR	L34B0		; exit to STACK_A (via IN-PK-STK to save a byte 
 					; of instruction code).
 
 ;--------------------------
@@ -16076,7 +16032,7 @@ L34AC	CALL	FIND_INT2		; routine FIND_INT2 puts address in BC.
 		LD	A,(BC)		; load contents into A register.
 
 					;; IN-PK-STK
-L34B0	JP	L2D28		; exit via STACK-A to put value on the 
+L34B0	JP	STACK_A		; exit via STACK_A to put value on the 
 					; calculator stack.
 
 ;----------------
@@ -16085,20 +16041,20 @@ L34B0	JP	L2D28		; exit via STACK-A to put value on the
 ; The USR function followed by a number 0-65535 is the method by which
 ; the Spectrum invokes machine code programs. This function returns the
 ; contents of the BC register pair.
-; Note. that STACK-BC re-initializes the IY register if a user-written
+; Note. that STACK_BC re-initializes the IY register if a user-written
 ; program has altered it.
 
 					;; usr-no
 L34B3	CALL	FIND_INT2		; routine FIND_INT2 to fetch the
 					; supplied address into BC.
 
-		LD	HL,L2D2B		; address: STACK-BC is
+		LD	HL,STACK_BC		; address: STACK_BC is
 		PUSH	HL		; pushed onto the machine stack.
 		PUSH	BC		; then the address of the machine code
 					; routine.
 
 		RET			; make an indirect jump to the routine
-					; and, hopefully, to STACK-BC also.
+					; and, hopefully, to STACK_BC also.
 
 ;----------------
 ; USR string (19)
@@ -16115,7 +16071,7 @@ L34B3	CALL	FIND_INT2		; routine FIND_INT2 to fetch the
 ; It is highly likely that the first check was written by Steven Vickers.
 
 					;; usr-$
-L34BC	CALL	L2BF1		; routine STK-FETCH fetches the string
+L34BC	CALL	STK_FETCH		; routine STK_FETCH fetches the string
 					; parameters.
 		DEC	BC		; decrease BC by
 		LD	A,B		; one to test
@@ -16123,7 +16079,7 @@ L34BC	CALL	L2BF1		; routine STK-FETCH fetches the string
 		JR	NZ,L34E7		; to REPORT-A if not a single character.
 
 		LD	A,(DE)		; fetch the character
-		CALL	L2C8D		; routine ALPHA sets carry if 'A-Z' or 'a-z'.
+		CALL	ALPHA		; routine ALPHA sets carry if 'A-Z' or 'a-z'.
 		JR	C,L34D3		; forward to USR-RANGE if ascii.
 
 		SUB	$90		; make udgs range 0-20d
@@ -16151,7 +16107,7 @@ L34D3	DEC	A		; make range of bits 0-4 start at zero
 		INC	B		; increment high byte.
 
 					;; USR-STACK
-L34E4	JP	L2D2B		; jump back and exit via STACK-BC to store
+L34E4	JP	STACK_BC		; jump back and exit via STACK_BC to store
 
 					;; REPORT-A
 L34E7	RST	08H		; ERROR_1
@@ -16452,11 +16408,11 @@ L354E	BIT	2,A		; test if a string comparison.
 L3559	RRCA			; 2nd RRCA causes eql/neql to set carry.
 		PUSH	AF		; save A and carry.
 
-		CALL	L2BF1		; routine STK-FETCH gets 2nd string params
+		CALL	STK_FETCH		; routine STK_FETCH gets 2nd string params
 		PUSH	DE		; save start2 *.
 		PUSH	BC		; and the length.
 
-		CALL	L2BF1		; routine STK-FETCH gets 1st string 
+		CALL	STK_FETCH		; routine STK_FETCH gets 1st string 
 					; parameters - start in DE, length in BC.
 		POP	HL		; restore length of second to HL.
 
@@ -16570,12 +16526,12 @@ L358C	POP	AF		; pop carry  - will be set if eql/neql
 ; The two parameters of the two strings to be combined are on the stack.
 
 					;; strs-add
-L359C	CALL	L2BF1		; routine STK-FETCH fetches string parameters
+L359C	CALL	STK_FETCH		; routine STK_FETCH fetches string parameters
 					; and deletes calculator stack entry.
 		PUSH	DE		; save start address.
 		PUSH	BC		; and length.
 
-		CALL	L2BF1		; routine STK-FETCH for first string
+		CALL	STK_FETCH		; routine STK_FETCH for first string
 		POP	HL		; re-fetch first length
 		PUSH	HL		; and save again
 		PUSH	DE		; save start of second string
@@ -16587,7 +16543,7 @@ L359C	CALL	L2BF1		; routine STK-FETCH fetches string parameters
 		RST	30H		; BC_SPACES in workspace.
 					; DE points to start of space.
 
-		CALL	L2AB2		; routine STK-STO-$ stores parameters
+		CALL	STK_STO_D	; routine STK_STO_D stores parameters
 					; of new string updating STKEND.
 
 		POP	BC		; length of first
@@ -16652,7 +16608,7 @@ L35C9	CALL	L2DD5		; routine FP-TO-A puts the number in A.
 
 		LD	(DE),A		; and store in workspace
 
-		CALL	L2AB2		; routine STK-STO-$ stacks descriptor.
+		CALL	STK_STO_D	; routine STK_STO_D stacks descriptor.
 
 		EX	DE,HL		; make HL point to result and DE to STKEND.
 		RET			; return.
@@ -16681,7 +16637,7 @@ L35DE	LD	HL,(CH_ADD)	; fetch value of system variable CH_ADD
 					; or $00 bit 6 = string result.
 		PUSH	AF		; save this mask on the stack
 
-		CALL	L2BF1		; routine STK-FETCH fetches the string operand
+		CALL	STK_FETCH		; routine STK_FETCH fetches the string operand
 					; from calculator stack.
 
 		PUSH	DE		; save the address of the start of the string.
@@ -16698,7 +16654,7 @@ L35DE	LD	HL,(CH_ADD)	; fetch value of system variable CH_ADD
 		DEC	HL		; decrement HL to point to end of new area.
 		LD	(HL),$0D		; insert a carriage return at end.
 		RES	7,(IY+$01)	; update FLAGS  - signal checking syntax.
-		CALL	L24FB		; routine SCANNING evaluates string
+		CALL	SCANNING	; routine SCANNING evaluates string
 					; expression and result.
 
 		RST	18H		; GET_CHAR fetches next character.
@@ -16717,7 +16673,7 @@ L360C	JP	NZ,REPORT_C		; jump back to REPORT_C with a result mismatch.
 
 		LD	(CH_ADD),HL	; set CH_ADD to the start of the string again.
 		SET	7,(IY+$01)	; update FLAGS  - signal running program.
-		CALL	L24FB		; routine SCANNING evaluates the string
+		CALL	SCANNING	; routine SCANNING evaluates the string
 					; in full leaving result on calculator stack.
 
 		POP	HL		; restore saved character address in program.
@@ -16760,7 +16716,7 @@ L361F	LD	BC,$0001		; create an initial byte in workspace
 		LD	B,H		; transfer the length to
 		LD	C,L		; the BC register pair.
 
-		CALL	L2AB2		; routine STK-STO-$ stores string parameters
+		CALL	STK_STO_D	; routine STK_STO_D stores string parameters
 					; on the calculator stack.
 
 		EX	DE,HL		; HL = last value, DE = STKEND.
@@ -16798,7 +16754,7 @@ L3645	CALL	FIND_INT1		; routine FIND_INT1 fetches stream to A
 		LD	(DE),A		; the character is inserted.
 
 					;; R-I-STORE
-L365F	CALL	L2AB2		; routine STK-STO-$ stacks the string
+L365F	CALL	STK_STO_D	; routine STK_STO_D stacks the string
 					; parameters.
 		POP	HL		; restore current channel address
 		CALL	CHAN_FLAG	; routine CHAN_FLAG resets current channel
@@ -16812,7 +16768,7 @@ L365F	CALL	L2AB2		; routine STK-STO-$ stacks the string
 ; e.g. CODE "Aardvark" = 65, CODE "" = 0.
 
 					;; code
-L3669	CALL	L2BF1		; routine STK-FETCH to fetch and delete the
+L3669	CALL	STK_FETCH		; routine STK_FETCH to fetch and delete the
 					; string parameters.
 					; DE points to the start, BC holds the length.
 		LD	A,B		; test length
@@ -16822,7 +16778,7 @@ L3669	CALL	L2BF1		; routine STK-FETCH to fetch and delete the
 		LD	A,(DE)		; else fetch the first character.
 
 					;; STK-CODE
-L3671	JP	L2D28		; jump back to STACK-A (with memory check)
+L3671	JP	STACK_A		; jump back to STACK_A (with memory check)
 
 ;----------------
 ; Handle LEN (1E)
@@ -16832,11 +16788,11 @@ L3671	JP	L2D28		; jump back to STACK-A (with memory check)
 ; so a sixteen-bit register is required to store the length
 
 					;; len
-L3674	CALL	L2BF1		; routine STK-FETCH to fetch and delete the
+L3674	CALL	STK_FETCH		; routine STK_FETCH to fetch and delete the
 					; string parameters from the calculator stack.
 					; register BC now holds the length of string.
 
-		JP	L2D2B		; jump back to STACK-BC to save result on the
+		JP	STACK_BC	; jump back to STACK_BC to save result on the
 					; calculator stack (with memory check).
 
 ;--------------------------
@@ -17097,7 +17053,7 @@ L371C	DEFB	$A0		;;stk-zero
 		LD	A,(HL)		;
 
 		LD	(HL),$80		;
-		CALL	L2D28		; routine STACK-A
+		CALL	STACK_A		; routine STACK_A
 
 		RST	28H		;; FP_CALC
 		DEFB	$34		;;stk-data
