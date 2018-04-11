@@ -170,7 +170,7 @@ ERROR_3:	LD	(IY+$00),L	; store it in the system variable ERR_NR.
 					; or REPORT_G on line entry.
 					; or ED_ERROR when editing.
 					; or ED_FULL during ED_ENTER.
-					; or IN-VAR-1 during runtime input etc.
+					; or IN_VAR_1 during runtime input etc.
 
 		JP	SET_STK		; jump to SET_STK to clear the calculator
 					; stack and reset MEM to usual place in the
@@ -3014,7 +3014,7 @@ PO_CONT:	LD	DE,PRINT_OUT	; Address: PRINT_OUT
 		LD	D,A		; save current character
 		LD	A,L		; the stored control code
 		CP	$16		; was it INK to OVER (1 operand) ?
-		JP	C,L2211		; to CO-TEMP-5
+		JP	C,CO_TEMP_5	; to CO_TEMP_5
 
 		JR	NZ,PO_TAB	; to PO_TAB if not 22d i.e. 23d TAB.
 
@@ -7437,7 +7437,7 @@ P_PRINT:	DEFB	$05		; CLASS_05 - Variable syntax checked entirely by routine.
 
 					;; $1A9F
 P_INPUT:	DEFB	$05		; CLASS_05 - Variable syntax checked entirely by routine.
-		DEFW	L2089		; Address: $2089; Address: INPUT
+		DEFW	INPUT		; Address: $2089; Address: INPUT
 
 					;; $1AA2
 P_DIM:		DEFB	$05		; CLASS_05 - Variable syntax checked entirely by routine.
@@ -7483,7 +7483,7 @@ P_CLS:		DEFB	$00		; CLASS_00 - No further operands.
 					;; $1AC1
 P_PLOT:		DEFB	$09		; CLASS_09 - Two comma-separated numeric expressions required with optional colour items.
 		DEFB	$00		; CLASS_00 - No further operands.
-		DEFW	L22DC		; Address: $22DC; Address: PLOT
+		DEFW	PLOT		; Address: $22DC; Address: PLOT
 
 					;; $1AC5
 P_PAUSE:	DEFB	$06		; CLASS_06 - A numeric expression must follow.
@@ -7505,7 +7505,7 @@ P_RESTORE:	DEFB	$03		; CLASS_03 - A numeric expression may follow else default t
 					;; $1AD2
 P_DRAW:		DEFB	$09		; CLASS_09 - Two comma-separated numeric expressions required with optional colour items.
 		DEFB	$05		; CLASS_05 - Variable syntax checked by routine.
-		DEFW	L2382		; Address: $2382; Address: DRAW
+		DEFW	DRAW		; Address: $2382; Address: DRAW
 
 					;; $1AD6
 P_COPY:		DEFB	$00		; CLASS_00 - No further operands.
@@ -7539,7 +7539,7 @@ P_BEEP:		DEFB	$08		; CLASS_08 - Two comma-separated numeric expressions required
 					;; $1AE7
 P_CIRCLE:	DEFB	$09		; CLASS_09 - Two comma-separated numeric expressions required with optional colour items.
 		DEFB	$05		; CLASS_05 - Variable syntax checked by routine.
-		DEFW	L2320		; Address: $2320; Address: CIRCLE
+		DEFW	CIRCLE		; Address: $2320; Address: CIRCLE
 
 					;; $1AEB
 P_INK:		DEFB	$07		; CLASS_07 - Offset address is converted to colour code.
@@ -7568,7 +7568,7 @@ P_OUT:		DEFB	$08		; CLASS_08 - Two comma-separated numeric expressions required.
 					;; $1AF5
 P_BORDER:	DEFB	$06		; CLASS_06 - A numeric expression must follow.
 		DEFB	$00		; CLASS_00 - No further operands.
-		DEFW	L2294		; Address: $2294; Address: BORDER
+		DEFW	BORDER		; Address: $2294; Address: BORDER
 
 					;; $1AF9
 P_DEF_FN:	DEFB	$05		; CLASS_05 - Variable syntax checked entirely by routine.
@@ -8150,7 +8150,7 @@ CLASS_07:	BIT	7,(IY+$01)	; test FLAGS - checking syntax only ?
 		SUB	P_INK-$D8 % 256 ; convert $EB to $D8 ('INK') etc.
 					; ( is SUB $13 in standard ROM )
 
-		CALL	L21FC		; routine CO-TEMP-4
+		CALL	CO_TEMP_4	; routine CO_TEMP_4
 		CALL	CHECK_END	; routine CHECK_END check that nothing else in statement. 
 
 					; return here in runtime.
@@ -8189,7 +8189,7 @@ CLASS_09:	CALL	L2530		; routine SYNTAX-Z
 		RST	18H		; GET_CHAR
 
 					;; $1CD6
-CL_09_1:	CALL	L21E2		; routine CO-TEMP-2 deals with embedded colour items.
+CL_09_1:	CALL	CO_TEMP_2	; routine CO_TEMP_2 deals with embedded colour items.
 		JR	EXPT_2NUM	; exit via EXPT_2NUM to check for x,y.
 
 ;-----------------
@@ -9277,7 +9277,7 @@ PR_ITEM_1:	RST	18H		; GET_CHAR
 					; calculator stack in runtime. 
 		CALL	UNSTACK_Z	; routine UNSTACK_Z quits if checking syntax.
 
-		CALL	L2307		; routine STK-TO-BC get the numbers in B and C.
+		CALL	STK_TO_BC	; routine STK_TO_BC get the numbers in B and C.
 		LD	A,$16		; prepare the 'at' control.
 		JR	PR_AT_TAB	; forward to PR_AT_TAB to print the sequence.
 
@@ -9305,7 +9305,7 @@ PR_AT_TAB:	RST	10H		; PRINT_A outputs the control
 					; Now consider paper 2; #2; a$
 
 					;; $2024
-PR_ITEM_3:	CALL	L21F2		; routine CO-TEMP-3 will print any colour
+PR_ITEM_3:	CALL	CO_TEMP_3	; routine CO_TEMP_3 will print any colour
 		RET	NC		; items - return if success.
 
 		CALL	STR_ALTER	; routine STR_ALTER considers new stream
@@ -9410,11 +9410,10 @@ STR_ALTER:	CP	$23		; is character '#' ?
 		SCF			; set carry flag.
 		RET	NZ		; return if no match.
 
-
 		RST	20H		; NEXT_CHAR
 		CALL	EXPT_1NUM	; routine EXPT_1NUM gets stream number
 		AND	A		; prepare to exit early with carry reset
-		CALL	UNSTACK_Z		; routine UNSTACK_Z exits early if parsing
+		CALL	UNSTACK_Z	; routine UNSTACK_Z exits early if parsing
 		CALL	FIND_INT1	; routine FIND_INT1 gets number off stack
 		CP	$10		; must be range 0 - 15 decimal.
 		JP	NC,REPORT_OA	; jump back to REPORT_OA if not
@@ -9430,43 +9429,36 @@ STR_ALTER:	CP	$23		; is character '#' ?
 ; This command
 ;
 
-					;; INPUT
-L2089	CALL	L2530		; routine SYNTAX-Z to check if in runtime.
-		JR	Z,L2096		; forward to INPUT-1 if checking syntax.
+					;; $2089
+INPUT:		CALL	L2530		; routine SYNTAX-Z to check if in runtime.
+		JR	Z,INPUT_1	; forward to INPUT_1 if checking syntax.
 
 		LD	A,$01		; select channel 'K' the keyboard for input.
 		CALL	CHAN_OPEN	; routine CHAN_OPEN opens it.
 		CALL	CLS_LOWER	; routine CLS_LOWER clears the lower screen.
 
-					;; INPUT-1
-L2096	LD	(IY+$02),$01	; set TV_FLAG - signal lower screen in use
-					; and clear the other bits.
+					;; $2096
+INPUT_1:	LD	(IY+$02),$01	; set TV_FLAG - signal lower screen in use and clear the other bits.
+		CALL	IN_ITEM_1	; routine IN_ITEM_1 to handle the input.
+		CALL	CHECK_END	; routine CHECK_END will make an early exit  if checking syntax. >>>
 
+					; keyboard input has been made and it remains to adjust the upper
+					; screen in case the lower two lines have been extended upwards.
 
-		CALL	L20C1		; routine IN-ITEM-1 to handle the input.
-
-		CALL	CHECK_END	; routine CHECK_END will make an early exit
-					; if checking syntax. >>>
-
-; keyboard input has been made and it remains to adjust the upper
-; screen in case the lower two lines have been extended upwards.
-
-		LD	BC,(S_POSN)	; fetch S_POSN current line/column of
-					; the upper screen.
-		LD	A,(DF_SZ)	; fetch DF_SZ the display file size of
-					; the lower screen.
+		LD	BC,(S_POSN)	; fetch S_POSN current line/column of the upper screen.
+		LD	A,(DF_SZ)	; fetch DF_SZ the display file size of the lower screen.
 		CP	B		; test that lower screen does not overlap
-		JR	C,L20AD		; forward to INPUT-2 if not.
+		JR	C,INPUT_2	; forward to INPUT_2 if not.
 
-; the two screens overlap so adjust upper screen.
+					; the two screens overlap so adjust upper screen.
 
 		LD	C,$21		; set column of upper screen to leftmost.
 		LD	B,A		; and line to one above lower screen.
 					; continue forward to update upper screen
 					; print position.
 
-					;; INPUT-2
-L20AD	LD	(S_POSN),BC	; set S_POSN update upper screen line/column.
+					;; $20AD
+INPUT_2:	LD	(S_POSN),BC	; set S_POSN update upper screen line/column.
 		LD	A,$19		; subtract from twenty five
 		SUB	B		; the new line number.
 		LD	(SCR_CT),A	; and place result in SCR_CT - scroll count.
@@ -9484,17 +9476,16 @@ L20AD	LD	(S_POSN),BC	; set S_POSN update upper screen line/column.
 ; It is only called from the above INPUT routine but was obviously
 ; once called from somewhere else in another context.
 
-					;; IN-ITEM-1
-L20C1	CALL	PR_POSN_1		; routine PR_POSN_1 deals with a single
+					;; $20C1
+IN_ITEM_1:	CALL	PR_POSN_1	; routine PR_POSN_1 deals with a single
 					; position item at each call.
-		JR	Z,L20C1		; back to IN-ITEM-1 until no more in a
-					; sequence.
+		JR	Z,IN_ITEM_1	; back to IN_ITEM_1 until no more in a sequence.
 
 		CP	$28		; is character '(' ?
-		JR	NZ,L20D8		; forward to IN-ITEM-2 if not.
+		JR	NZ,IN_ITEM_2	; forward to IN_ITEM_2 if not.
 
-; any variables within braces will be treated as part, or all, of the prompt
-; instead of being used as destination variables.
+					; any variables within braces will be treated as part, or all, of the prompt
+					; instead of being used as destination variables.
 
 		RST	20H		; NEXT_CHAR
 		CALL	PRINT_2		; routine PRINT_2 to output the dynamic
@@ -9506,11 +9497,11 @@ L20C1	CALL	PR_POSN_1		; routine PR_POSN_1 deals with a single
 					; 'Nonsense in basic'.
 
 		RST	20H		; NEXT_CHAR
-		JP	L21B2		; forward to IN-NEXT-2
+		JP	IN_NEXT_2	; forward to IN_NEXT_2
 
-					;; IN-ITEM-2
-L20D8	CP	$CA		; is the character the token 'LINE' ?
-		JR	NZ,L20ED	; forward to IN-ITEM-3 if not.
+					;; $20D8
+IN_ITEM_2:	CP	$CA		; is the character the token 'LINE' ?
+		JR	NZ,IN_ITEM_3	; forward to IN_ITEM_3 if not.
 
 		RST	20H		; NEXT_CHAR - variable must come next.
 		CALL	CLASS_01	; routine CLASS_01 returns destination
@@ -9523,22 +9514,22 @@ L20D8	CP	$CA		; is the character the token 'LINE' ?
 		JP	NZ,REPORT_C	; jump back to REPORT_C if not string
 					; 'Nonsense in basic'.
 
-		JR	L20FA		; forward to IN-PROMPT to set up workspace.
+		JR	IN_PROMPT	; forward to IN_PROMPT to set up workspace.
 
-; the jump was here for other variables.
+					; the jump was here for other variables.
 
-					;; IN-ITEM-3
-L20ED	CALL	L2C8D		; routine ALPHA checks if character is
+					;; $20ED
+IN_ITEM_3:	CALL	L2C8D		; routine ALPHA checks if character is
 					; a suitable variable name.
-		JP	NC,L21AF		; forward to IN-NEXT-1 if not
+		JP	NC,IN_NEXT_1	; forward to IN_NEXT_1 if not
 
-		CALL	CLASS_01		; routine CLASS_01 returns destination
+		CALL	CLASS_01	; routine CLASS_01 returns destination
 					; address of variable to be assigned.
 		RES	7,(IY+$37)	; update FLAGX  - signal not INPUT LINE.
 
-					;; IN-PROMPT
-L20FA	CALL	L2530		; routine SYNTAX-Z
-		JP	Z,L21B2		; forward to IN-NEXT-2 if checking syntax.
+					;; $20FA
+IN_PROMPT:	CALL	L2530		; routine SYNTAX-Z
+		JP	Z,IN_NEXT_2	; forward to IN_NEXT_2 if checking syntax.
 
 		CALL	SET_WORK	; routine SET_WORK clears workspace.
 		LD	HL,FLAGX	; point to system variable FLAGX
@@ -9547,39 +9538,36 @@ L20FA	CALL	L2530		; routine SYNTAX-Z
 		LD	BC,$0001	; initialize space required to one for
 					; the carriage return.
 		BIT	7,(HL)		; test FLAGX - INPUT LINE in use ?
-		JR	NZ,L211C	; forward to IN-PR-2 if so as that is
-					; all the space that is required.
+		JR	NZ,IN_PR_2	; forward to IN_PR_2 if so as that is  all the space that is required.
 
 		LD	A,(FLAGS)	; load accumulator from FLAGS
-		AND	$40		; mask to test BIT 6 of FLAGS and clear
-					; the other bits in A.
+		AND	$40		; mask to test BIT 6 of FLAGS and clear the other bits in A.
 					; numeric result expected ?
-		JR	NZ,L211A	; forward to IN-PR-1 if so
+		JR	NZ,IN_PR_1	; forward to IN_PR_1 if so
 
-		LD	C,$03		; increase space to three bytes for the
-					; pair of surrounding quotes.
+		LD	C,$03		; increase space to three bytes for the pair of surrounding quotes.
 
-					;; IN-PR-1
-L211A	OR	(HL)		; if numeric result, set bit 6 of FLAGX.
+					;; $211A
+IN_PR_1:	OR	(HL)		; if numeric result, set bit 6 of FLAGX.
 		LD	(HL),A		; and update system variable
 
-					;; IN-PR-2
-L211C	RST	30H		; BC_SPACES opens 1 or 3 bytes in workspace
+					;; $211C
+IN_PR_2:	RST	30H		; BC_SPACES opens 1 or 3 bytes in workspace
 		LD	(HL),$0D	; insert carriage return at last new location.
 		LD	A,C		; fetch the length, one or three.
 		RRCA			; lose bit 0.
 		RRCA			; test if quotes required.
-		JR	NC,L2129	; forward to IN-PR-3 if not.
+		JR	NC,IN_PR_3	; forward to IN_PR_3 if not.
 
 		LD	A,$22		; load the '"' character
 		LD	(DE),A		; place quote in first new location at DE.
 		DEC	HL		; decrease HL - from carriage return.
 		LD	(HL),A		; and place a quote in second location.
 
-					;; IN-PR-3
-L2129	LD	(K_CUR),HL	; set keyboard cursor K_CUR to HL
+					;; $2129
+IN_PR_3:	LD	(K_CUR),HL	; set keyboard cursor K_CUR to HL
 		BIT	7,(IY+$37)	; test FLAGX  - is this INPUT LINE ??
-		JR	NZ,L215E		; forward to IN-VAR-3 if so as input will
+		JR	NZ,IN_VAR_3	; forward to IN_VAR_3 if so as input will
 					; be accepted without checking it's syntax.
 
 		LD	HL,(CH_ADD)	; fetch CH_ADD
@@ -9587,17 +9575,16 @@ L2129	LD	(K_CUR),HL	; set keyboard cursor K_CUR to HL
 		LD	HL,(ERR_SP)	; fetch ERR_SP
 		PUSH	HL		; and save on stack
 
-					;; IN-VAR-1
-L213A	LD	HL,L213A		; address: IN-VAR-1 - this address
+					;; $213A
+IN_VAR_1:	LD	HL,IN_VAR_1	; address: IN_VAR_1 - this address
 		PUSH	HL		; is saved on stack to handle errors.
 		BIT	4,(IY+$30)	; test FLAGS2  - is K channel in use ?
-		JR	Z,L2148		; forward to IN-VAR-2 if not using the
-					; keyboard for input. (??)
+		JR	Z,IN_VAR_2	; forward to IN_VAR_2 if not using the keyboard for input. (??)
 
-		LD	(ERR_SP),SP	; set ERR_SP to point to IN-VAR-1 on stack.
+		LD	(ERR_SP),SP	; set ERR_SP to point to IN_VAR_1 on stack.
 
-					;; IN-VAR-2
-L2148	LD	HL,(WORKSP)	; set HL to WORKSP - start of workspace.
+					;; $2148
+IN_VAR_2:	LD	HL,(WORKSP)	; set HL to WORKSP - start of workspace.
 		CALL	REMOVE_FP	; routine REMOVE_FP removes floating point
 					; forms when looping in error condition.
 		LD	(IY+$00),$FF	; set ERR_NR to 'OK' cancelling the error.
@@ -9606,41 +9593,40 @@ L2148	LD	HL,(WORKSP)	; set HL to WORKSP - start of workspace.
 		CALL	EDITOR		; routine EDITOR allows input to be entered
 					; or corrected if this is second time around.
 
-; if we pass to next then there are no system errors
+					; if we pass to next then there are no system errors
 
 		RES	7,(IY+$01)	; update FLAGS  - signal checking syntax
-		CALL	L21B9		; routine IN-ASSIGN checks syntax using
+		CALL	IN_ASSIGN	; routine IN_ASSIGN checks syntax using
 					; the VAL_FET_2 and powerful SCANNING routines.
-					; any syntax error and it's back to IN-VAR-1.
+					; any syntax error and it's back to IN_VAR_1.
 					; but with the flashing error marker showing
 					; where the error is.
 					; Note. the syntax of string input has to be
 					; checked as the user may have removed the
 					; bounding quotes or escaped them as with
 					; "hat" + "stand" for example.
-; proceed if syntax passed.
+					; proceed if syntax passed.
 
-		JR	L2161		; jump forward to IN-VAR-4
+		JR	IN_VAR_4	; jump forward to IN_VAR_4
 
-; the jump was to here when using INPUT LINE.
+					; the jump was to here when using INPUT LINE.
 
-					;; IN-VAR-3
-L215E	CALL	EDITOR		; routine EDITOR is called for input
+					;; $215E
+IN_VAR_3:	CALL	EDITOR		; routine EDITOR is called for input
 
-; when ENTER received rejoin other route but with no syntax check.
+					; when ENTER received rejoin other route but with no syntax check.
 
-; INPUT and INPUT LINE converge here.
+					; INPUT and INPUT LINE converge here.
 
-					;; IN-VAR-4
-L2161	LD	(IY+$22),$00	; set K_CUR_hi to a low value so that the cursor
+					;; $2161
+IN_VAR_4:	LD	(IY+$22),$00	; set K_CUR_hi to a low value so that the cursor
 					; no longer appears in the input line.
 
-		CALL	L21D6		; routine IN-CHAN-K tests if the keyboard
+		CALL	IN_CHAN_K	; routine IN_CHAN_K tests if the keyboard
 					; is being used for input.
-		JR	NZ,L2174		; forward to IN-VAR-5 if using another input 
-					; channel.
+		JR	NZ,IN_VAR_5	; forward to IN_VAR_5 if using another input channel.
 
-; continue here if using the keyboard.
+					; continue here if using the keyboard.
 
 		CALL	ED_COPY		; routine ED_COPY overprints the edit line
 					; to the lower screen. The only visible
@@ -9649,27 +9635,24 @@ L2161	LD	(IY+$22),$00	; set K_CUR_hi to a low value so that the cursor
 					; a statement then that becomes apparent.
 
 		LD	BC,(ECHO_E)	; fetch line and column from ECHO_E
-		CALL	CL_SET		; routine CL_SET sets S-POSNL to those
-					; values.
+		CALL	CL_SET		; routine CL_SET sets S-POSNL to those values.
 
-; if using another input channel rejoin here.
+					; if using another input channel rejoin here.
 
-					;; IN-VAR-5
-L2174	LD	HL,FLAGX		; point HL to FLAGX
+					;; $2174
+IN_VAR_5:	LD	HL,FLAGX	; point HL to FLAGX
 		RES	5,(HL)		; signal not in input mode
 		BIT	7,(HL)		; is this INPUT LINE ?
 		RES	7,(HL)		; cancel the bit anyway.
-		JR	NZ,L219B		; forward to IN-VAR-6 if INPUT LINE.
+		JR	NZ,IN_VAR_6	; forward to IN_VAR_6 if INPUT LINE.
 
 		POP	HL		; drop the looping address
-		POP	HL		; drop the the address of previous
-					; error handler.
+		POP	HL		; drop the the address of previous error handler.
 		LD	(ERR_SP),HL	; set ERR_SP to point to it.
-		POP	HL		; drop original CH_ADD which points to
-					; INPUT command in BASIC line.
+		POP	HL		; drop original CH_ADD which points to INPUT command in BASIC line.
 		LD	(X_PTR),HL	; save in X_PTR while input is assigned.
 		SET	7,(IY+$01)	; update FLAGS - Signal running program
-		CALL	L21B9		; routine IN-ASSIGN is called again
+		CALL	IN_ASSIGN	; routine IN_ASSIGN is called again
 					; this time the variable will be assigned
 					; the input value without error.
 					; Note. the previous example now
@@ -9678,36 +9661,36 @@ L2174	LD	HL,FLAGX		; point HL to FLAGX
 		LD	HL,(X_PTR)	; fetch stored CH_ADD value from X_PTR.
 		LD	(IY+$26),$00	; set X_PTR_HI so that no longer relevant.
 		LD	(CH_ADD),HL	; put restored value back in CH_ADD
-		JR	L21B2		; forward to IN-NEXT-2 to see if anything
+		JR	IN_NEXT_2	; forward to IN_NEXT_2 to see if anything
 					; more in the INPUT list.
 
-; the jump was to here with INPUT LINE only
+					; the jump was to here with INPUT LINE only
 
-					;; IN-VAR-6
-L219B	LD	HL,(STKBOT)	; STKBOT points to the end of the input.
+					;; $219B
+IN_VAR_6:	LD	HL,(STKBOT)	; STKBOT points to the end of the input.
 		LD	DE,(WORKSP)	; WORKSP points to the beginning.
 		SCF			; prepare for true subtraction.
 		SBC	HL,DE		; subtract to get length
 		LD	B,H		; transfer it to
 		LD	C,L		; the BC register pair.
-		CALL	L2AB2		; routine STK-STO-$ stores parameters on
+		CALL	L2AB2	; routine STK-STO-$ stores parameters on
 					; the calculator stack.
-		CALL	L2AFF		; routine LET assigns it to destination.
-		JR	L21B2		; forward to IN-NEXT-2 as print items
+		CALL	L2AFF	; routine LET assigns it to destination.
+		JR	IN_NEXT_2	; forward to IN_NEXT_2 as print items
 					; not allowed with INPUT LINE.
 					; Note. that "hat" + "stand" will, for
 					; example, be unchanged as also would
 					; 'PRINT "Iris was here"'.
 
-; the jump was to here when ALPHA found more items while looking for
-; a variable name.
+					; the jump was to here when ALPHA found more items while looking for
+					; a variable name.
 
-					;; IN-NEXT-1
-L21AF	CALL	PR_ITEM_1		; routine PR_ITEM_1 considers further items.
+					;; $21AF
+IN_NEXT_1:	CALL	PR_ITEM_1	; routine PR_ITEM_1 considers further items.
 
-					;; IN-NEXT-2
-L21B2	CALL	PR_POSN_1		; routine PR_POSN_1 handles a position item.
-		JP	Z,L20C1		; jump back to IN-ITEM-1 if the zero flag
+					;; $21B2
+IN_NEXT_2:	CALL	PR_POSN_1	; routine PR_POSN_1 handles a position item.
+		JP	Z,IN_ITEM_1	; jump back to IN_ITEM_1 if the zero flag
 					; indicates more items are present.
 
 		RET			; return.
@@ -9720,13 +9703,13 @@ L21B2	CALL	PR_POSN_1		; routine PR_POSN_1 handles a position item.
 ; using SCANNING. The final call with the syntax flag reset is to make
 ; the assignment.
 
-					;; IN-ASSIGN
-L21B9	LD	HL,(WORKSP)	; fetch WORKSP start of input
+					;; $21B9
+IN_ASSIGN:	LD	HL,(WORKSP)	; fetch WORKSP start of input
 		LD	(CH_ADD),HL	; set CH_ADD to first character
 
 		RST	18H		; GET_CHAR ignoring leading white-space.
 		CP	$E2		; is it 'STOP'
-		JR	Z,L21D0		; forward to IN-STOP if so.
+		JR	Z,IN_STOP	; forward to IN_STOP if so.
 
 		LD	A,(FLAGX)	; load accumulator from FLAGX
 		CALL	VAL_FET_2	; routine VAL_FET_2 makes assignment
@@ -9739,23 +9722,23 @@ L21B9	LD	HL,(WORKSP)	; fetch WORKSP start of input
 					; either syntax is OK
 					; or assignment has been made.
 
-; if another character was found then raise an error.
-; User doesn't see report but the flashing error marker
-; appears in the lower screen.
+					; if another character was found then raise an error.
+					; User doesn't see report but the flashing error marker
+					; appears in the lower screen.
 
-					;; REPORT-Cb
-L21CE	RST	08H		; ERROR_1
+					;; $21CE
+REPORT_CB:	RST	08H		; ERROR_1
 		DEFB	$0B		; Error Report: Nonsense in BASIC
 
-					;; IN-STOP
-L21D0	CALL	L2530		; routine SYNTAX-Z (UNSTACK_Z?)
+					;; $21D0
+IN_STOP:	CALL	L2530		; routine SYNTAX-Z (UNSTACK_Z?)
 		RET	Z		; return if checking syntax
 					; as user wouldn't see error report.
 					; but generate visible error report
 					; on second invocation.
 
-					;; REPORT-H
-L21D4	RST	08H		; ERROR_1
+					;; $21D4
+REPORT_H:	RST	08H		; ERROR_1
 		DEFB	$10		; Error Report: STOP in INPUT
 
 ;-------------------
@@ -9765,9 +9748,9 @@ L21D4	RST	08H		; ERROR_1
 ; INPUT command to check if the input routine in
 ; use is the one for the keyboard.
 
-					;; IN-CHAN-K
-L21D6	LD	HL,(CURCHL)	; fetch address of current channel CURCHL
-		INC	HL		;
+					;; $21D6
+IN_CHAN_K:	LD	HL,(CURCHL)	; fetch address of current channel CURCHL
+		INC	HL
 		INC	HL		; advance past
 		INC	HL		; input and
 		INC	HL		; output streams
@@ -9780,9 +9763,9 @@ L21D6	LD	HL,(CURCHL)	; fetch address of current channel CURCHL
 ;---------------------
 ;
 ; These routines have 3 entry points -
-; 1) CO-TEMP-2 to handle a series of embedded Graphic colour items.
-; 2) CO-TEMP-3 to handle a single embedded print colour item.
-; 3) CO TEMP-4 to handle a colour command such as FLASH 1
+; 1) CO_TEMP_2 to handle a series of embedded Graphic colour items.
+; 2) CO_TEMP_3 to handle a single embedded print colour item.
+; 3) CO_TEMP_4 to handle a colour command such as FLASH 1
 ;
 ; "Due to a bug, if you bring in a peripheral channel and later use a colour
 ;  statement, colour controls will be sent to it by mistake." - Steven Vickers
@@ -9800,30 +9783,30 @@ L21D6	LD	HL,(CURCHL)	; fetch address of current channel CURCHL
 ; PRINT_OUT the current channel when not checking syntax.
 ; -----------------------------------------------------------------
 
-					;; CO-TEMP-1
-L21E1	RST	20H		; NEXT_CHAR
+					;; $21E1
+CO_TEMP_1:	RST	20H		; NEXT_CHAR
 
-; -> Entry point from CLASS_09. Embedded Graphic colour items.
-; e.g. PLOT INK 2; PAPER 8; 128,88
-; Loops till all colour items output, finally addressing the coordinates.
+					; -> Entry point from CLASS_09. Embedded Graphic colour items.
+					; e.g. PLOT INK 2; PAPER 8; 128,88
+					; Loops till all colour items output, finally addressing the coordinates.
 
-					;; CO-TEMP-2
-L21E2	CALL	L21F2		; routine CO-TEMP-3 to output colour control.
+					;; $21E2
+CO_TEMP_2:	CALL	CO_TEMP_3	; routine CO_TEMP_3 to output colour control.
 		RET	C		; return if nothing more to output. ->
 
 
 		RST	18H		; GET_CHAR
 		CP	$2C		; is it ',' separator ?
-		JR	Z,L21E1		; back if so to CO-TEMP-1
+		JR	Z,CO_TEMP_1	; back if so to CO_TEMP_1
 
 		CP	$3B		; is it ';' separator ?
-		JR	Z,L21E1		; back to CO-TEMP-1 for more.
+		JR	Z,CO_TEMP_1	; back to CO_TEMP_1 for more.
 
-		JP	REPORT_C	; to REPORT_C (REPORT-Cb is within range)
+		JP	REPORT_C	; to REPORT_C (REPORT_CB is within range)
 					; 'Nonsense in Basic'
 
 ; -------------------
-; CO-TEMP-3
+; CO_TEMP_3
 ; -------------------
 ; -> this routine evaluates and outputs a colour control and parameter.
 ; It is called from above and also from PR_ITEM_3 to handle a single embedded
@@ -9831,8 +9814,8 @@ L21E2	CALL	L21F2		; routine CO-TEMP-3 to output colour control.
 ; multiple items is within the PR-ITEM routine.
 ; It is quite permissible to send these to any stream.
 
-					;; CO-TEMP-3
-L21F2	CP	$D9		; is it 'INK' ?
+					;; $21F2
+CO_TEMP_3:	CP	$D9		; is it 'INK' ?
 		RET	C		; return if less.
 
 		CP	$DF		; compare with 'OUT'
@@ -9844,18 +9827,17 @@ L21F2	CP	$D9		; is it 'INK' ?
 		RST	20H		; address NEXT_CHAR
 		POP	AF		; restore token and continue.
 
-; -> this entry point used by CLASS_07. e.g. the command PAPER 6.
+					; -> this entry point used by CLASS_07. e.g. the command PAPER 6.
 
-					;; CO-TEMP-4
-L21FC	SUB	$C9		; reduce to control character $10 (INK)
-					; thru $15 (OVER).
+					;; $21FC
+CO_TEMP_4:	SUB	$C9		; reduce to control character $10 (INK) thru $15 (OVER).
 		PUSH	AF		; save control.
 		CALL	EXPT_1NUM	; routine EXPT_1NUM stacks addressed
 					; parameter on calculator stack.
 		POP	AF		; restore control.
 		AND	A		; clear carry
 
-		CALL	UNSTACK_Z		; routine UNSTACK_Z returns if checking syntax.
+		CALL	UNSTACK_Z	; routine UNSTACK_Z returns if checking syntax.
 
 		PUSH	AF		; save again
 		CALL	FIND_INT1	; routine FIND_INT1 fetches parameter to A.
@@ -9871,30 +9853,31 @@ L21FC	SUB	$C9		; reduce to control character $10 (INK)
 
 ; -------------------------------------------------------------------------
 ;
-;		 {fl}{br}{	paper	}{  ink	}	The temporary colour attributes
-;		___ ___ ___ ___ ___ ___ ___ ___	system variable.
-; ATTR_T  |	|	|	|	|	|	|	|	|
-;		 |	|	|	|	|	|	|	|	|
-; 23695	|___|___|___|___|___|___|___|___|
-;		7	6	5	4	3	2	1	0
+;         {fl}{br}{   paper   }{  ink    }    The temporary colour attributes
+;          ___ ___ ___ ___ ___ ___ ___ ___    system variable.
+; ATTR_T  |   |   |   |   |   |   |   |   |
+;         |   |   |   |   |   |   |   |   |
+; 23695   |___|___|___|___|___|___|___|___|
+;           7   6   5   4   3   2   1   0
 ;
 ;
-;		 {fl}{br}{	paper	}{  ink	}	The temporary mask used for
-;		___ ___ ___ ___ ___ ___ ___ ___	transparent colours. Any bit
-; MASK_T  |	|	|	|	|	|	|	|	|	that is 1 shows that the
-;		 |	|	|	|	|	|	|	|	|	corresponding attribute is
-; 23696	|___|___|___|___|___|___|___|___|	taken not from ATTR-T but from
-;		7	6	5	4	3	2	1	0	what is already on the screen.
+;         {fl}{br}{   paper   }{  ink    }    The temporary mask used for
+;          ___ ___ ___ ___ ___ ___ ___ ___    transparent colours. Any bit
+; MASK_T  |   |   |   |   |   |   |   |   |   that is 1 shows that the
+;         |   |   |   |   |   |   |   |   |   corresponding attribute is
+; 23696   |___|___|___|___|___|___|___|___|   taken not from ATTR-T but from
+;           7   6   5   4   3   2   1   0     what is already on the screen.
 ;
 ;
-;		 {paper9 }{ ink9 }{ inv1 }{ over1}	The print flags. Even bits are
-;		___ ___ ___ ___ ___ ___ ___ ___	temporary flags. The odd bits
-; P_FLAG  |	|	|	|	|	|	|	|	|	are the permanent flags.
-;		 | p | t | p | t | p | t | p | t |
-; 23697	|___|___|___|___|___|___|___|___|
-;		7	6	5	4	3	2	1	0
+;         {paper9 }{ ink9 }{ inv1 }{ over1}   The print flags. Even bits are
+;          ___ ___ ___ ___ ___ ___ ___ ___    temporary flags. The odd bits
+; P_FLAG  |   |   |   |   |   |   |   |   |   are the permanent flags.
+;         | p | t | p | t | p | t | p | t |
+; 23697   |___|___|___|___|___|___|___|___|
+;           7   6   5   4   3   2   1   0
 ;
 ; -----------------------------------------------------------------------
+
 
 ; ------------------------------------
 ;  The colour system variable handler.
@@ -9904,93 +9887,93 @@ L21FC	SUB	$C9		; reduce to control character $10 (INK)
 ; D holds parameter 0-9 for ink/paper 0,1 or 8 for bright/flash,
 ; 0 or 1 for over/inverse.
 
-					;; CO-TEMP-5
-L2211	SUB	$11		; reduce range $FF-$04
+					;; $2211
+CO_TEMP_5:	SUB	$11		; reduce range $FF-$04
 		ADC	A,$00		; add in carry if INK
-		JR	Z,L2234		; forward to CO-TEMP-7 with INK and PAPER.
+		JR	Z,CO_TEMP_7	; forward to CO_TEMP_7 with INK and PAPER.
 
 		SUB	$02		; reduce range $FF-$02
 		ADC	A,$00		; add carry if FLASH
-		JR	Z,L2273		; forward to CO-TEMP-C with FLASH and BRIGHT.
+		JR	Z,CO_TEMP_C	; forward to CO_TEMP_C with FLASH and BRIGHT.
 
 		CP	$01		; is it 'INVERSE' ?
 		LD	A,D		; fetch parameter for INVERSE/OVER
 		LD	B,$01		; prepare OVER mask setting bit 0.
-		JR	NZ,L2228		; forward to CO-TEMP-6 if OVER
+		JR	NZ,CO_TEMP_6	; forward to CO_TEMP_6 if OVER
 
 		RLCA			; shift bit 0
 		RLCA			; to bit 2
 		LD	B,$04		; set bit 2 of mask for inverse.
 
-					;; CO-TEMP-6
-L2228	LD	C,A		; save the A
+					;; $2228
+CO_TEMP_6:	LD	C,A		; save the A
 		LD	A,D		; re-fetch parameter
 		CP	$02		; is it less than 2
-		JR	NC,L2244		; to REPORT-K if not 0 or 1.
+		JR	NC,REPORT_K	; to REPORT_K if not 0 or 1.
 					; 'Invalid colour'.
 
 		LD	A,C		; restore A
-		LD	HL,P_FLAG		; address system variable P_FLAG
-		JR	L226C		; forward to exit via routine CO-CHANGE
+		LD	HL,P_FLAG	; address system variable P_FLAG
+		JR	CO_CHANGE	; forward to exit via routine CO_CHANGE
 
-; the branch was here with INK/PAPER and carry set for INK.
+					; the branch was here with INK/PAPER and carry set for INK.
 
-					;; CO-TEMP-7
-L2234	LD	A,D		; fetch parameter
+					;; $2234
+CO_TEMP_7:	LD	A,D		; fetch parameter
 		LD	B,$07		; set ink mask 00000111
-		JR	C,L223E		; forward to CO-TEMP-8 with INK
+		JR	C,CO_TEMP_8	; forward to CO_TEMP_8 with INK
 
 		RLCA			; shift bits 0-2
 		RLCA			; to
 		RLCA			; bits 3-5
 		LD	B,$38		; set paper mask 00111000
 
-; both paper and ink rejoin here
+					; both paper and ink rejoin here
 
-					;; CO-TEMP-8
-L223E	LD	C,A		; value to C
+					;; $223E
+CO_TEMP_8:	LD	C,A		; value to C
 		LD	A,D		; fetch parameter
 		CP	$0A		; is it less than 10d ?
-		JR	C,L2246		; forward to CO-TEMP-9 if so.
+		JR	C,CO_TEMP_9	; forward to CO_TEMP_9 if so.
 
-; ink 10 etc. is not allowed.
+					; ink 10 etc. is not allowed.
 
-					;; REPORT-K
-L2244	RST	08H		; ERROR_1
+					;; $2244
+REPORT_K:	RST	08H		; ERROR_1
 		DEFB	$13		; Error Report: Invalid colour
 
-					;; CO-TEMP-9
-L2246	LD	HL,ATTRT_MASKT		; address system variable ATTR_T initially.
+					;; $2246
+CO_TEMP_9:	LD	HL,ATTRT_MASKT	; address system variable ATTR_T initially.
 		CP	$08		; compare with 8
-		JR	C,L2258		; forward to CO-TEMP-B with 0-7.
+		JR	C,CO_TEMP_B	; forward to CO_TEMP_B with 0-7.
 
 		LD	A,(HL)		; fetch temporary attribute as no change.
-		JR	Z,L2257		; forward to CO-TEMP-A with INK/PAPER 8
+		JR	Z,CO_TEMP_A	; forward to CO_TEMP_A with INK/PAPER 8
 
-; it is either ink 9 or paper 9 (contrasting)
+					; it is either ink 9 or paper 9 (contrasting)
 
 		OR	B		; or with mask to make white
 		CPL			; make black and change other to dark
 		AND	$24		; 00100100
-		JR	Z,L2257		; forward to CO-TEMP-A if black and
+		JR	Z,CO_TEMP_A	; forward to CO_TEMP_A if black and
 					; originally light.
 
 		LD	A,B		; else just use the mask (white)
 
-					;; CO-TEMP-A
-L2257	LD	C,A		; save A in C
+					;; $2257
+CO_TEMP_A:	LD	C,A		; save A in C
 
-					;; CO-TEMP-B
-L2258	LD	A,C		; load colour to A
-		CALL	L226C		; routine CO-CHANGE addressing ATTR-T
+					;; $2258
+CO_TEMP_B:	LD	A,C		; load colour to A
+		CALL	CO_CHANGE	; routine CO_CHANGE addressing ATTR-T
 
 		LD	A,$07		; put 7 in accumulator
 		CP	D		; compare with parameter
 		SBC	A,A		; $00 if 0-7, $FF if 8
-		CALL	L226C		; routine CO-CHANGE addressing MASK-T
+		CALL	CO_CHANGE	; routine CO_CHANGE addressing MASK-T
 					; mask returned in A.
 
-; now consider P-FLAG.
+					; now consider P-FLAG.
 
 		RLCA			; 01110000 or 00001110
 		RLCA			; 11100000 or 00011100
@@ -10009,8 +9992,8 @@ L2258	LD	A,C		; load colour to A
 ; This routine addresses a system variable ATTR_T, MASK_T or P-FLAG in HL.
 ; colour value in A, mask in B.
 
-					;; CO-CHANGE
-L226C	XOR	(HL)		; impress bits specified
+					;; $226C
+CO_CHANGE:	XOR	(HL)		; impress bits specified
 		AND	B		; by mask
 		XOR	(HL)		; on system variable.
 		LD	(HL),A		; update system variable.
@@ -10018,39 +10001,37 @@ L226C	XOR	(HL)		; impress bits specified
 		LD	A,B		; put current value of mask in A
 		RET			; return.
 
+					; the branch was here with flash and bright
 
-; the branch was here with flash and bright
-
-
-					;; CO-TEMP-C
-L2273	SBC	A,A		; set zero flag for bright.
+					;; $2273
+CO_TEMP_C:	SBC	A,A		; set zero flag for bright.
 		LD	A,D		; fetch original parameter 0,1 or 8
 		RRCA			; rotate bit 0 to bit 7
 		LD	B,$80		; mask for flash 10000000
-		JR	NZ,L227D		; forward to CO-TEMP-D if flash
+		JR	NZ,CO_TEMP_D	; forward to CO_TEMP_D if flash
 
 		RRCA			; rotate bit 7 to bit 6
 		LD	B,$40		; mask for bright 01000000
 
-					;; CO-TEMP-D
-L227D	LD	C,A		; store value in C
+					;; $227D
+CO_TEMP_D:	LD	C,A		; store value in C
 		LD	A,D		; fetch parameter
 		CP	$08		; compare with 8
-		JR	Z,L2287		; forward to CO-TEMP-E if 8
+		JR	Z,CO_TEMP_E	; forward to CO_TEMP_E if 8
 
 		CP	$02		; test if 0 or 1
-		JR	NC,L2244		; back to REPORT-K if not
+		JR	NC,REPORT_K	; back to REPORT_K if not
 					; 'Invalid colour'
 
-					;; CO-TEMP-E
-L2287	LD	A,C		; value to A
+					;; $2287
+CO_TEMP_E:	LD	A,C		; value to A
 		LD	HL,ATTRT_MASKT	; address ATTR_T
-		CALL	L226C		; routine CO-CHANGE addressing ATTR_T
+		CALL	CO_CHANGE	; routine CO_CHANGE addressing ATTR_T
 		LD	A,C		; fetch value
 		RRCA			; for flash8/bright8 complete
 		RRCA			; rotations to put set bit in
 		RRCA			; bit 7 (flash) bit 6 (bright)
-		JR	L226C		; back to CO-CHANGE addressing MASK_T
+		JR	CO_CHANGE	; back to CO_CHANGE addressing MASK_T
 					; and indirect return.
 
 ;----------------------
@@ -10060,10 +10041,10 @@ L2287	LD	A,C		; value to A
 ; This command routine sets the border to one of the eight colours.
 ; The colours used for the lower screen are based on this.
 
-					;; BORDER
-L2294	CALL	FIND_INT1		; routine FIND_INT1
+					;; $2294
+BORDER:		CALL	FIND_INT1	; routine FIND_INT1
 		CP	$08		; must be in range 0 (black) to 7 (white)
-		JR	NC,L2244	; back to REPORT-K if not
+		JR	NC,REPORT_K	; back to REPORT_K if not
 					; 'Invalid colour'.
 
 		OUT	($FE),A		; outputting to port effects an immediate
@@ -10073,31 +10054,29 @@ L2294	CALL	FIND_INT1		; routine FIND_INT1
 		RLCA			; ink colour black.
 		BIT	5,A		; is the number light coloured ?
 					; i.e. in the range green to white.
-		JR	NZ,L22A6		; skip to BORDER-1 if so
+		JR	NZ,BORDER_1	; skip to BORDER_1 if so
 
 		XOR	$07		; make the ink white.
 
-					;; BORDER-1
-L22A6	LD	(BORDCR),A	; update BORDCR with new paper/ink
+					;; $22A6
+BORDER_1:	LD	(BORDCR),A	; update BORDCR with new paper/ink
 		RET			; return.
 
 ;------------------
 ; Get pixel address
 ;------------------
-;
-;
 
-					;; PIXEL-ADD
-L22AA	LD	A,$AF		; load with 175 decimal.
+					;; $22AA
+PIXEL_ADD:	LD	A,$AF		; load with 175 decimal.
 		SUB	B		; subtract the y value.
-		JP	C,L24F9		; jump forward to REPORT-Bc if greater.
+		JP	C,REPORT_BC	; jump forward to REPORT_BC if greater.
 					; 'Integer out of range'
 
-; the high byte is derived from Y only.
-; the first 3 bits are always 010
-; the next 2 bits denote in which third of the screen the byte is.
-; the last 3 bits denote in which of the 8 scan lines within a third
-; the byte is located. There are 24 discrete values.
+					; the high byte is derived from Y only.
+					; the first 3 bits are always 010
+					; the next 2 bits denote in which third of the screen the byte is.
+					; the last 3 bits denote in which of the 8 scan lines within a third
+					; the byte is located. There are 24 discrete values.
 
 
 		LD	B,A		; the line number from top of screen to B.
@@ -10108,17 +10087,17 @@ L22AA	LD	A,$AF		; load with 175 decimal.
 		AND	A		; clear carry flag
 		RRA			;			010xxxxx
 
-		XOR	B		;
+		XOR	B
 		AND	$F8		; keep the top 5 bits	11111000
 		XOR	B		;			010xxbbb
 		LD	H,A		; transfer high byte to H.
 
-; the low byte is derived from both X and Y.
+					; the low byte is derived from both X and Y.
 
 		LD	A,C		; the x value 0-255.
-		RLCA			;
-		RLCA			;
-		RLCA			;
+		RLCA
+		RLCA
+		RLCA
 		XOR	B		; the y value
 		AND	$C7		; apply mask		11000111
 		XOR	B		; restore unmasked bits	xxyyyxxx
@@ -10126,7 +10105,7 @@ L22AA	LD	A,$AF		; load with 175 decimal.
 		RLCA			; required position.	yyyxxxxx
 		LD	L,A		; low byte to L.
 
-; finally form the pixel position in A.
+					; finally form the pixel position in A.
 
 		LD	A,C		; x value to A
 		AND	$07		; mod 8
@@ -10138,29 +10117,28 @@ L22AA	LD	A,$AF		; load with 175 decimal.
 ; The point subroutine is called from s-point via the scanning functions
 ; table.
 
-					;; POINT-SUB
-L22CB	CALL	L2307		; routine STK-TO-BC
-		CALL	L22AA		; routine PIXEL-ADD finds address of pixel.
+					;; $22CB
+POINT_SUB:	CALL	STK_TO_BC	; routine STK_TO_BC
+		CALL	PIXEL_ADD	; routine PIXEL_ADD finds address of pixel.
 		LD	B,A		; pixel position to B, 0-7.
 		INC	B		; increment to give rotation count 1-8.
 		LD	A,(HL)		; fetch byte from screen.
 
-					;; POINT-LP
-L22D4	RLCA			; rotate and loop back
-		DJNZ	L22D4		; to POINT-LP until pixel at right.
+					;; $22D4
+POINT_LP:	RLCA			; rotate and loop back
+		DJNZ	POINT_LP	; to POINT_LP until pixel at right.
 
 		AND	$01		; test to give zero or one.
-		JP	L2D28		; jump forward to STACK-A to save result.
+		JP	L2D28	; jump forward to STACK-A to save result.
 
 ;--------------------
 ; Handle PLOT command
 ;--------------------
 ; Command Syntax example: PLOT 128,88
-;
 
-					;; PLOT
-L22DC	CALL	L2307		; routine STK-TO-BC
-		CALL	L22E5		; routine PLOT-SUB
+					;; $22DC
+PLOT:		CALL	STK_TO_BC	; routine STK_TO_BC
+		CALL	PLOT_SUB	; routine PLOT_SUB
 		JP	TEMPS		; to TEMPS
 
 ; -------------------
@@ -10168,62 +10146,59 @@ L22DC	CALL	L2307		; routine STK-TO-BC
 ; -------------------
 ; A screen byte holds 8 pixels so it is necessary to rotate a mask
 ; into the correct position to leave the other 7 pixels unaffected.
-; However all 64 pixels in the character cell take any embedded colour
-; items.
+; However all 64 pixels in the character cell take any embedded colour items.
 ; A pixel can be reset (inverse 1), toggled (over 1), or set ( with inverse
 ; and over switches off). With both switches on, the byte is simply put
 ; back on the screen though the colours may change.
 
-					;; PLOT-SUB
-L22E5	LD	(COORDS),BC	; store new x/y values in COORDS
-		CALL	L22AA		; routine PIXEL-ADD gets address in HL,
+					;; $22E5
+PLOT_SUB:	LD	(COORDS),BC	; store new x/y values in COORDS
+		CALL	PIXEL_ADD	; routine PIXEL_ADD gets address in HL,
 					; count from left 0-7 in B.
 		LD	B,A		; transfer count to B.
 		INC	B		; increase 1-8.
 		LD	A,$FE		; 11111110 in A.
 
-					;; PLOT-LOOP
-L22F0	RRCA			; rotate mask.
-		DJNZ	L22F0		; to PLOT-LOOP until B circular rotations.
+					;; $22F0
+PLOT_LOOP:	RRCA			; rotate mask.
+		DJNZ	PLOT_LOOP	; to PLOT_LOOP until B circular rotations.
 
 		LD	B,A		; load mask to B
 		LD	A,(HL)		; fetch screen byte to A
 
 		LD	C,(IY+$57)	; P_FLAG to C
 		BIT	0,C		; is it to be OVER 1 ?
-		JR	NZ,L22FD		; forward to PL-TST-IN if so.
+		JR	NZ,PL_TST_IN	; forward to PL_TST_IN if so.
 
-; was over 0
+					; was over 0
 
 		AND	B		; combine with mask to blank pixel.
 
-					;; PL-TST-IN
-L22FD	BIT	2,C		; is it inverse 1 ?
-		JR	NZ,L2303		; to PLOT-END if so.
+					;; $22FD
+PL_TST_IN:	BIT	2,C		; is it inverse 1 ?
+		JR	NZ,PLOT_END	; to PLOT_END if so.
 
 		XOR	B		; switch the pixel
 		CPL			; restore other 7 bits
 
-					;; PLOT-END
-L2303	LD	(HL),A		; load byte to the screen.
+					;; $2303
+PLOT_END:	LD	(HL),A		; load byte to the screen.
 		JP	PO_ATTR		; exit to PO_ATTR to set colours for cell.
 
 ;-------------------------------
 ; Put two numbers in BC register
 ;-------------------------------
-;
-;
 
-					;; STK-TO-BC
-L2307	CALL	L2314		; routine STK-TO-A
-		LD	B,A		;
-		PUSH	BC		;
-		CALL	L2314		; routine STK-TO-A
-		LD	E,C		;
-		POP	BC		;
-		LD	D,C		;
-		LD	C,A		;
-		RET			;
+					;; $2307
+STK_TO_BC:	CALL	STK_TO_A	; routine STK_TO_A
+		LD	B,A
+		PUSH	BC
+		CALL	STK_TO_A	; routine STK_TO_A
+		LD	E,C
+		POP	BC
+		LD	D,C
+		LD	C,A
+		RET
 
 ;------------------------
 ; Put stack in A register
@@ -10231,11 +10206,11 @@ L2307	CALL	L2314		; routine STK-TO-A
 ; This routine puts the last value on the calculator stack into the accumulator
 ; deleting the last value.
 
-					;; STK-TO-A
-L2314	CALL	L2DD5		; routine FP-TO-A compresses last value into
+					;; $2314
+STK_TO_A:	CALL	L2DD5	; routine FP-TO-A compresses last value into
 					; accumulator. e.g. PI would become 3. 
 					; zero flag set if positive.
-		JP	C,L24F9		; jump forward to REPORT-Bc if >= 255.5.
+		JP	C,REPORT_BC	; jump forward to REPORT_BC if >= 255.5.
 
 		LD	C,$01		; prepare a positive sign byte.
 		RET	Z		; return if FP-TO-BC indicated positive.
@@ -10250,8 +10225,8 @@ L2314	CALL	L2DD5		; routine FP-TO-A compresses last value into
 ;
 ; syntax has been partly checked using the class for draw command.
 
-					;; CIRCLE
-L2320	RST	18H		; GET_CHAR
+					;; $2320
+CIRCLE:		RST	18H		; GET_CHAR
 		CP	$2C		; is it required comma ?
 		JP	NZ,REPORT_C	; jump to REPORT_C if not
 
@@ -10268,30 +10243,30 @@ L2320	RST	18H		; GET_CHAR
 
 		LD	A,(HL)		; fetch first floating point byte
 		CP	$81		; compare to one
-		JR	NC,L233B	; forward to C-R-GRE-1 if circle radius
+		JR	NC,C_R_GRE_1	; forward to C_R_GRE_1 if circle radius
 					; is greater than one.
 
 
 		RST	28H		;; FP_CALC
-		DEFB	$02		;;delete		; delete the radius from stack.
+		DEFB	$02		;;delete	; delete the radius from stack.
 		DEFB	$38		;;end-calc
 
-		JR	L22DC		; to PLOT to just plot x,y.
+		JR	PLOT		; to PLOT to just plot x,y.
 
 
-					;; C-R-GRE-1
-L233B	RST	28H		;; FP_CALC	; x, y, r
+					;; $233B
+C_R_GRE_1:	RST	28H		;; FP_CALC	; x, y, r
 		DEFB	$A3		;;stk-pi/2	; x, y, r, pi/2.
 		DEFB	$38		;;end-calc
 
-		LD	(HL),$83		;		; x, y, r, 2*PI
+		LD	(HL),$83	;		; x, y, r, 2*PI
 
 		RST	28H		;; FP_CALC
 		DEFB	$C5		;;st-mem-5	; store 2*PI in mem-5
 		DEFB	$02		;;delete	; x, y, z.
 		DEFB	$38		;;end-calc
 
-		CALL	L247D		; routine CD-PRMS1
+		CALL	CD_PRMS1	; routine CD_PRMS1
 		PUSH	BC		;
 
 		RST	28H		;; FP_CALC
@@ -10302,7 +10277,7 @@ L233B	RST	28H		;; FP_CALC	; x, y, r
 
 		LD	A,(HL)		;
 		CP	$80		;
-		JR	NC,L235A		; to C-ARC-GE1
+		JR	NC,C_ARC_GE1	; to C_ARC_GE1
 
 
 		RST	28H		;; FP_CALC
@@ -10311,11 +10286,11 @@ L233B	RST	28H		;; FP_CALC	; x, y, r
 		DEFB	$38		;;end-calc
 
 		POP	BC		;
-		JP	L22DC		; to PLOT
+		JP	PLOT		; to PLOT
 
 
-					;; C-ARC-GE1
-L235A	RST	28H		;; FP_CALC
+					;; $235A
+C_ARC_GE1:	RST	28H		;; FP_CALC
 		DEFB	$C2		;;st-mem-2
 		DEFB	$01		;;exchange
 		DEFB	$C0		;;st-mem-0
@@ -10345,26 +10320,24 @@ L235A	RST	28H		;; FP_CALC
 		LD	H,A		;
 		LD	(COORDS),HL	; COORDS
 		POP	BC		;
-		JP	L2420		; to DRW-STEPS
+		JP	DRW_STEPS	; to DRW_STEPS
 
 
 ;--------------------
 ; Handle DRAW command
 ;--------------------
-;
-;
 
-					;; DRAW
-L2382	RST	18H		; GET_CHAR
+					;; $2382
+DRAW:		RST	18H		; GET_CHAR
 		CP	$2C		;
-		JR	Z,L238D		; to DR-3-PRMS
+		JR	Z,DR_3_PRMS	; to DR_3_PRMS
 
 		CALL	CHECK_END	; routine CHECK_END
-		JP	L2477		; to LINE-DRAW
+		JP	LINE_DRAW	; to LINE_DRAW
 
 
-					;; DR-3-PRMS
-L238D	RST	20H		; NEXT_CHAR
+					;; $238D
+DR_3_PRMS:	RST	20H		; NEXT_CHAR
 		CALL	EXPT_1NUM	; routine EXPT_1NUM
 		CALL	CHECK_END	; routine CHECK_END
 
@@ -10378,17 +10351,17 @@ L238D	RST	20H		; NEXT_CHAR
 		DEFB	$30		;;not
 		DEFB	$00		;;jump-true
 
-		DEFB	$06		;;to L23A3, DR-SIN-NZ
+		DEFB	$06		;;to DR_SIN_NZ
 
 		DEFB	$02		;;delete
 		DEFB	$38		;;end-calc
 
-		JP	L2477		; to LINE-DRAW
+		JP	LINE_DRAW	; to LINE_DRAW
 
 
 
-					;; DR-SIN-NZ
-L23A3	DEFB	$C0		;;st-mem-0
+					;; $23A3
+DR_SIN_NZ:	DEFB	$C0		;;st-mem-0
 		DEFB	$02		;;delete
 		DEFB	$C1		;;st-mem-1
 		DEFB	$02		;;delete
@@ -10407,9 +10380,9 @@ L23A3	DEFB	$C0		;;st-mem-0
 		DEFB	$3D		;;re-stack
 		DEFB	$38		;;end-calc
 
-		LD	A,(HL)		;
-		CP	$81		;
-		JR	NC,L23C1		; to DR-PRMS
+		LD	A,(HL)
+		CP	$81
+		JR	NC,DR_PRMS	; to DR_PRMS
 
 
 		RST	28H		;; FP_CALC
@@ -10417,10 +10390,10 @@ L23A3	DEFB	$C0		;;st-mem-0
 		DEFB	$02		;;delete
 		DEFB	$38		;;end-calc
 
-		JP	L2477		; to LINE-DRAW
+		JP	LINE_DRAW	; to LINE_DRAW
 
-					;; DR-PRMS
-L23C1	CALL	L247D		; routine CD-PRMS1
+					;; $23C1
+DR_PRMS:	CALL	CD_PRMS1	; routine CD_PRMS1
 		PUSH	BC		;
 
 		RST	28H		;; FP_CALC
@@ -10480,19 +10453,19 @@ L23C1	CALL	L247D		; routine CD-PRMS1
 		DEFB	$02		;;delete
 		DEFB	$38		;;end-calc
 
-		LD	A,(DE)		;
-		CP	$81		;
-		POP	BC		;
-		JP	C,L2477		; to LINE-DRAW
+		LD	A,(DE)
+		CP	$81
+		POP	BC
+		JP	C,LINE_DRAW	; to LINE_DRAW
 
-		PUSH	BC		;
+		PUSH	BC
 
 		RST	28H		;; FP_CALC
 		DEFB	$01		;;exchange
 		DEFB	$38		;;end-calc
 
 		LD	A,(COORDS)	; COORDS-x
-		CALL	L2D28		; routine STACK-A
+		CALL	L2D28	; routine STACK-A
 
 		RST	28H		;; FP_CALC
 		DEFB	$C0		;;st-mem-0
@@ -10500,8 +10473,8 @@ L23C1	CALL	L247D		; routine CD-PRMS1
 		DEFB	$01		;;exchange
 		DEFB	$38		;;end-calc
 
-		LD	A,($5C7E)	; COORDS-y
-		CALL	L2D28		; routine STACK-A
+		LD	A,(COORDS_Y)	; COORDS_Y
+		CALL	L2D28	; routine STACK-A
 
 		RST	28H		;; FP_CALC
 		DEFB	$C5		;;st-mem-5
@@ -10510,17 +10483,16 @@ L23C1	CALL	L247D		; routine CD-PRMS1
 		DEFB	$E5		;;get-mem-5
 		DEFB	$38		;;end-calc
 
-		POP	BC		;
+		POP	BC
 
-					;; DRW-STEPS
-L2420	DEC	B		;
-		JR	Z,L245F		; to ARC-END
+					;; $2420
+DRW_STEPS:	DEC	B
+		JR	Z,ARC_END	; to ARC_END
 
-		JR	L2439		; to ARC-START
+		JR	ARC_START	; to ARC_START
 
-
-					;; ARC-LOOP
-L2425	RST	28H		;; FP_CALC
+					;; $2425
+ARC_LOOP:	RST	28H		;; FP_CALC
 		DEFB	$E1		;;get-mem-1
 		DEFB	$31		;;duplicate
 		DEFB	$E3		;;get-mem-3
@@ -10541,8 +10513,8 @@ L2425	RST	28H		;; FP_CALC
 		DEFB	$02		;;delete
 		DEFB	$38		;;end-calc
 
-					;; ARC-START
-L2439	PUSH	BC		;
+					;; $2439
+ARC_START:	PUSH	BC
 
 		RST	28H		;; FP_CALC
 		DEFB	$C0		;;st-mem-0
@@ -10553,7 +10525,7 @@ L2439	PUSH	BC		;
 		DEFB	$38		;;end-calc
 
 		LD	A,(COORDS)	; COORDS-x
-		CALL	L2D28		; routine STACK-A
+		CALL	L2D28	; routine STACK-A
 
 		RST	28H		;; FP_CALC
 		DEFB	$03		;;subtract
@@ -10565,53 +10537,51 @@ L2439	PUSH	BC		;
 		DEFB	$E0		;;get-mem-0
 		DEFB	$38		;;end-calc
 
-		LD	A,($5C7E)	; COORDS-y
-		CALL	L2D28		; routine STACK-A
+		LD	A,(COORDS_Y)	; COORDS_Y
+		CALL	L2D28	; routine STACK-A
 
 		RST	28H		;; FP_CALC
 		DEFB	$03		;;subtract
 		DEFB	$38		;;end-calc
 
-		CALL	L24B7		; routine DRAW-LINE
-		POP	BC		;
-		DJNZ	L2425		; to ARC-LOOP
+		CALL	DRAW_LINE	; routine DRAW_LINE
+		POP	BC
+		DJNZ	ARC_LOOP	; to ARC_LOOP
 
 
-					;; ARC-END
-L245F	RST	28H		;; FP_CALC
+					;; $245F
+ARC_END:	RST	28H		;; FP_CALC
 		DEFB	$02		;;delete
 		DEFB	$02		;;delete
 		DEFB	$01		;;exchange
 		DEFB	$38		;;end-calc
 
 		LD	A,(COORDS)	; COORDS-x
-		CALL	L2D28		; routine STACK-A
+		CALL	L2D28	; routine STACK-A
 
 		RST	28H		;; FP_CALC
 		DEFB	$03		;;subtract
 		DEFB	$01		;;exchange
 		DEFB	$38		;;end-calc
 
-		LD	A,($5C7E)	; COORDS-y
-		CALL	L2D28		; routine STACK-A
+		LD	A,(COORDS_Y)	; COORDS_Y
+		CALL	L2D28	; routine STACK-A
 
 		RST	28H		;; FP_CALC
 		DEFB	$03		;;subtract
 		DEFB	$38		;;end-calc
 
-					;; LINE-DRAW
-L2477	CALL	L24B7		; routine DRAW-LINE
+					;; $2477
+LINE_DRAW:	CALL	DRAW_LINE	; routine DRAW_LINE
 		JP	TEMPS		; to TEMPS
 
 
 ;-------------------
 ; Initial parameters
 ;-------------------
-;
-;
 
-					;; CD-PRMS1
-L247D	RST	28H		;; FP_CALC
+					;; $247D
+CD_PRMS1:	RST	28H		;; FP_CALC
 		DEFB	$31		;;duplicate
 		DEFB	$28		;;sqr
 		DEFB	$34		;;stk-data
@@ -10625,19 +10595,19 @@ L247D	RST	28H		;; FP_CALC
 		DEFB	$2A		;;abs
 		DEFB	$38		;;end-calc
 
-		CALL	L2DD5		; routine FP-TO-A
-		JR	C,L2495		; to USE-252
+		CALL	L2DD5	; routine FP-TO-A
+		JR	C,USE_252	; to USE_252
 
-		AND	$FC		;
-		ADD	A,$04		;
-		JR	NC,L2497		; to DRAW-SAVE
+		AND	$FC
+		ADD	A,$04
+		JR	NC,DRAW_SAVE	; to DRAW_SAVE
 
-					;; USE-252
-L2495	LD	A,$FC		;
+					;; $2495
+USE_252:	LD	A,$FC
 
-					;; DRAW-SAVE
-L2497	PUSH	AF		;
-		CALL	L2D28		; routine STACK-A
+					;; $2497
+DRAW_SAVE:	PUSH	AF
+		CALL	L2D28	; routine STACK-A
 
 		RST	28H		;; FP_CALC
 		DEFB	$E5		;;get-mem-5
@@ -10666,91 +10636,89 @@ L2497	PUSH	AF		;
 		DEFB	$02		;;delete
 		DEFB	$38		;;end-calc
 
-		POP	BC		;
-		RET			;
+		POP	BC
+		RET;
 
 ;-------------
 ; Line drawing
 ;-------------
-;
-;
 
-					;; DRAW-LINE
-L24B7	CALL	L2307		; routine STK-TO-BC
-		LD	A,C		;
-		CP	B		;
-		JR	NC,L24C4		; to DL-X-GE-Y
+					;; $24B7
+DRAW_LINE:	CALL	STK_TO_BC	; routine STK_TO_BC
+		LD	A,C
+		CP	B
+		JR	NC,DL_X_GE_Y	; to DL_X_GE_Y
 
-		LD	L,C		;
-		PUSH	DE		;
-		XOR	A		;
-		LD	E,A		;
-		JR	L24CB		; to DL-LARGER
+		LD	L,C
+		PUSH	DE
+		XOR	A
+		LD	E,A
+		JR	DL_LARGER	; to DL_LARGER
 
-					;; DL-X-GE-Y
-L24C4	OR	C		;
-		RET	Z		;
+					;; $24C4
+DL_X_GE_Y:	OR	C
+		RET	Z
 
-		LD	L,B		;
-		LD	B,C		;
-		PUSH	DE		;
-		LD	D,$00		;
+		LD	L,B
+		LD	B,C
+		PUSH	DE
+		LD	D,$00
 
-					;; DL-LARGER
-L24CB	LD	H,B		;
-		LD	A,B		;
-		RRA			;
+					;; $24CB
+DL_LARGER:	LD	H,B
+		LD	A,B
+		RRA
 
-					;; D-L-LOOP
-L24CE	ADD	A,L		;
-		JR	C,L24D4		; to D-L-DIAG
+					;; $24CE
+D_L_LOOP:	ADD	A,L		;
+		JR	C,D_L_DIAG	; to D_L_DIAG
 
 		CP	H		;
-		JR	C,L24DB		; to D-L-HR-VT
+		JR	C,D_L_HR_VT	; to D_L_HR_VT
 
-					;; D-L-DIAG
-L24D4	SUB	H		;
-		LD	C,A		;
-		EXX			;
-		POP	BC		;
-		PUSH	BC		;
-		JR	L24DF		; to D-L-STEP
+					;; $24D4
+D_L_DIAG:	SUB	H
+		LD	C,A
+		EXX
+		POP	BC
+		PUSH	BC
+		JR	D_L_STEP	; to D_L_STEP
 
-					;; D-L-HR-VT
-L24DB	LD	C,A		;
-		PUSH	DE		;
-		EXX			;
-		POP	BC		;
+					;; $24DB
+D_L_HR_VT:	LD	C,A
+		PUSH	DE
+		EXX
+		POP	BC
 
-					;; D-L-STEP
-L24DF	LD	HL,(COORDS)	; COORDS
-		LD	A,B		;
-		ADD	A,H		;
-		LD	B,A		;
-		LD	A,C		;
-		INC	A		;
-		ADD	A,L		;
-		JR	C,L24F7		; to D-L-RANGE
+					;; $24DF
+D_L_STEP:	LD	HL,(COORDS)
+		LD	A,B
+		ADD	A,H
+		LD	B,A
+		LD	A,C
+		INC	A
+		ADD	A,L
+		JR	C,D_L_RANGE	; to D_L_RANGE
 
-		JR	Z,L24F9		; to REPORT-Bc
+		JR	Z,REPORT_BC	; to REPORT_BC
 
-					;; D-L-PLOT
-L24EC	DEC	A		;
-		LD	C,A		;
-		CALL	L22E5		; routine PLOT-SUB
-		EXX			;
-		LD	A,C		;
-		DJNZ	L24CE		; to D-L-LOOP
+					;; $24EC
+D_L_PLOT:	DEC	A
+		LD	C,A
+		CALL	PLOT_SUB	; routine PLOT_SUB
+		EXX
+		LD	A,C
+		DJNZ	D_L_LOOP	; to D_L_LOOP
 
-		POP	DE		;
-		RET			;
+		POP	DE
+		RET
 
-					;; D-L-RANGE
-L24F7	JR	Z,L24EC		; to D-L-PLOT
+					;; $24F7
+D_L_RANGE:	JR	Z,D_L_PLOT	; to D_L_PLOT
 
 
-					;; REPORT-Bc
-L24F9	RST	08H		; ERROR_1
+					;; $24F9
+REPORT_BC:	RST	08H		; ERROR_1
 		DEFB	$0A		; Error Report: Integer out of range
 
 
@@ -10879,7 +10847,7 @@ L2530	BIT	7,(IY+$01)	; test FLAGS  - checking syntax only ?
 ; range checking will be performed. 
 
 					;; S-SCRN$-S
-L2535	CALL	L2307		; routine STK-TO-BC.
+L2535	CALL	STK_TO_BC		; routine STK_TO_BC.
 		LD	HL,(CHARS)	; fetch address of CHARS.
 		LD	DE,$0100		; fetch offset to chr$ 32
 		ADD	HL,DE		; and find start of bitmaps.
@@ -10974,7 +10942,7 @@ L257D	JP	L2AB2		; to STK-STO-$ to store the string in
 ; Again it's up to the Basic programmer to supply valid values of line/column.
 
 					;; S-ATTR-S
-L2580	CALL	L2307		; routine STK-TO-BC fetches line to C,
+L2580	CALL	STK_TO_BC		; routine STK_TO_BC fetches line to C,
 					; and column to B.
 		LD	A,C		; line to A $00 - $17	(max 00010111)
 		RRCA			; rotate
@@ -11242,7 +11210,7 @@ L2672	CALL	L2522		; routine S-2-COORD
 ; ->
 					;; S-POINT
 L267B	CALL	L2522		; routine S-2-COORD
-		CALL	NZ,L22CB		; routine POINT-SUB
+		CALL	NZ,POINT_SUB	; routine POINT_SUB
 
 		RST	20H		; NEXT_CHAR
 		JR	L26C3		; forward to S-NUMERIC
