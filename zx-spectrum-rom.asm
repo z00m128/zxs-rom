@@ -7226,7 +7226,7 @@ E_LINE_NO:	LD	HL,(E_LINE)	; load HL from system variable E_LINE.
 
 		CALL	INT_TO_FP	; routine INT_TO_FP will read digits till
 					; a non-digit found.
-		CALL	L2DA2	; routine FP-TO-BC will retrieve number
+		CALL	FP_TO_BC	; routine FP_TO_BC will retrieve number
 					; from stack at membot.
 		JR	C,E_L_1		; forward to E_L_1 if overflow i.e. > 65535.
 					; 'Nonsense in basic'
@@ -8778,7 +8778,7 @@ POKE:		CALL	TWO_PARAM	; routine TWO_PARAM fetches values to BC and A.
 ; producing an error if either is out of range.
 
 					;; $1E85
-TWO_PARAM:	CALL	L2DD5		; routine FP-TO-A
+TWO_PARAM:	CALL	FP_TO_A		; routine FP_TO_A
 		JR	C,REPORT_BB	; forward to REPORT_BB if overflow occurred
 
 		JR	Z,TWO_P_1	; forward to TWO_P_1 if positive
@@ -8803,13 +8803,13 @@ TWO_P_1:	PUSH	AF		; save the value
 ; ->
 
 					;; $1E94
-FIND_INT1:	CALL	L2DD5		; routine FP-TO-A
+FIND_INT1:	CALL	FP_TO_A		; routine FP_TO_A
 		JR	FIND_I_1	; forward to FIND_I_1 for common exit routine.
 
 					; ->
 
 					;; $1E99
-FIND_INT2:	CALL	L2DA2		; routine FP-TO-BC
+FIND_INT2:	CALL	FP_TO_BC	; routine FP_TO_BC
 
 					;; $1E9C
 FIND_I_1:	JR	C,REPORT_BB	; to REPORT_BB with overflow.
@@ -10207,13 +10207,13 @@ STK_TO_BC:	CALL	STK_TO_A	; routine STK_TO_A
 ; deleting the last value.
 
 					;; $2314
-STK_TO_A:	CALL	L2DD5	; routine FP-TO-A compresses last value into
+STK_TO_A:	CALL	FP_TO_A		; routine FP_TO_A compresses last value into
 					; accumulator. e.g. PI would become 3. 
 					; zero flag set if positive.
 		JP	C,REPORT_BC	; jump forward to REPORT_BC if >= 255.5.
 
 		LD	C,$01		; prepare a positive sign byte.
-		RET	Z		; return if FP-TO-BC indicated positive.
+		RET	Z		; return if FP_TO_BC indicated positive.
 
 		LD	C,$FF		; prepare negative sign byte and
 		RET			; return.
@@ -10595,7 +10595,7 @@ CD_PRMS1:	RST	28H		;; FP_CALC
 		DEFB	$2A		;;abs
 		DEFB	$38		;;end-calc
 
-		CALL	L2DD5	; routine FP-TO-A
+		CALL	FP_TO_A		; routine FP_TO_A
 		JR	C,USE_252	; to USE_252
 
 		AND	$FC
@@ -11108,7 +11108,7 @@ S_RND:		CALL	SYNTAX_Z	; routine SYNTAX_Z
 		DEFB	$31		;;duplicate		;rnd,rnd.
 		DEFB	$38		;;end-calc
 
-		CALL	L2DA2	; routine FP-TO-BC
+		CALL	FP_TO_BC	; routine FP_TO_BC
 		LD	(SEED),BC	; store in SEED for next starting point.
 		LD	A,(HL)		; fetch exponent
 		AND	A		; is it zero ?
@@ -13380,7 +13380,7 @@ ST_E_PART:	CALL	NUMERIC		; routine NUMERIC
 
 		PUSH	BC		; save sign (in B)
 		CALL	INT_TO_FP	; routine INT_TO_FP places exponent on stack
-		CALL	L2DD5	; routine FP-TO-A  transfers it to A
+		CALL	FP_TO_A		; routine FP_TO_A  transfers it to A
 		POP	BC		; restore sign
 		JP	C,L31AD	; to REPORT-6 if overflow (over 255)
 					; raise 'Number too big'.
@@ -13391,7 +13391,7 @@ ST_E_PART:	CALL	NUMERIC		; routine NUMERIC
 					; 127 is still way too high and it is
 					; impossible to enter an exponent greater
 					; than 39 from the keyboard. The error gets
-					; raised later in E-TO-FP so two different
+					; raised later in E_TO_FP so two different
 					; error messages depending how high A is.
 
 		INC	B		; $FF to $00 or $00 to $01 - expendable now.
@@ -13400,7 +13400,7 @@ ST_E_PART:	CALL	NUMERIC		; routine NUMERIC
 		NEG			; Negate the exponent.
 
 					;; $2D18
-E_FP_JUMP:	JP	L2D4F	; jump forward to E-TO-FP to assign to
+E_FP_JUMP:	JP	E_TO_FP		; jump forward to E_TO_FP to assign to
 					; last value x on stack x * 10 to power A
 					; a relative jump would have done.
 
@@ -13505,20 +13505,19 @@ NXT_DGT_2:	CALL	STK_DIGIT	; routine STK_DIGIT puts 0-9 on stack
 ; on entry there is a value x on the calculator stack and an exponent of ten
 ; in A.	The required value is x + 10 ^ A
 
-					;; e-to-fp
-					;; E-TO-FP
-L2D4F	RLCA			; this will set the		x.
+					;; $2D4F
+E_TO_FP:	RLCA			; this will set the		x.
 		RRCA			; carry if bit 7 is set
 
-		JR	NC,L2D55		; to E-SAVE  if positive.
+		JR	NC,E_SAVE	; to E_SAVE  if positive.
 
 		CPL			; make negative positive
 		INC	A		; without altering carry.
 
-					;; E-SAVE
-L2D55	PUSH	AF		; save positive exp and sign in carry
+					;; $2D55
+E_SAVE:		PUSH	AF		; save positive exp and sign in carry
 
-		LD	HL,MEM_0		; address MEM_0
+		LD	HL,MEM_0	; address MEM_0
 
 		CALL	L350B		; routine FP-0/1
 					; places an integer zero, if no carry,
@@ -13530,12 +13529,12 @@ L2D55	PUSH	AF		; save positive exp and sign in carry
 
 		POP	AF		; pop the exponent.
 
-; now enter a loop
+					; now enter a loop
 
-					;; E-LOOP
-L2D60	SRL	A		; 0>76543210>C
+					;; $2D60
+E_LOOP:		SRL	A		; 0>76543210>C
 
-		JR	NC,L2D71		; forward to E-TST-END if no bit
+		JR	NC,E_TST_END	; forward to E_TST_END if no bit
 
 		PUSH	AF		; save shifted exponent.
 
@@ -13544,26 +13543,26 @@ L2D60	SRL	A		; 0>76543210>C
 		DEFB	$E0		;;get-mem-0		x, 10, (0/1).
 		DEFB	$00		;;jump-true
 
-		DEFB	$04		;;to L2D6D, E-DIVSN
+		DEFB	$04		;;to E_DIVSN
 
 		DEFB	$04		;;multiply		x*10.
 		DEFB	$33		;;jump
 
-		DEFB	$02		;;to L2D6E, E-FETCH
+		DEFB	$02		;;to E_FETCH
 
-					;; E-DIVSN
-L2D6D	DEFB	$05		;;division		x/10.
+					;; $2D6D
+E_DIVSN:	DEFB	$05		;;division		x/10.
 
-					;; E-FETCH
-L2D6E	DEFB	$E1		;;get-mem-1		x/10 or x*10, 10.
+					;; $2D6E
+E_FETCH:	DEFB	$E1		;;get-mem-1		x/10 or x*10, 10.
 		DEFB	$38		;;end-calc		new x, 10.
 
 		POP	AF		; restore shifted exponent
 
-; the loop branched to here with no carry
+					; the loop branched to here with no carry
 
-					;; E-TST-END
-L2D71	JR	Z,L2D7B		; forward to E-END  if A emptied of bits
+					;; $2D71
+E_TST_END:	JR	Z,E_END		; forward to E_END  if A emptied of bits
 
 		PUSH	AF		; re-save shifted exponent
 
@@ -13573,44 +13572,41 @@ L2D71	JR	Z,L2D7B		; forward to E-END  if A emptied of bits
 		DEFB	$38		;;end-calc
 
 		POP	AF		; restore shifted exponent
-		JR	L2D60		; back to E-LOOP  until all bits done.
+		JR	E_LOOP		; back to E_LOOP  until all bits done.
 
-; although only the first pass is shown it can be seen that for each set bit
-; representing a power of two, x is multiplied or divided by the
-; corresponding power of ten.
+					; although only the first pass is shown it can be seen that for each set bit
+					; representing a power of two, x is multiplied or divided by the
+					; corresponding power of ten.
 
-					;; E-END
-L2D7B	RST	28H		;; FP_CALC		final x, factor.
+					;; $2D7B
+E_END:		RST	28H		;; FP_CALC		final x, factor.
 		DEFB	$02		;;delete		final x.
 		DEFB	$38		;;end-calc		x.
 
 		RET			; return
 
-
-
-
 ;--------------
 ; Fetch integer
 ;--------------
-; This routine is called by the mathematical routines - FP-TO-BC, PRINT_FP,
+; This routine is called by the mathematical routines - FP_TO_BC, PRINT_FP,
 ; mult, re-stack and negate to fetch an integer from address HL.
 ; HL points to the stack or a location in MEM and no deletion occurs.
-; If the number is negative then a similar process to that used in INT-STORE
+; If the number is negative then a similar process to that used in INT_STORE
 ; is used to restore the twos complement number to normal in DE and a sign
 ; in C.
 
-					;; INT-FETCH
-L2D7F	INC	HL		; skip zero indicator.
+					;; $2D7F
+INT_FETCH:	INC	HL		; skip zero indicator.
 		LD	C,(HL)		; fetch sign to C
 		INC	HL		; address low byte
 		LD	A,(HL)		; fetch to A
 		XOR	C		; two's complement
-		SUB	C		;
+		SUB	C
 		LD	E,A		; place in E
 		INC	HL		; address high byte
 		LD	A,(HL)		; fetch to A
 		ADC	A,C		; two's complement
-		XOR	C		;
+		XOR	C
 		LD	D,A		; place in D
 		RET			; return
 
@@ -13620,8 +13616,8 @@ L2D7F	INC	HL		; skip zero indicator.
 ; This entry point is not used in this ROM but would
 ; store any integer as positive.
 
-					;; p-int-sto
-L2D8C	LD	C,$00		; make sign byte positive and continue
+					;; $2D8C
+P_INT_STO:	LD	C,$00		; make sign byte positive and continue
 
 ;--------------
 ; Store integer
@@ -13632,28 +13628,28 @@ L2D8C	LD	C,$00		; make sign byte positive and continue
 ; If negative, the number is stored in 2's complement form so that it is
 ; ready to be added.
 
-					;; INT-STORE
-L2D8E	PUSH	HL		; preserve HL
+					;; $2D8E
+INT_STORE:	PUSH	HL		; preserve HL
 
-		LD	(HL),$00		; first byte zero shows integer not exponent
-		INC	HL		;
+		LD	(HL),$00	; first byte zero shows integer not exponent
+		INC	HL
 		LD	(HL),C		; then store the sign byte
-		INC	HL		;
-					; e.g.		  +1		  -1
-		LD	A,E		; fetch low byte	00000001	00000001
-		XOR	C		; xor sign		00000000	or  11111111
-					; gives		 00000001	or  11111110
-		SUB	C		; sub sign		00000000	or  11111111
-					; gives		 00000001>0 or  11111111>C
+		INC	HL
+					; e.g.             +1             -1
+		LD	A,E		; fetch low byte   00000001       00000001
+		XOR	C		; xor sign         00000000   or  11111111
+					; gives            00000001   or  11111110
+		SUB	C		; sub sign         00000000   or  11111111
+					; gives            00000001>0 or  11111111>C
 		LD	(HL),A		; store 2's complement.
-		INC	HL		;
-		LD	A,D		; high byte		00000000	00000000
-		ADC	A,C		; sign		  00000000<0	11111111<C
-					; gives		 00000000	or  00000000
-		XOR	C		; xor sign		00000000	11111111
+		INC	HL
+		LD	A,D		; high byte        00000000       00000000
+		ADC	A,C		; sign             00000000<0     11111111<C
+					; gives            00000000   or  00000000
+		XOR	C		; xor sign         00000000       11111111
 		LD	(HL),A		; store 2's complement.
-		INC	HL		;
-		LD	(HL),$00		; last byte always zero for integers.
+		INC	HL
+		LD	(HL),$00	; last byte always zero for integers.
 					; is not used and need not be looked at when
 					; testing for zero but comes into play should
 					; an integer be converted to fp.
@@ -13667,15 +13663,15 @@ L2D8E	PUSH	HL		; preserve HL
 ; This routine gets a floating point number e.g. 127.4 from the calculator
 ; stack to the BC register.
 
-					;; FP-TO-BC
-L2DA2	RST	28H		;; FP_CALC		set HL to
+					;; $2DA2
+FP_TO_BC:	RST	28H		;; FP_CALC		set HL to
 		DEFB	$38		;;end-calc		point to last value.
 
 		LD	A,(HL)		; get first of 5 bytes
 		AND	A		; and test
-		JR	Z,L2DAD		; forward to FP-DELETE if an integer
+		JR	Z,FP_DELETE	; forward to FP_DELETE if an integer
 
-; The value is first rounded up and then converted to integer.
+					; The value is first rounded up and then converted to integer.
 
 		RST	28H		;; FP_CAL		x.
 		DEFB	$A2		;;stk-half		x. 1/2.
@@ -13683,10 +13679,10 @@ L2DA2	RST	28H		;; FP_CALC		set HL to
 		DEFB	$27		;;int			int(x + .5)
 		DEFB	$38		;;end-calc
 
-; now delete but leave HL pointing at integer
+					; now delete but leave HL pointing at integer
 
-					;; FP-DELETE
-L2DAD	RST	28H		;; FP_CALC
+					;; $2DAD
+FP_DELETE:	RST	28H		;; FP_CALC
 		DEFB	$02		;;delete
 		DEFB	$38		;;end-calc
 
@@ -13694,7 +13690,7 @@ L2DAD	RST	28H		;; FP_CALC
 		PUSH	DE		; and STKEND.
 		EX	DE,HL		; make HL point to exponent/zero indicator
 		LD	B,(HL)		; indicator to B
-		CALL	L2D7F		; routine INT-FETCH
+		CALL	INT_FETCH	; routine INT_FETCH
 					; gets int in DE sign byte to C
 					; but meaningless values if a large integer
 
@@ -13719,14 +13715,14 @@ L2DAD	RST	28H		;; FP_CALC
 ;-------------
 ; This routine is used when printing floating point numbers to
 
-					;; LOG(2^A)
-L2DC1	LD	D,A		;
-		RLA			;
-		SBC	A,A		;
-		LD	E,A		;
-		LD	C,A		;
-		XOR	A		;
-		LD	B,A		;
+					;; $2DC1
+LOG_2_A:	LD	D,A
+		RLA
+		SBC	A,A
+		LD	E,A
+		LD	C,A
+		XOR	A
+		LD	B,A
 		CALL	STK_STORE	; routine STK_STORE
 
 		RST	28H		;; FP_CALC
@@ -13745,23 +13741,23 @@ L2DC1	LD	D,A		;
 ; Not all the calling routines raise an error with overflow so no attempt
 ; is made to produce an error report here.
 
-					;; FP-TO-A
-L2DD5	CALL	L2DA2		; routine FP-TO-BC returns with C in A also.
+					;; $2DD5
+FP_TO_A:	CALL	FP_TO_BC	; routine FP_TO_BC returns with C in A also.
 		RET	C		; return with carry set if > 65535, overflow
 
 		PUSH	AF		; save the value and flags
 		DEC	B		; and test that
 		INC	B		; the high byte is zero.
-		JR	Z,L2DE1		; forward  FP-A-END if zero
+		JR	Z,FP_A_END	; forward  FP_A_END if zero
 
-; else there has been 8-bit overflow
+					; else there has been 8-bit overflow
 
 		POP	AF		; retrieve the value
 		SCF			; set carry flag to show overflow
 		RET			; and return.
 
-					;; FP-A-END
-L2DE1	POP	AF		; restore value and success flag and
+					;; $2DE1
+FP_A_END:	POP	AF		; restore value and success flag and
 		RET			; return.
 
 
@@ -13846,7 +13842,7 @@ L2E01	RST	28H		;; FP_CALC
 ; continue with small positive integer components in range 0 - 65535 
 ; if original number was say .999 then this integer component is zero. 
 
-		CALL	L2D7F		; routine INT-FETCH gets x in DE
+		CALL	INT_FETCH	; routine INT_FETCH gets x in DE
 					; (but x is not deleted)
 
 		LD	B,$10		; set B, bit counter, to 16d
@@ -13892,14 +13888,14 @@ L2E25	DEFB	$E2		;;get-mem-2	int x = 0, x-int x.
 		LD	A,(HL)		; fetch exponent of positive fractional number
 		SUB	$7E		; subtract 
 
-		CALL	L2DC1		; routine LOG(2^A) calculates leading digits.
+		CALL	LOG_2_A		; routine LOG_2_A calculates leading digits.
 
 		LD	D,A		; transfer count to D
 		LD	A,($5CAC)	; fetch total MEM-5-1
 		SUB	D		;
 		LD	($5CAC),A	; MEM-5-1
 		LD	A,D		; 
-		CALL	L2D4F		; routine E-TO-FP
+		CALL	E_TO_FP		; routine E_TO_FP
 
 		RST	28H		;; FP_CALC
 		DEFB	$31		;;duplicate
@@ -13909,7 +13905,7 @@ L2E25	DEFB	$E2		;;get-mem-2	int x = 0, x-int x.
 		DEFB	$E1		;;get-mem-1
 		DEFB	$38		;;end-calc
 
-		CALL	L2DD5		; routine FP-TO-A
+		CALL	FP_TO_A		; routine FP_TO_A
 
 		PUSH	HL		; save HL
 		LD	($5CA1),A	; MEM-3-1
@@ -13940,7 +13936,7 @@ L2E56	SUB	$80		; make exponent positive
 		CP	$1C		; compare to 28
 		JR	C,L2E6F		; to PF-MEDIUM if integer <= 2^27
 
-		CALL	L2DC1		; routine LOG(2^A)
+		CALL	LOG_2_A		; routine LOG_2_A
 		SUB	$07		;
 		LD	B,A		;
 		LD	HL,$5CAC		; address MEM-5-1 the leading digits counter.
@@ -13948,7 +13944,7 @@ L2E56	SUB	$80		; make exponent positive
 		LD	(HL),A		; store updated value.
 		LD	A,B		; 
 		NEG			; negate
-		CALL	L2D4F		; routine E-TO-FP
+		CALL	E_TO_FP		; routine E_TO_FP
 		JR	L2E01		; back to PF-LOOP
 
 ; ----------------------------
@@ -14710,11 +14706,11 @@ L30CA	LD	A,(DE)		;
 		PUSH	DE		;
 		PUSH	HL		;
 		PUSH	DE		;
-		CALL	L2D7F		; routine INT-FETCH
+		CALL	INT_FETCH	; routine INT_FETCH
 		EX	DE,HL		;
 		EX	(SP),HL		;
 		LD	B,C		;
-		CALL	L2D7F		; routine INT-FETCH
+		CALL	INT_FETCH	; routine INT_FETCH
 		LD	A,B		;
 		XOR	C		;
 		LD	C,A		;
@@ -14731,7 +14727,7 @@ L30CA	LD	A,(DE)		;
 		LD	C,A		;
 
 					;; MULT-RSLT
-L30EA	CALL	L2D8E		; routine INT-STORE
+L30EA	CALL	INT_STORE		; routine INT_STORE
 		POP	DE		;
 		RET			;
 
@@ -15111,7 +15107,7 @@ L3261	SRL	D		;
 		DJNZ	L3261		; to T-SHIFT
 
 					;; T-STORE
-L3267	CALL	L2D8E		; routine INT-STORE
+L3267	CALL	INT_STORE		; routine INT_STORE
 		POP	DE		;
 		RET			;
 
@@ -15241,7 +15237,7 @@ L3297	LD	A,(HL)		; Fetch Exponent byte to A
 					; floating-point form.
 
 		PUSH	DE		; preserve DE.
-		CALL	L2D7F		; routine INT-FETCH
+		CALL	INT_FETCH	; routine INT_FETCH
 					; integer to DE, sign to C.
 
 ; HL points to 4th byte.
@@ -15426,7 +15422,7 @@ L32D7	DEFW	L368F		; $00 Address: $368F - jump-true
 		DEFW	L3783		; $39 Address: $3783 - get-argt
 		DEFW	L3214		; $3A Address: $3214 - truncate
 		DEFW	L33A2		; $3B Address: $33A2 - FP_CALC_2
-		DEFW	L2D4F		; $3C Address: $2D4F - e-to-fp
+		DEFW	E_TO_FP		; $3C Address: $2D4F - E_TO_FP
 		DEFW	L3297		; $3D Address: $3297 - re-stack
 
 ; the following are just the next available slots for the 128 compound literals
@@ -15968,7 +15964,7 @@ L3483	PUSH	DE		; save STKEND.
 
 		PUSH	HL		; save pointer to the last value/result.
 
-		CALL	L2D7F		; routine INT-FETCH puts integer in DE
+		CALL	INT_FETCH	; routine INT_FETCH puts integer in DE
 					; and the sign in C.
 
 		POP	HL		; restore the result pointer.
@@ -15978,7 +15974,7 @@ L3483	PUSH	DE		; save STKEND.
 		CPL			; $00 for abs, switched for neg
 		LD	C,A		; transfer result to sign byte.
 
-		CALL	L2D8E		; routine INT-STORE to re-write the integer.
+		CALL	INT_STORE	; routine INT_STORE to re-write the integer.
 
 		POP	DE		; restore STKEND.
 		RET			; return.
@@ -16002,7 +15998,7 @@ L3492	CALL	L34E9		; call routine TEST-ZERO and
 		DEC	HL		; step back to point to the result.
 		SBC	A,A		; byte will be $FF if negative, $00 if positive.
 		LD	C,A		; store the sign byte in the C register.
-		CALL	L2D8E		; routine INT-STORE to overwrite the last
+		CALL	INT_STORE	; routine INT_STORE to overwrite the last
 					; value with 0001 and sign.
 
 		POP	DE		; restore STKEND.
@@ -16594,7 +16590,7 @@ L35BF	LD	HL,(STKEND)	; fetch STKEND value from system variable.
 ; converting a number in the range 0-255 to a string e.g. CHR$ 65 = "A".
 
 					;; chrs
-L35C9	CALL	L2DD5		; routine FP-TO-A puts the number in A.
+L35C9	CALL	FP_TO_A		; routine FP_TO_A puts the number in A.
 
 		JR	C,L35DC		; forward to REPORT-Bd if overflow
 		JR	NZ,L35DC		; forward to REPORT-Bd if negative
@@ -16990,13 +16986,13 @@ L36C4	RST	28H		;; FP_CALC
 		DEFB	$E3		;;get-mem-3
 		DEFB	$38		;;end-calc
 
-		CALL	L2DD5		; routine FP-TO-A
-		JR	NZ,L3705		; to N-NEGTV
+		CALL	FP_TO_A		; routine FP_TO_A
+		JR	NZ,L3705	; to N-NEGTV
 
 		JR	C,L3703		; to REPORT-6b
 
 		ADD	A,(HL)		;
-		JR	NC,L370C		; to RESULT-OK
+		JR	NC,L370C	; to RESULT-OK
 
 
 					;; REPORT-6b
@@ -17007,7 +17003,7 @@ L3703	RST	08H		; ERROR_1
 L3705	JR	C,L370E		; to RSLT-ZERO
 
 		SUB	(HL)		;
-		JR	NC,L370E		; to RSLT-ZERO
+		JR	NC,L370E	; to RSLT-ZERO
 
 		NEG			; Negate
 
