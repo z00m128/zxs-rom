@@ -14521,7 +14521,7 @@ ADDN_OFLW:	DEC	HL
 		POP	DE
 
 					;; $303E
-FULL_ADDN:	CALL	L3293	; routine RE-ST-TWO
+FULL_ADDN:	CALL	RE_ST_TWO	; routine RE_ST_TWO
 		EXX
 		PUSH	HL
 		EXX
@@ -14716,7 +14716,7 @@ MULT_RSLT:	CALL	INT_STORE	; routine INT_STORE
 MULT_OFLW:	POP	DE
 
 					;; $30F0
-MULT_LONG:	CALL	L3293	; routine RE-ST-TWO
+MULT_LONG:	CALL	RE_ST_TWO	; routine RE_ST_TWO
 		XOR	A
 		CALL	PREP_M_D	; routine PREP_M_D
 		RET	C
@@ -14906,7 +14906,7 @@ REPORT_6:	RST	08H		; ERROR_1
 ;---------------------
 
 					;; $31AF
-DIVISION:	CALL	L3293	; routine RE-ST-TWO
+DIVISION:	CALL	RE_ST_TWO	; routine RE_ST_TWO
 		EX	DE,HL
 		XOR	A
 		CALL	PREP_M_D	; routine PREP_M_D
@@ -15188,12 +15188,12 @@ IX_END:		EX	DE,HL
 ; This routine is called to re-stack two numbers in full floating point form
 ; e.g. from mult when integer multiplication has overflowed.
 
-					;; RE-ST-TWO
-L3293	CALL	L3296		; routine RESTK-SUB  below and continue
+					;; $3293
+RE_ST_TWO:	CALL	RESTK_SUB	; routine RESTK_SUB  below and continue
 					; into the routine to do the other one.
 
-					;; RESTK-SUB
-L3296	EX	DE,HL		; swap pointers
+					;; $3296
+RESTK_SUB:	EX	DE,HL		; swap pointers
 
 ;---------------------------------
 ; Re-stack one number in full form
@@ -15202,8 +15202,8 @@ L3296	EX	DE,HL		; swap pointers
 ; in full floating point form.
 ; HL points to first byte.
 
-					;; re-stack
-L3297	LD	A,(HL)		; Fetch Exponent byte to A
+					;; $3297
+RE_STACK:	LD	A,(HL)		; Fetch Exponent byte to A
 		AND	A		; test it
 		RET	NZ		; return if not zero as already in full
 					; floating-point form.
@@ -15212,7 +15212,7 @@ L3297	LD	A,(HL)		; Fetch Exponent byte to A
 		CALL	INT_FETCH	; routine INT_FETCH
 					; integer to DE, sign to C.
 
-; HL points to 4th byte.
+					; HL points to 4th byte.
 
 		XOR	A		; clear accumulator.
 		INC	HL		; point to 5th.
@@ -15224,29 +15224,29 @@ L3297	LD	A,(HL)		; Fetch Exponent byte to A
 					; and imaginary dec point 16 bits to right
 					; of first bit.
 
-; we could skip to normalize now but it's quicker to avoid
-; normalizing through an empty D.
+					; we could skip to normalize now but it's quicker to avoid
+					; normalizing through an empty D.
 
 		LD	A,D		; fetch the high byte D
 		AND	A		; is it zero ?
-		JR	NZ,L32B1		; skip to RS-NRMLSE if not.
+		JR	NZ,RS_NRMLSE	; skip to RS_NRMLSE if not.
 
 		OR	E		; low byte E to A and test for zero
 		LD	B,D		; set B exponent to 0
-		JR	Z,L32BD		; forward to RS-STORE if value is zero.
+		JR	Z,RS_STORE	; forward to RS_STORE if value is zero.
 
 		LD	D,E		; transfer E to D
 		LD	E,B		; set E to 0
 		LD	B,$89		; reduce the initial exponent by eight.
 
 
-					;; RS-NRMLSE
-L32B1	EX	DE,HL		; integer to HL, addr of 4th byte to DE.
+					;; $32B1
+RS_NRMLSE:	EX	DE,HL		; integer to HL, addr of 4th byte to DE.
 
-					;; RSTK-LOOP
-L32B2	DEC	B		; decrease exponent
+					;; $32B2
+RSTK_LOOP:	DEC	B		; decrease exponent
 		ADD	HL,HL		; shift DE left
-		JR	NC,L32B2		; loop back to RSTK-LOOP
+		JR	NC,RSTK_LOOP	; loop back to RSTK_LOOP
 					; until a set bit pops into carry
 
 		RRC	C		; now rotate the sign byte $00 or $FF
@@ -15257,8 +15257,8 @@ L32B2	DEC	B		; decrease exponent
 
 		EX	DE,HL		; address 4th byte, normalized int to DE
 
-					;; RS-STORE
-L32BD	DEC	HL		; address 3rd byte
+					;; $32BD
+RS_STORE:	DEC	HL		; address 3rd byte
 		LD	(HL),E		; place E
 		DEC	HL		; address 2nd byte
 		LD	(HL),D		; place D
@@ -15395,7 +15395,7 @@ L32D7	DEFW	L368F		; $00 Address: $368F - jump-true
 		DEFW	TRUNCATE	; $3A Address: $3214 - TRUNCATE
 		DEFW	L33A2		; $3B Address: $33A2 - FP_CALC_2
 		DEFW	E_TO_FP		; $3C Address: $2D4F - E_TO_FP
-		DEFW	L3297		; $3D Address: $3297 - re-stack
+		DEFW	RE_STACK		; $3D Address: $3297 - RE_STACK
 
 ; the following are just the next available slots for the 128 compound literals
 ; which are in range $80 - $FF.
@@ -17230,7 +17230,7 @@ L37DA	RST	28H		;; FP_CALC	x.
 ; the inverse tangent function with the result in radians.
 
 					;; atn
-L37E2	CALL	L3297		; routine re-stack
+L37E2	CALL	RE_STACK		; routine RE_STACK
 		LD	A,(HL)		;
 		CP	$81		;
 		JR	C,L37F8		; to SMALL
