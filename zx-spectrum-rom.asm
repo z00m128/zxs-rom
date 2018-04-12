@@ -9317,7 +9317,7 @@ PR_ITEM_3:	CALL	CO_TEMP_3	; routine CO_TEMP_3 will print any colour
 		BIT	6,(IY+$01)	; test FLAGS  - Numeric or string result ?
 		CALL	Z,STK_FETCH	; routine STK_FETCH if string.
 					; note no flags affected.
-		JP	NZ,L2DE3	; to PRINT_FP to print if numeric >>>
+		JP	NZ,PRINT_FP	; to PRINT_FP to print if numeric >>>
 
 					; It was a string expression - start in DE, length in BC
 					; Now enter a loop to print it
@@ -12738,7 +12738,7 @@ DE_DE_1:	EX	DE,HL
 GET_HL_DE:	CALL	SYNTAX_Z	; routine SYNTAX_Z.
 		RET	Z		; return if checking syntax.
 
-		CALL	L30A9	; routine HL-HL*DE.
+		CALL	HL_HL_DE	; routine HL_HL_DE.
 		JP	C,REPORT_4	; jump back to REPORT_4 if over 65535.
 
 		RET			; else return with 16-bit result in HL.
@@ -13262,7 +13262,7 @@ BIN_DIGIT:	RST	20H		; NEXT_CHAR
 		EX	DE,HL		; buffer to HL
 		CCF			; Carry now set if originally '1'
 		ADC	HL,HL		; shift the carry into HL
-		JP	C,L31AD		; to REPORT-6 if overflow - too many digits
+		JP	C,REPORT_6	; to REPORT_6 if overflow - too many digits
 					; after first '1'. There can be an unlimited
 					; number of leading zeros.
 					; 'Number too big' - raise an error
@@ -13382,11 +13382,11 @@ ST_E_PART:	CALL	NUMERIC		; routine NUMERIC
 		CALL	INT_TO_FP	; routine INT_TO_FP places exponent on stack
 		CALL	FP_TO_A		; routine FP_TO_A  transfers it to A
 		POP	BC		; restore sign
-		JP	C,L31AD	; to REPORT-6 if overflow (over 255)
+		JP	C,REPORT_6	; to REPORT_6 if overflow (over 255)
 					; raise 'Number too big'.
 
 		AND	A		; set flags
-		JP	M,L31AD	; to REPORT-6 if over '127'.
+		JP	M,REPORT_6	; to REPORT_6 if over '127'.
 					; raise 'Number too big'.
 					; 127 is still way too high and it is
 					; impossible to enter an exponent greater
@@ -13728,7 +13728,7 @@ LOG_2_A:	LD	D,A
 		RST	28H		;; FP_CALC
 		DEFB	$34		;;stk-data
 		DEFB	$EF		;;Exponent: $7F, Bytes: 4
-		DEFB	$1A,$20,$9A,$85 ;;
+		DEFB	$1A,$20,$9A,$85
 		DEFB	$04		;;multiply
 		DEFB	$27		;;int
 		DEFB	$38		;;end-calc
@@ -13767,21 +13767,21 @@ FP_A_END:	POP	AF		; restore value and success flag and
 ; Not a trivial task.
 ; Begin by considering whether to print a leading sign for negative numbers.
 
-					;; PRINT_FP
-L2DE3	RST	28H		;; FP_CALC
+					;; $2DE3
+PRINT_FP:	RST	28H		;; FP_CALC
 		DEFB	$31		;;duplicate
 		DEFB	$36		;;less-0
 		DEFB	$00		;;jump-true
 
-		DEFB	$0B		;;to L2DF2, PF-NEGTVE
+		DEFB	$0B		;;to PF_NEGTVE
 
 		DEFB	$31		;;duplicate
 		DEFB	$37		;;greater-0
 		DEFB	$00		;;jump-true
 
-		DEFB	$0D		;;to L2DF8, PF-POSTVE
+		DEFB	$0D		;;to PF_POSTVE
 
-; must be zero itself
+					; must be zero itself
 
 		DEFB	$02		;;delete
 		DEFB	$38		;;end-calc
@@ -13790,22 +13790,21 @@ L2DE3	RST	28H		;; FP_CALC
 
 		RST	10H		; PRINT_A
 		RET			; return.		->
-; ---
 
-					;; PF-NEGTVE
-L2DF2	DEFB	$2A		;;abs
+					;; $2DF2
+PF_NEGTVE:	DEFB	$2A		;;abs
 		DEFB	$38		;;end-calc
 
 		LD	A,$2D		; the character '-'
 
 		RST	10H		; PRINT_A
 
-; and continue to print the now positive number.
+					; and continue to print the now positive number.
 
 		RST	28H		;; FP_CALC
 
-					;; PF-POSTVE
-L2DF8	DEFB	$A0		;;stk-zero	x,0.	begin by
+					;; $2DF8
+PF_POSTVE:	DEFB	$A0		;;stk-zero	x,0.	begin by
 		DEFB	$C3		;;st-mem-3	x,0.	clearing a temporary
 		DEFB	$C4		;;st-mem-4	x,0.	output buffer to
 		DEFB	$C5		;;st-mem-5	x,0.	fifteen zeros.
@@ -13816,10 +13815,10 @@ L2DF8	DEFB	$A0		;;stk-zero	x,0.	begin by
 		PUSH	HL		; pointer to whatever comes after
 		EXX			; str$ as H'L' will be used.
 
-; now enter a loop?
+					; now enter a loop?
 
-					;; PF-LOOP
-L2E01	RST	28H		;; FP_CALC
+					;; $2E01
+PF_LOOP:	RST	28H		;; FP_CALC
 		DEFB	$31		;;duplicate	x,x.
 		DEFB	$27		;;int		x,int x.
 		DEFB	$C2		;;st-mem-2	x,int x.
@@ -13832,15 +13831,15 @@ L2E01	RST	28H		;; FP_CALC
 					;
 					; mem-2 holds the fractional part.
 
-; HL points to last value int x
+					; HL points to last value int x
 
 		LD	A,(HL)		; fetch exponent of int x.
 		AND	A		; test
-		JR	NZ,L2E56		; forward to PF-LARGE if a large integer
+		JR	NZ,PF_LARGE	; forward to PF_LARGE if a large integer
 					; > 65535
 
-; continue with small positive integer components in range 0 - 65535 
-; if original number was say .999 then this integer component is zero. 
+					; continue with small positive integer components in range 0 - 65535 
+					; if original number was say .999 then this integer component is zero. 
 
 		CALL	INT_FETCH	; routine INT_FETCH gets x in DE
 					; (but x is not deleted)
@@ -13849,40 +13848,38 @@ L2E01	RST	28H		;; FP_CALC
 
 		LD	A,D		; test if
 		AND	A		; high byte is zero
-		JR	NZ,L2E1E		; forward to PF-SAVE if 16-bit integer.
+		JR	NZ,PF_SAVE	; forward to PF_SAVE if 16-bit integer.
 
-; and continue with integer in range 0 - 255.
+					; and continue with integer in range 0 - 255.
 
 		OR	E		; test the low byte for zero
 					; i.e. originally just point something or other.
-		JR	Z,L2E24		; forward if so to PF-SMALL 
-
-; 
+		JR	Z,PF_SMALL	; forward if so to PF_SMALL  
 
 		LD	D,E		; transfer E to D
 		LD	B,$08		; and reduce the bit counter to 8.
 
-					;; PF-SAVE
-L2E1E	PUSH	DE		; save the part before decimal point.
-		EXX			;
+					;; $2E1E
+PF_SAVE:	PUSH	DE		; save the part before decimal point.
+		EXX
 		POP	DE		; and pop in into D'E'
-		EXX			;
-		JR	L2E7B		; forward to PF-BITS
+		EXX
+		JR	PF_BITS		; forward to PF_BITS
 
-; ---------------------
+					; ---------------------
 
-; the branch was here when 'int x' was found to be zero as in say 0.5.
-; The zero has been fetched from the calculator stack but not deleted and
-; this should occur now. This omission leaves the stack unbalanced and while
-; that causes no problems with a simple PRINT statement, it will if str$ is
-; being used in an expression e.g. "2" + STR$ 0.5 gives the result "0.5"
-; instead of the expected result "20.5".
-; credit Tony Stratton, 1982.
-; A DEFB 02 delete is required immediately on using the calculator.
+					; the branch was here when 'int x' was found to be zero as in say 0.5.
+					; The zero has been fetched from the calculator stack but not deleted and
+					; this should occur now. This omission leaves the stack unbalanced and while
+					; that causes no problems with a simple PRINT statement, it will if str$ is
+					; being used in an expression e.g. "2" + STR$ 0.5 gives the result "0.5"
+					; instead of the expected result "20.5".
+					; credit Tony Stratton, 1982.
+					; A DEFB 02 delete is required immediately on using the calculator.
 
-					;; PF-SMALL
-L2E24	RST	28H		;; FP_CALC	int x = 0.
-L2E25	DEFB	$E2		;;get-mem-2	int x = 0, x-int x.
+					;; $2E24
+PF_SMALL:	RST	28H		;; FP_CALC	int x = 0.
+L2E25:		DEFB	$E2		;;get-mem-2	int x = 0, x-int x.
 		DEFB	$38		;;end-calc
 
 		LD	A,(HL)		; fetch exponent of positive fractional number
@@ -13891,10 +13888,10 @@ L2E25	DEFB	$E2		;;get-mem-2	int x = 0, x-int x.
 		CALL	LOG_2_A		; routine LOG_2_A calculates leading digits.
 
 		LD	D,A		; transfer count to D
-		LD	A,($5CAC)	; fetch total MEM-5-1
-		SUB	D		;
-		LD	($5CAC),A	; MEM-5-1
-		LD	A,D		; 
+		LD	A,(MEM_5_1)	; fetch total digits - MEM_5 2nd byte
+		SUB	D
+		LD	(MEM_5_1),A	; store MEM_5 2nd byte
+		LD	A,D
 		CALL	E_TO_FP		; routine E_TO_FP
 
 		RST	28H		;; FP_CALC
@@ -13908,74 +13905,74 @@ L2E25	DEFB	$E2		;;get-mem-2	int x = 0, x-int x.
 		CALL	FP_TO_A		; routine FP_TO_A
 
 		PUSH	HL		; save HL
-		LD	($5CA1),A	; MEM-3-1
-		DEC	A		;
-		RLA			;
-		SBC	A,A		;
-		INC	A		;
+		LD	(MEM_3),A	; MEM_3 1st byte
+		DEC	A
+		RLA
+		SBC	A,A
+		INC	A
 
-		LD	HL,$5CAB		; address MEM-5-1 leading digit counter
+		LD	HL,MEM_5_0	; address MEM_5 leading digit counter
 		LD	(HL),A		; store counter
-		INC	HL		; address MEM-5-2 total digits
+		INC	HL		; address MEM_5 2nd byte - total digits
 		ADD	A,(HL)		; add counter to contents
 		LD	(HL),A		; and store updated value
 		POP	HL		; restore HL
 
-		JP	L2ECF		; JUMP forward to PF-FRACTN
+		JP	PF_FRACTN	; JUMP forward to PF_FRACTN
 
-; Note. while it would be pedantic to comment on every occasion a JP
-; instruction could be replaced with a JR instruction, this applies to the
-; above, which is useful if you wish to correct the unbalanced stack error
-; by inserting a 'DEFB 02 delete' at L2E25, and maintain main addresses.
+					; Note. while it would be pedantic to comment on every occasion a JP
+					; instruction could be replaced with a JR instruction, this applies to the
+					; above, which is useful if you wish to correct the unbalanced stack error
+					; by inserting a 'DEFB 02 delete' at L2E25, and maintain main addresses.
 
-; the branch was here with a large positive integer > 65535 e.g. 123456789
-; the accumulator holds the exponent.
+					; the branch was here with a large positive integer > 65535 e.g. 123456789
+					; the accumulator holds the exponent.
 
-					;; PF-LARGE
-L2E56	SUB	$80		; make exponent positive
+					;; $2E56
+PF_LARGE:	SUB	$80		; make exponent positive
 		CP	$1C		; compare to 28
-		JR	C,L2E6F		; to PF-MEDIUM if integer <= 2^27
+		JR	C,PF_MEDIUM	; to PF_MEDIUM if integer <= 2^27
 
 		CALL	LOG_2_A		; routine LOG_2_A
-		SUB	$07		;
-		LD	B,A		;
-		LD	HL,$5CAC		; address MEM-5-1 the leading digits counter.
+		SUB	$07
+		LD	B,A
+		LD	HL,MEM_5_1	; address MEM_5_1 the leading digits counter.
 		ADD	A,(HL)		; add A to contents
 		LD	(HL),A		; store updated value.
-		LD	A,B		; 
+		LD	A,B
 		NEG			; negate
 		CALL	E_TO_FP		; routine E_TO_FP
-		JR	L2E01		; back to PF-LOOP
+		JR	PF_LOOP		; back to PF_LOOP
 
-; ----------------------------
+					; ----------------------------
 
-					;; PF-MEDIUM
-L2E6F	EX	DE,HL		;
-		CALL	L2FBA		; routine FETCH-TWO
-		EXX			;
-		SET	7,D		;
-		LD	A,L		;
-		EXX			;
-		SUB	$80		;
-		LD	B,A		;
+					;; $2E6F
+PF_MEDIUM:	EX	DE,HL
+		CALL	FETCH_TWO	; routine FETCH_TWO
+		EXX
+		SET	7,D
+		LD	A,L
+		EXX
+		SUB	$80
+		LD	B,A
 
-; the branch was here to handle bits in DE with 8 or 16 in B  if small int
-; and integer in D'E', 6 nibbles will accommodate 065535 but routine does
-; 32-bit numbers as well from above
+					; the branch was here to handle bits in DE with 8 or 16 in B  if small int
+					; and integer in D'E', 6 nibbles will accommodate 065535 but routine does
+					; 32-bit numbers as well from above
 
-					;; PF-BITS
-L2E7B	SLA	E		;  C<xxxxxxxx<0
+					;; $2E7B
+PF_BITS:	SLA	E		;  C<xxxxxxxx<0
 		RL	D		;  C<xxxxxxxx<C
-		EXX			;
+		EXX
 		RL	E		;  C<xxxxxxxx<C
 		RL	D		;  C<xxxxxxxx<C
-		EXX			;
+		EXX
 
-		LD	HL,$5CAA		; set HL to mem-4-5th last byte of buffer
-		LD	C,$05		; set byte count to 5 -  10 nibbles
+		LD	HL,MEM_4_4	; set HL to MEM_4 5th last byte of buffer
+		LD	C,$05		; set byte count to 5 - 10 nibbles
 
-					;; PF-BYTES
-L2E8A	LD	A,(HL)		; fetch 0 or prev value
+					;; $2E8A
+PF_BYTES:	LD	A,(HL)		; fetch 0 or prev value
 		ADC	A,A		; shift left add in carry	C<xxxxxxxx<C
 
 		DAA			; Decimal Adjust Accumulator.
@@ -13990,18 +13987,18 @@ L2E8A	LD	A,(HL)		; fetch 0 or prev value
 		LD	(HL),A		; put back
 		DEC	HL		; work down thru mem 4
 		DEC	C		; decrease the 5 counter.
-		JR	NZ,L2E8A		; back to PF-BYTES until the ten nibbles rolled
+		JR	NZ,PF_BYTES	; back to PF_BYTES until the ten nibbles rolled
 
-		DJNZ	L2E7B		; back to PF-BITS until 8 or 16 (or 32) done
+		DJNZ	PF_BITS		; back to PF_BITS until 8 or 16 (or 32) done
 
-; at most 9 digits for 32-bit number will have been loaded with digits
-; each of the 9 nibbles in mem 4 is placed into ten bytes in mem-3 and mem 4
-; unless the nibble is zero as the buffer is already zero.
-; ( or in the case of mem-5 will become zero as a result of RLD instruction )
+					; at most 9 digits for 32-bit number will have been loaded with digits
+					; each of the 9 nibbles in mem 4 is placed into ten bytes in mem-3 and mem 4
+					; unless the nibble is zero as the buffer is already zero.
+					; ( or in the case of mem-5 will become zero as a result of RLD instruction )
 
 		XOR	A		; clear to accept
-		LD	HL,$5CA6		; address MEM-4-0 byte destination.
-		LD	DE,$5CA1		; address MEM-3-0 nibble source.
+		LD	HL,MEM_4	; address MEM_4 byte destination.
+		LD	DE,MEM_3	; address MEM_3 nibble source.
 		LD	B,$09		; the count is 9 (not ten) as the first 
 					; nibble is known to be blank.
 
@@ -14011,245 +14008,233 @@ L2E8A	LD	A,(HL)		; fetch 0 or prev value
 					; 0000 0000	3210 0000
 					; A picks up the blank nibble
 
-
 		LD	C,$FF		; set a flag to indicate when a significant
 					; digit has been encountered.
 
-					;; PF-DIGITS
-L2EA1	RLD			; pick up leftmost nibble from (HL)
-					;	A		(HL)
+					;; $2EA1
+PF_DIGITS:	RLD			; pick up leftmost nibble from (HL)
+					;    A           (HL)
 					; 0000 0000 < 7654 3210
-					; 0000 7654	3210 0000
+					; 0000 7654   3210 0000
 
 
-		JR	NZ,L2EA9		; to PF-INSERT if non-zero value picked up.
+		JR	NZ,PF_INSERT	; to PF_INSERT if non-zero value picked up.
 
 		DEC	C		; test
 		INC	C		; flag
-		JR	NZ,L2EB3		; skip forward to PF-TEST-2 if flag still $FF
+		JR	NZ,PF_TEST_2	; skip forward to PF_TEST_2 if flag still $FF
 					; indicating this is a leading zero.
 
-; but if the zero is a significant digit e.g. 10 then include in digit totals.
-; the path for non-zero digits rejoins here.
+					; but if the zero is a significant digit e.g. 10 then include in digit totals.
+					; the path for non-zero digits rejoins here.
 
-					;; PF-INSERT
-L2EA9	LD	(DE),A		; insert digit at destination
+					;; $2EA9
+PF_INSERT:	LD	(DE),A		; insert digit at destination
 		INC	DE		; increase the destination pointer
-		INC	(IY+$71)		; increment MEM-5-1st  digit counter
-		INC	(IY+$72)		; increment MEM-5-2nd  leading digit counter
+		INC	(IY+$71)	; increment MEM_5 1st  digit counter
+		INC	(IY+$72)	; increment MEM_5 2nd  leading digit counter
 		LD	C,$00		; set flag to zero indicating that any 
-					; subsequent zeros are significant and not 
-					; leading.
+					; subsequent zeros are significant and not leading.
 
-					;; PF-TEST-2
-L2EB3	BIT	0,B		; test if the nibble count is even
-		JR	Z,L2EB8		; skip to PF-ALL-9 if so to deal with the
-					; other nibble in the same byte
+					;; $L2EB3
+PF_TEST_2:	BIT	0,B		; test if the nibble count is even
+		JR	Z,PF_ALL_9	; skip to PF_ALL_9 if so to deal with the other nibble in the same byte
 
 		INC	HL		; point to next source byte if not
 
-					;; PF-ALL-9
-L2EB8	DJNZ	L2EA1		; decrement the nibble count, back to PF-DIGITS
+					;; $2EB8
+PF_ALL_9:	DJNZ	PF_DIGITS	; decrement the nibble count, back to PF_DIGITS
 					; if all nine not done.
 
-; For 8-bit integers there will be at most 3 digits.
-; For 16-bit integers there will be at most 5 digits. 
-; but for larger integers there could be nine leading digits.
-; if nine digits complete then the last one is rounded up as the number will
-; be printed using E-format notation
+					; For 8-bit integers there will be at most 3 digits.
+					; For 16-bit integers there will be at most 5 digits. 
+					; but for larger integers there could be nine leading digits.
+					; if nine digits complete then the last one is rounded up as the number will
+					; be printed using E-format notation
 
-		LD	A,($5CAB)	; fetch digit count from MEM-5-1st
+		LD	A,(MEM_5_0)	; fetch digit count from MEM_5 1st
 		SUB	$09		; subtract 9 - max possible
-		JR	C,L2ECB		; forward if less to PF-MORE
+		JR	C,PF_MORE	; forward if less to PF_MORE
 
-		DEC	(IY+$71)		; decrement digit counter MEM-5-1st to 8
+		DEC	(IY+$71)	; decrement digit counter MEM_5 1st to 8
 		LD	A,$04		; load A with the value 4.
-		CP	(IY+$6F)		; compare with MEM-4-4th - the ninth digit
-		JR	L2F0C		; forward to PF-ROUND
+		CP	(IY+$6F)	; compare with MEM_4 4th - the ninth digit
+		JR	PF_ROUND	; forward to PF_ROUND
 					; to consider rounding.
 
-; ---------------------------------------
- 
-; now delete int x from calculator stack and fetch fractional part.
+ 					; now delete int x from calculator stack and fetch fractional part.
 
-					;; PF-MORE
-L2ECB	RST	28H		;; FP_CALC		int x.
-		DEFB	$02		;;delete		.
+					;; $2ECB
+PF_MORE:	RST	28H		;; FP_CALC	int x.
+		DEFB	$02		;;delete	.
 		DEFB	$E2		;;get-mem-2	x - int x = f.
 		DEFB	$38		;;end-calca	f.
 
-					;; PF-FRACTN
-L2ECF	EX	DE,HL		;
-		CALL	L2FBA		; routine FETCH-TWO
-		EXX			;
-		LD	A,$80		;
-		SUB	L		;
-		LD	L,$00		;
-		SET	7,D		;
-		EXX			;
-		CALL	L2FDD		; routine SHIFT-FP
+					;; $2ECF
+PF_FRACTN:	EX	DE,HL
+		CALL	FETCH_TWO	; routine FETCH_TWO
+		EXX
+		LD	A,$80
+		SUB	L
+		LD	L,$00
+		SET	7,D
+		EXX
+		CALL	SHIFT_FP	; routine SHIFT_FP
 
-					;; PF-FRN-LP
-L2EDF	LD	A,(IY+$71)	; MEM-5-1st
-		CP	$08		;
-		JR	C,L2EEC		; to PF-FR-DGT
+					;; $2EDF
+PF_FRN_LP:	LD	A,(IY+$71)	; MEM_5 1st
+		CP	$08
+		JR	C,PF_FR_DGT	; to PF_FR_DGT
 
-		EXX			;
-		RL	D		;
-		EXX			;
-		JR	L2F0C		; to PF-ROUND
+		EXX
+		RL	D
+		EXX
+		JR	PF_ROUND	; to PF_ROUND
 
-					;; PF-FR-DGT
-L2EEC	LD	BC,$0200		;
+					;; $2EEC
+PF_FR_DGT:	LD	BC,$0200
 
-					;; PF-FR-EXX
-L2EEF	LD	A,E		;
-		CALL	L2F8B		; routine CA-10*A+C
-		LD	E,A		;
-		LD	A,D		;
-		CALL	L2F8B		; routine CA-10*A+C
-		LD	D,A		;
-		PUSH	BC		;
-		EXX			;
-		POP	BC		;
-		DJNZ	L2EEF		; to PF-FR-EXX
+					;; $2EEF
+PF_FR_EXX:	LD	A,E
+		CALL	CA_10_A_C	; routine CA_10_A_C
+		LD	E,A
+		LD	A,D
+		CALL	CA_10_A_C	; routine CA_10_A_C
+		LD	D,A
+		PUSH	BC
+		EXX
+		POP	BC
+		DJNZ	PF_FR_EXX	; to PF_FR_EXX
 
-		LD	HL,$5CA1		; MEM-3
-		LD	A,C		;
-		LD	C,(IY+$71)	; MEM-5-1st
-		ADD	HL,BC		;
-		LD	(HL),A		;
-		INC	(IY+$71)		; MEM-5-1st
-		JR	L2EDF		; to PF-FRN-LP
+		LD	HL,MEM_3	; MEM-3
+		LD	A,C
+		LD	C,(IY+$71)	; MEM_5 1st
+		ADD	HL,BC
+		LD	(HL),A
+		INC	(IY+$71)	; MEM_5 1st
+		JR	PF_FRN_LP	; to PF_FRN_LP
 
-; ----------------
 
-; 1) with 9 digits but 8 in mem-5-1 and A holding 4, carry set if rounding up.
-; e.g. 
-;	999999999 is printed as 1E+9
-;	100000001 is printed as 1E+8
-;	100000009 is printed as 1.0000001E+8
+					; 1) with 9 digits but 8 in MEM_5_1 and A holding 4, carry set if rounding up.
+					; e.g. 
+					;	999999999 is printed as 1E+9
+					;	100000001 is printed as 1E+8
+					;	100000009 is printed as 1.0000001E+8
 
-					;; PF-ROUND
-L2F0C	PUSH	AF		; save A and flags
-		LD	HL,$5CA1		; address MEM-3 start of digits
-		LD	C,(IY+$71)	; MEM-5-1st No. of digits to C
+					;; $2F0C
+PF_ROUND:	PUSH	AF		; save A and flags
+		LD	HL,MEM_3	; address MEM_3 start of digits
+		LD	C,(IY+$71)	; MEM_5 1st No. of digits to C
 		LD	B,$00		; prepare to add
 		ADD	HL,BC		; address last digit + 1
 		LD	B,C		; No. of digits to B counter
 		POP	AF		; restore A and carry flag from comparison.
 
-					;; PF-RND-LP
-L2F18	DEC	HL		; address digit at rounding position.
+					;; $2F18
+PF_RND_LP:	DEC	HL		; address digit at rounding position.
 		LD	A,(HL)		; fetch it
 		ADC	A,$00		; add carry from the comparison
 		LD	(HL),A		; put back result even if $0A.
 		AND	A		; test A
-		JR	Z,L2F25		; skip to PF-R-BACK if ZERO?
+		JR	Z,PF_R_BACK	; skip to PF_R_BACK if ZERO?
 
 		CP	$0A		; compare to 'ten' - overflow
 		CCF			; complement carry flag so that set if ten.
-		JR	NC,L2F2D		; forward to PF-COUNT with 1 - 9.
+		JR	NC,PF_COUNT	; forward to PF_COUNT with 1 - 9.
 
-					;; PF-R-BACK
-L2F25	DJNZ	L2F18		; loop back to PF-RND-LP
+					;; $2F25
+PF_R_BACK:	DJNZ	PF_RND_LP	; loop back to PF_RND_LP
 
-; if B counts down to zero then we've rounded right back as in 999999995.
-; and the first 8 locations all hold $0A.
+					; if B counts down to zero then we've rounded right back as in 999999995.
+					; and the first 8 locations all hold $0A.
 
 
-		LD	(HL),$01		; load first location with digit 1.
+		LD	(HL),$01	; load first location with digit 1.
 		INC	B		; make B hold 1 also.
 					; could save an instruction byte here.
-		INC	(IY+$72)		; make MEM-5-2nd hold 1.
+		INC	(IY+$72)	; make MEM-5-2nd hold 1.
 					; and proceed to initialize total digits to 1.
 
-					;; PF-COUNT
-L2F2D	LD	(IY+$71),B	; MEM-5-1st
+					;; $2F2D
+PF_COUNT:	LD	(IY+$71),B	; MEM_5 1st
 
-; now balance the calculator stack by deleting  it
+					; now balance the calculator stack by deleting  it
 
 		RST	28H		;; FP_CALC
 		DEFB	$02		;;delete
 		DEFB	$38		;;end-calc
 
-; note if used from str$ then other values may be on the calculator stack.
-; we can also restore the next literal pointer from it's position on the
-; machine stack.
+					; note if used from str$ then other values may be on the calculator stack.
+					; we can also restore the next literal pointer from it's position on the
+					; machine stack.
 
-		EXX			;
+		EXX
 		POP	HL		; restore next literal pointer.
-		EXX			;
+		EXX
 
-		LD	BC,($5CAB)	; set C to MEM-5-1st digit counter.
-					; set B to MEM-5-2nd leading digit counter.
-		LD	HL,$5CA1		; set HL to start of digits at MEM-3-1
-		LD	A,B		;
-		CP	$09		;
-		JR	C,L2F46		; to PF-NOT-E
+		LD	BC,(MEM_5_0)	; set C to MEM_5 1st digit counter.
+					; set B to MEM_5 2nd leading digit counter.
+		LD	HL,MEM_3	; set HL to start of digits at MEM_3
+		LD	A,B
+		CP	$09
+		JR	C,PF_NOT_E	; to PF_NOT_E
 
 		CP	$FC		;
-		JR	C,L2F6C		; to PF-E-FRMT
+		JR	C,PF_E_FRMT	; to PF_E_FRMT
 
-					;; PF-NOT-E
-L2F46	AND	A		; test for zero leading digits as in .123
+					;; $2F46
+PF_NOT_E:	AND	A		; test for zero leading digits as in .123
 
 		CALL	Z,OUT_CODE	; routine OUT_CODE prints a zero e.g. 0.123
 
-					;; PF-E-SBRN
-L2F4A	XOR	A		;
-		SUB	B		;
-		JP	M,L2F52		; skip forward to PF-OUT-LP if originally +ve
+					;; $2F4A
+PF_E_SBRN:	XOR	A
+		SUB	B
+		JP	M,PF_OUT_LP	; skip forward to PF_OUT_LP if originally +ve
 
 		LD	B,A		; else negative count now +ve
-		JR	L2F5E		; forward to PF-DC-OUT	->
+		JR	PF_DC_OUT	; forward to PF_DC_OUT	->
 
-; ---
-
-					;; PF-OUT-LP
-L2F52	LD	A,C		; fetch total digit count
+					;; $2F52
+PF_OUT_LP:	LD	A,C		; fetch total digit count
 		AND	A		; test for zero
-		JR	Z,L2F59		; forward to PF-OUT-DT if so
+		JR	Z,PF_OUT_DT	; forward to PF_OUT_DT if so
 
 		LD	A,(HL)		; fetch digit
 		INC	HL		; address next digit
 		DEC	C		; decrease total digit counter
 
-					;; PF-OUT-DT
-L2F59	CALL	OUT_CODE		; routine OUT_CODE outputs it.
-		DJNZ	L2F52		; loop back to PF-OUT-LP until B leading 
+					;; $2F59
+PF_OUT_DT:	CALL	OUT_CODE	; routine OUT_CODE outputs it.
+		DJNZ	PF_OUT_LP	; loop back to PF_OUT_LP until B leading 
 					; digits output.
 
-					;; PF-DC-OUT
-L2F5E	LD	A,C		; fetch total digits and
+					;; $2F5E
+PF_DC_OUT:	LD	A,C		; fetch total digits and
 		AND	A		; test if also zero
 		RET	Z		; return if so			-->
-
-; 
 
 		INC	B		; increment B
 		LD	A,$2E		; prepare the character '.'
 
-					;; PF-DEC-0$
-L2F64	RST	10H		; PRINT_A outputs the character '.' or '0'
+					;; $L2F64
+PF_DEC_0:	RST	10H		; PRINT_A outputs the character '.' or '0'
 
 		LD	A,$30		; prepare the character '0'
 					; (for cases like .000012345678)
-		DJNZ	L2F64		; loop back to PF-DEC-0$ for B times.
+		DJNZ	PF_DEC_0	; loop back to PF_DEC_0 for B times.
 
 		LD	B,C		; load B with now trailing digit counter.
-		JR	L2F52		; back to PF-OUT-LP
+		JR	PF_OUT_LP	; back to PF_OUT_LP
 
-; ---------------------------------
+					; the branch was here for E-format printing e.g 123456789 => 1.2345679e+8
 
-; the branch was here for E-format printing e.g 123456789 => 1.2345679e+8
-
-					;; PF-E-FRMT
-L2F6C	LD	D,B		; counter to D
+					;; $2F6C
+PF_E_FRMT:	LD	D,B		; counter to D
 		DEC	D		; decrement
 		LD	B,$01		; load B with 1.
 
-		CALL	L2F4A		; routine PF-E-SBRN above
+		CALL	PF_E_SBRN	; routine PF_E_SBRN above
 
 		LD	A,$45		; prepare character 'e'
 		RST	10H		; PRINT_A
@@ -14257,18 +14242,18 @@ L2F6C	LD	D,B		; counter to D
 		LD	C,D		; exponent to C
 		LD	A,C		; and to A
 		AND	A		; test exponent
-		JP	P,L2F83		; to PF-E-POS if positive
+		JP	P,PF_E_POS	; to PF_E_POS if positive
 
 		NEG			; negate
 		LD	C,A		; positive exponent to C
 		LD	A,$2D		; prepare character '-'
-		JR	L2F85		; skip to PF-E-SIGN
+		JR	PF_E_SIGN	; skip to PF_E_SIGN
 
-					;; PF-E-POS
-L2F83	LD	A,$2B		; prepare character '+'
+					;; $2F83
+PF_E_POS:	LD	A,$2B		; prepare character '+'
 
-					;; PF-E-SIGN
-L2F85	RST	10H		; PRINT_A outputs the sign
+					;; $2F85
+PF_E_SIGN:	RST	10H		; PRINT_A outputs the sign
 
 		LD	B,$00		; make the high byte zero.
 		JP	OUT_NUM_1	; exit via OUT_NUM_1 to print exponent in BC
@@ -14279,8 +14264,9 @@ L2F85	RST	10H		; PRINT_A outputs the sign
 ; This subroutine is called twice from above when printing floating-point
 ; numbers. It returns 10*A +C in registers C and A
 
-					;; CA-10*A+C
-L2F8B	PUSH	DE		; preserve DE.
+					;; $2F8B
+					; CA-10*A+C
+CA_10_A_C:	PUSH	DE		; preserve DE.
 		LD	L,A		; transfer A to L
 		LD	H,$00		; zero high byte.
 		LD	E,L		; copy HL
@@ -14304,9 +14290,9 @@ L2F8B	PUSH	DE		; preserve DE.
 ; is tested before being set to the implied state. Negative numbers are twos
 ; complemented.
 
-					;; PREP-ADD
-L2F9B	LD	A,(HL)		; pick up exponent
-		LD	(HL),$00		; make location zero
+					;; $2F9B
+PREP_ADD:	LD	A,(HL)		; pick up exponent
+		LD	(HL),$00	; make location zero
 		AND	A		; test if number is zero
 		RET	Z		; return if so
 
@@ -14317,19 +14303,19 @@ L2F9B	LD	A,(HL)		; pick up exponent
 		RET	Z		; return if positive number.
 
 		PUSH	BC		; preserve BC
-		LD	BC,$0005		; length of number
+		LD	BC,$0005	; length of number
 		ADD	HL,BC		; point HL past end
 		LD	B,C		; set B to 5 counter
 		LD	C,A		; store exponent in C
 		SCF			; set carry flag
 
-					;; NEG-BYTE
-L2FAF	DEC	HL		; work from LSB to MSB
+					;; $2FAF
+NEG_BYTE:	DEC	HL		; work from LSB to MSB
 		LD	A,(HL)		; fetch byte
 		CPL			; complement
 		ADC	A,$00		; add in initial carry or from prev operation
 		LD	(HL),A		; put back
-		DJNZ	L2FAF		; loop to NEG-BYTE till all 5 done
+		DJNZ	NEG_BYTE	; loop to NEG_BYTE till all 5 done
 
 		LD	A,C		; stored exponent to A
 		POP	BC		; restore original BC
@@ -14344,43 +14330,43 @@ L2FAF	DEC	HL		; work from LSB to MSB
 ; For arithmetic only, A holds the sign of the result which is stored in
 ; the second location. 
 
-					;; FETCH-TWO
-L2FBA	PUSH	HL		; save pointer to first number, result if math.
+					;; $2FBA
+FETCH_TWO:	PUSH	HL		; save pointer to first number, result if math.
 		PUSH	AF		; save result sign.
 
-		LD	C,(HL)		;
-		INC	HL		;
+		LD	C,(HL)
+		INC	HL
 
-		LD	B,(HL)		;
+		LD	B,(HL)
 		LD	(HL),A		; store the sign at correct location in 
 					; destination 5 bytes for arithmetic only.
-		INC	HL		;
+		INC	HL
 
-		LD	A,C		;
-		LD	C,(HL)		;
-		PUSH	BC		;
-		INC	HL		;
-		LD	C,(HL)		;
-		INC	HL		;
-		LD	B,(HL)		;
-		EX	DE,HL		;
-		LD	D,A		;
-		LD	E,(HL)		;
-		PUSH	DE		;
-		INC	HL		;
-		LD	D,(HL)		;
-		INC	HL		;
-		LD	E,(HL)		;
-		PUSH	DE		;
-		EXX			;
-		POP	DE		;
-		POP	HL		;
-		POP	BC		;
-		EXX			;
-		INC	HL		;
-		LD	D,(HL)		;
-		INC	HL		;
-		LD	E,(HL)		;
+		LD	A,C
+		LD	C,(HL)
+		PUSH	BC
+		INC	HL
+		LD	C,(HL)
+		INC	HL
+		LD	B,(HL)
+		EX	DE,HL
+		LD	D,A
+		LD	E,(HL)
+		PUSH	DE
+		INC	HL
+		LD	D,(HL)
+		INC	HL
+		LD	E,(HL)
+		PUSH	DE
+		EXX
+		POP	DE
+		POP	HL
+		POP	BC
+		EXX
+		INC	HL
+		LD	D,(HL)
+		INC	HL
+		LD	E,(HL)
 
 		POP	AF		; restore possible result sign.
 		POP	HL		; and pointer to possible result.
@@ -14389,69 +14375,65 @@ L2FBA	PUSH	HL		; save pointer to first number, result if math.
 ;----------------------------------
 ; Shift floating point number right
 ;----------------------------------
-;
-;
 
-					;; SHIFT-FP
-L2FDD	AND	A		;
-		RET	Z		;
+					;; $2FDD
+SHIFT_FP:	AND	A
+		RET	Z
 
-		CP	$21		;
-		JR	NC,L2FF9		; to ADDEND-0
+		CP	$21
+		JR	NC,ADDEND_0	; to ADDEND_0
 
-		PUSH	BC		;
-		LD	B,A		;
+		PUSH	BC
+		LD	B,A
 
-					;; ONE-SHIFT
-L2FE5	EXX			;
-		SRA	L		;
-		RR	D		;
-		RR	E		;
-		EXX			;
-		RR	D		;
-		RR	E		;
-		DJNZ	L2FE5		; to ONE-SHIFT
+					;; $2FE5
+ONE_SHIFT:	EXX
+		SRA	L
+		RR	D
+		RR	E
+		EXX
+		RR	D
+		RR	E
+		DJNZ	ONE_SHIFT	; to ONE_SHIFT
 
-		POP	BC		;
-		RET	NC		;
+		POP	BC
+		RET	NC
 
-		CALL	L3004		; routine ADD-BACK
-		RET	NZ		;
+		CALL	ADD_BACK	; routine ADD_BACK
+		RET	NZ
 
-					;; ADDEND-0
-L2FF9	EXX			;
-		XOR	A		;
+					;; $2FF9
+ADDEND_0:	EXX
+		XOR	A
 
-					;; ZEROS-4/5
-L2FFB	LD	L,$00		;
-		LD	D,A		;
-		LD	E,L		;
-		EXX			;
-		LD	DE,$0000		;
-		RET			;
+					;; $2FFB
+ZEROS_4_5:	LD	L,$00
+		LD	D,A
+		LD	E,L
+		EXX
+		LD	DE,$0000
+		RET
 
 ;-------------------
 ; Add back any carry
 ;-------------------
-;
-;
 
-					;; ADD-BACK
-L3004	INC	E		;
-		RET	NZ		;
+					;; $3004
+ADD_BACK:	INC	E
+		RET	NZ
 
-		INC	D		;
-		RET	NZ		;
+		INC	D
+		RET	NZ
 
-		EXX			;
-		INC	E		;
-		JR	NZ,L300D		; to ALL-ADDED
+		EXX
+		INC	E
+		JR	NZ,ALL_ADDED	; to ALL_ADDED
 
-		INC	D		;
+		INC	D
 
-					;; ALL-ADDED
-L300D	EXX			;
-		RET			;
+					;; $300D
+ALL_ADDED:	EXX
+		RET
 
 ;------------------------
 ; Handle subtraction (03)
@@ -14459,8 +14441,8 @@ L300D	EXX			;
 ; Subtraction is done by switching the sign byte/bit of the second number
 ; which may be integer of floating point and continuing into addition.
 
-					;; subtract
-L300F	EX	DE,HL		; address second number with HL
+					;; $300F
+SUBTRACT:	EX	DE,HL		; address second number with HL
 
 		CALL	L346E		; routine NEGATE switches sign
 
@@ -14473,13 +14455,13 @@ L300F	EX	DE,HL		; address second number with HL
 ; HL points to first number, DE to second.
 ; If they are both integers, then go for the easy route.
 
-					;; addition
-L3014	LD	A,(DE)		; fetch first byte of second
+					;; ADDITION
+ADDITION:	LD	A,(DE)		; fetch first byte of second
 		OR	(HL)		; combine with first byte of first
-		JR	NZ,L303E		; forward to FULL-ADDN if at least one was
+		JR	NZ,FULL_ADDN	; forward to FULL_ADDN if at least one was
 					; in floating point form.
 
-; continue if both were small integers.
+					; continue if both were small integers.
 
 		PUSH	DE		; save pointer to lowest number for result.
 
@@ -14518,121 +14500,121 @@ L3014	LD	A,(DE)		; fetch first byte of second
 
 		ADC	A,$00		; both acceptable signs now zero
 
-		JR	NZ,L303C		; forward to ADDN-OFLW if not
+		JR	NZ,ADDN_OFLW	; forward to ADDN_OFLW if not
 
 		SBC	A,A		; restore a negative result sign
 
-		LD	(HL),A		;
-		INC	HL		;
-		LD	(HL),E		;
-		INC	HL		;
-		LD	(HL),D		;
-		DEC	HL		;
-		DEC	HL		;
-		DEC	HL		;
+		LD	(HL),A
+		INC	HL
+		LD	(HL),E
+		INC	HL
+		LD	(HL),D
+		DEC	HL
+		DEC	HL
+		DEC	HL
 
 		POP	DE		; STKEND
-		RET			;
+		RET
 
-					;; ADDN-OFLW
-L303C	DEC	HL		;
-		POP	DE		;
+					;; $303C
+ADDN_OFLW:	DEC	HL
+		POP	DE
 
-					;; FULL-ADDN
-L303E	CALL	L3293		; routine RE-ST-TWO
-		EXX			;
-		PUSH	HL		;
-		EXX			;
-		PUSH	DE		;
-		PUSH	HL		;
-		CALL	L2F9B		; routine PREP-ADD
-		LD	B,A		;
-		EX	DE,HL		;
-		CALL	L2F9B		; routine PREP-ADD
-		LD	C,A		;
-		CP	B		;
-		JR	NC,L3055		; to SHIFT-LEN
+					;; $303E
+FULL_ADDN:	CALL	L3293	; routine RE-ST-TWO
+		EXX
+		PUSH	HL
+		EXX
+		PUSH	DE
+		PUSH	HL
+		CALL	PREP_ADD	; routine PREP_ADD
+		LD	B,A
+		EX	DE,HL
+		CALL	PREP_ADD	; routine PREP_ADD
+		LD	C,A
+		CP	B
+		JR	NC,SHIFT_LEN	; to SHIFT_LEN
 
-		LD	A,B		;
-		LD	B,C		;
-		EX	DE,HL		;
+		LD	A,B
+		LD	B,C
+		EX	DE,HL
 
-					;; SHIFT-LEN
-L3055	PUSH	AF		;
-		SUB	B		;
-		CALL	L2FBA		; routine FETCH-TWO
-		CALL	L2FDD		; routine SHIFT-FP
-		POP	AF		;
-		POP	HL		;
-		LD	(HL),A		;
-		PUSH	HL		;
-		LD	L,B		;
-		LD	H,C		;
-		ADD	HL,DE		;
-		EXX			;
-		EX	DE,HL		;
-		ADC	HL,BC		;
-		EX	DE,HL		;
-		LD	A,H		;
-		ADC	A,L		;
-		LD	L,A		;
-		RRA			;
-		XOR	L		;
-		EXX			;
-		EX	DE,HL		;
-		POP	HL		;
-		RRA			;
-		JR	NC,L307C		; to TEST-NEG
+					;; $3055
+SHIFT_LEN:	PUSH	AF
+		SUB	B
+		CALL	FETCH_TWO	; routine FETCH_TWO
+		CALL	SHIFT_FP	; routine SHIFT_FP
+		POP	AF
+		POP	HL
+		LD	(HL),A
+		PUSH	HL
+		LD	L,B
+		LD	H,C
+		ADD	HL,DE
+		EXX
+		EX	DE,HL
+		ADC	HL,BC
+		EX	DE,HL
+		LD	A,H
+		ADC	A,L
+		LD	L,A
+		RRA
+		XOR	L
+		EXX
+		EX	DE,HL
+		POP	HL
+		RRA
+		JR	NC,TEST_NEG	; to TEST_NEG
 
-		LD	A,$01		;
-		CALL	L2FDD		; routine SHIFT-FP
-		INC	(HL)		;
-		JR	Z,L309F		; to ADD-REP-6
+		LD	A,$01
+		CALL	SHIFT_FP	; routine SHIFT_FP
+		INC	(HL)
+		JR	Z,ADD_REP_6	; to ADD_REP_6
 
-					;; TEST-NEG
-L307C	EXX			;
-		LD	A,L		;
-		AND	$80		;
-		EXX			;
-		INC	HL		;
-		LD	(HL),A		;
-		DEC	HL		;
-		JR	Z,L30A5		; to GO-NC-MLT
+					;; $307C
+TEST_NEG:	EXX
+		LD	A,L
+		AND	$80
+		EXX
+		INC	HL
+		LD	(HL),A
+		DEC	HL
+		JR	Z,GO_NC_MLT	; to GO_NC_MLT
 
-		LD	A,E		;
+		LD	A,E
 		NEG			; Negate
 		CCF			; Complement Carry Flag
-		LD	E,A		;
-		LD	A,D		;
-		CPL			;
-		ADC	A,$00		;
-		LD	D,A		;
-		EXX			;
-		LD	A,E		;
-		CPL			;
-		ADC	A,$00		;
-		LD	E,A		;
-		LD	A,D		;
-		CPL			;
-		ADC	A,$00		;
-		JR	NC,L30A3		; to END-COMPL
+		LD	E,A
+		LD	A,D
+		CPL
+		ADC	A,$00
+		LD	D,A
+		EXX
+		LD	A,E
+		CPL
+		ADC	A,$00
+		LD	E,A
+		LD	A,D
+		CPL
+		ADC	A,$00
+		JR	NC,END_COMPL	; to END_COMPL
 
-		RRA			;
-		EXX			;
-		INC	(HL)		;
+		RRA
+		EXX
+		INC	(HL)
 
-					;; ADD-REP-6
-L309F	JP	Z,L31AD		; to REPORT-6
+					;; $309F
+ADD_REP_6:	JP	Z,REPORT_6	; to REPORT_6
 
-		EXX			;
+		EXX
 
-					;; END-COMPL
-L30A3	LD	D,A		;
-		EXX			;
+					;; $30A3
+END_COMPL:	LD	D,A
+		EXX
 
-					;; GO-NC-MLT
-L30A5	XOR	A		;
-		JP	L3155		; to TEST-NORM
+					;; $30A5
+GO_NC_MLT:	XOR	A
+		JP	TEST_NORM	; to TEST_NORM
 
 ;------------------------------
 ; Used in 16 bit multiplication
@@ -14644,31 +14626,32 @@ L30A5	XOR	A		;
 ; It is also used by STK_VAR to calculate array subscripts and by DIM to
 ; calculate the space required for multi-dimensional arrays.
 
+					;; $30A9
 					;; HL-HL*DE
-L30A9	PUSH	BC		; preserve BC throughout
+HL_HL_DE:	PUSH	BC		; preserve BC throughout
 		LD	B,$10		; set B to 16
 		LD	A,H		; save H in A high byte
 		LD	C,L		; save L in C low byte
-		LD	HL,$0000		; initialize result to zero
+		LD	HL,$0000	; initialize result to zero
 
-; now enter a loop.
+					; now enter a loop.
 
-					;; HL-LOOP
-L30B1	ADD	HL,HL		; double result
-		JR	C,L30BE		; to HL-END if overflow
+					;; $30B1
+HL_LOOP:	ADD	HL,HL		; double result
+		JR	C,HL_END	; to HL_END if overflow
 
 		RL	C		; shift AC left into carry
 		RLA			;
-		JR	NC,L30BC		; to HL-AGAIN to skip addition if no carry
+		JR	NC,HL_AGAIN	; to HL_AGAIN to skip addition if no carry
 
 		ADD	HL,DE		; add in DE
-		JR	C,L30BE		; to HL-END if overflow
+		JR	C,HL_END	; to HL_END if overflow
 
-					;; HL-AGAIN
-L30BC	DJNZ	L30B1		; back to HL-LOOP for all 16 bits
+					;; $30BC
+HL_AGAIN:	DJNZ	HL_LOOP		; back to HL_LOOP for all 16 bits
 
-					;; HL-END
-L30BE	POP	BC		; restore preserved BC
+					;; $30BE
+HL_END:		POP	BC		; restore preserved BC
 		RET			; return with carry reset if successful
 					; and result in HL.
 
@@ -14682,8 +14665,8 @@ L30BE	POP	BC		; restore preserved BC
 ; plus etc. If either number is zero then this is flagged.
 ; HL addresses the exponent.
 
-					;; PREP-M/D
-L30C0	CALL	L34E9		; routine TEST-ZERO  preserves accumulator.
+					;; $30C0
+PREP_M_D:	CALL	L34E9		; routine TEST-ZERO  preserves accumulator.
 		RET	C		; return carry set if zero
 
 		INC	HL		; address first byte of mantissa
@@ -14695,464 +14678,453 @@ L30C0	CALL	L34E9		; routine TEST-ZERO  preserves accumulator.
 ;---------------------------
 ; Handle multiplication (04)
 ;---------------------------
-;
-;
 
-					;; multiply
-L30CA	LD	A,(DE)		;
-		OR	(HL)		;
-		JR	NZ,L30F0		; to MULT-LONG
+					;; $30CA
+MULTIPLY:	LD	A,(DE)
+		OR	(HL)
+		JR	NZ,MULT_LONG	; to MULT_LONG
 
-		PUSH	DE		;
-		PUSH	HL		;
-		PUSH	DE		;
+		PUSH	DE
+		PUSH	HL
+		PUSH	DE
 		CALL	INT_FETCH	; routine INT_FETCH
-		EX	DE,HL		;
-		EX	(SP),HL		;
-		LD	B,C		;
+		EX	DE,HL
+		EX	(SP),HL
+		LD	B,C
 		CALL	INT_FETCH	; routine INT_FETCH
-		LD	A,B		;
-		XOR	C		;
-		LD	C,A		;
-		POP	HL		;
-		CALL	L30A9		; routine HL-HL*DE
-		EX	DE,HL		;
-		POP	HL		;
-		JR	C,L30EF		; to MULT-OFLW
+		LD	A,B
+		XOR	C
+		LD	C,A
+		POP	HL
+		CALL	HL_HL_DE	; routine HL_HL_DE
+		EX	DE,HL
+		POP	HL
+		JR	C,MULT_OFLW	; to MULT_OFLW
 
-		LD	A,D		;
-		OR	E		;
-		JR	NZ,L30EA		; to MULT-RSLT
+		LD	A,D
+		OR	E
+		JR	NZ,MULT_RSLT	; to MULT_RSLT
 
-		LD	C,A		;
+		LD	C,A
 
-					;; MULT-RSLT
-L30EA	CALL	INT_STORE		; routine INT_STORE
-		POP	DE		;
-		RET			;
+					;; $30EA
+MULT_RSLT:	CALL	INT_STORE	; routine INT_STORE
+		POP	DE
+		RET
 
-					;; MULT-OFLW
-L30EF	POP	DE		;
+					;; $30EF
+MULT_OFLW:	POP	DE
 
-					;; MULT-LONG
-L30F0	CALL	L3293		; routine RE-ST-TWO
-		XOR	A		;
-		CALL	L30C0		; routine PREP-M/D
-		RET	C		;
+					;; $30F0
+MULT_LONG:	CALL	L3293	; routine RE-ST-TWO
+		XOR	A
+		CALL	PREP_M_D	; routine PREP_M_D
+		RET	C
 
-		EXX			;
-		PUSH	HL		;
-		EXX			;
-		PUSH	DE		;
-		EX	DE,HL		;
-		CALL	L30C0		; routine PREP-M/D
-		EX	DE,HL		;
-		JR	C,L315D		; to ZERO-RSLT
+		EXX
+		PUSH	HL
+		EXX
+		PUSH	DE
+		EX	DE,HL
+		CALL	PREP_M_D	; routine PREP_M_D
+		EX	DE,HL
+		JR	C,ZERO_RSLT	; to ZERO_RSLT
 
-		PUSH	HL		;
-		CALL	L2FBA		; routine FETCH-TWO
-		LD	A,B		;
-		AND	A		;
-		SBC	HL,HL		;
-		EXX			;
-		PUSH	HL		;
-		SBC	HL,HL		;
-		EXX			;
-		LD	B,$21		;
-		JR	L3125		; to STRT-MLT
+		PUSH	HL
+		CALL	FETCH_TWO	; routine FETCH_TWO
+		LD	A,B
+		AND	A
+		SBC	HL,HL
+		EXX
+		PUSH	HL
+		SBC	HL,HL
+		EXX
+		LD	B,$21
+		JR	STRT_MLT	; to STRT_MLT
 
-					;; MLT-LOOP
-L3114	JR	NC,L311B		; to NO-ADD
+					;; $3114
+MLT_LOOP:	JR	NC,NO_ADD	; to NO_ADD
 
-		ADD	HL,DE		;
-		EXX			;
-		ADC	HL,DE		;
-		EXX			;
+		ADD	HL,DE
+		EXX
+		ADC	HL,DE
+		EXX
 
-					;; NO-ADD
-L311B	EXX			;
-		RR	H		;
-		RR	L		;
-		EXX			;
-		RR	H		;
-		RR	L		;
+					;; $311B
+NO_ADD:		EXX
+		RR	H
+		RR	L
+		EXX
+		RR	H
+		RR	L
 
-					;; STRT-MLT
-L3125	EXX			;
-		RR	B		;
-		RR	C		;
-		EXX			;
-		RR	C		;
-		RRA			;
-		DJNZ	L3114		; to MLT-LOOP
+					;; $3125
+STRT_MLT:	EXX
+		RR	B
+		RR	C
+		EXX
+		RR	C
+		RRA
+		DJNZ	MLT_LOOP	; to MLT_LOOP
 
-		EX	DE,HL		;
-		EXX			;
-		EX	DE,HL		;
-		EXX			;
-		POP	BC		;
-		POP	HL		;
-		LD	A,B		;
-		ADD	A,C		;
-		JR	NZ,L313B		; to MAKE-EXPT
+		EX	DE,HL
+		EXX
+		EX	DE,HL
+		EXX
+		POP	BC
+		POP	HL
+		LD	A,B
+		ADD	A,C
+		JR	NZ,MAKE_EXPT	; to MAKE_EXPT
 
-		AND	A		;
+		AND	A
 
-					;; MAKE-EXPT
-L313B	DEC	A		;
+					;; $313B
+MAKE_EXPT:	DEC	A
 		CCF			; Complement Carry Flag
 
-					;; DIVN-EXPT
-L313D	RLA			;
+					;; $313D
+DIVN_EXPT:	RLA
 		CCF			; Complement Carry Flag
-		RRA			;
-		JP	P,L3146		; to OFLW1-CLR
+		RRA
+		JP	P,OFLW1_CLR	; to OFLW1_CLR
 
-		JR	NC,L31AD		; to REPORT-6
+		JR	NC,REPORT_6	; to REPORT_6
 
-		AND	A		;
+		AND	A
 
-					;; OFLW1-CLR
-L3146	INC	A		;
-		JR	NZ,L3151		; to OFLW2-CLR
+					;; $3146
+OFLW1_CLR:	INC	A		;
+		JR	NZ,OFLW2_CLR	; to OFLW2_CLR
 
-		JR	C,L3151		; to OFLW2-CLR
+		JR	C,OFLW2_CLR	; to OFLW2_CLR
 
-		EXX			;
-		BIT	7,D		;
-		EXX			;
-		JR	NZ,L31AD		; to REPORT-6
+		EXX
+		BIT	7,D
+		EXX
+		JR	NZ,REPORT_6	; to REPORT_6
 
-					;; OFLW2-CLR
-L3151	LD	(HL),A		;
-		EXX			;
-		LD	A,B		;
-		EXX			;
+					;; $3151
+OFLW2_CLR:	LD	(HL),A
+		EXX
+		LD	A,B
+		EXX
 
-					;; TEST-NORM
-L3155	JR	NC,L316C		; to NORMALISE
+					;; $3155
+TEST_NORM:	JR	NC,NORMALISE	; to NORMALISE
 
-		LD	A,(HL)		;
-		AND	A		;
+		LD	A,(HL)
+		AND	A
 
-					;; NEAR-ZERO
-L3159	LD	A,$80		;
-		JR	Z,L315E		; to SKIP-ZERO
+					;; $3159
+NEAR_ZERO:	LD	A,$80
+		JR	Z,SKIP_ZERO	; to SKIP_ZERO
 
-					;; ZERO-RSLT
-L315D	XOR	A		;
+					;; $315D
+ZERO_RSLT:	XOR	A
 
-					;; SKIP-ZERO
-L315E	EXX			;
-		AND	D		;
-		CALL	L2FFB		; routine ZEROS-4/5
-		RLCA			;
-		LD	(HL),A		;
-		JR	C,L3195		; to OFLOW-CLR
+					;; $315E
+SKIP_ZERO:	EXX
+		AND	D
+		CALL	ZEROS_4_5	; routine ZEROS_4_5
+		RLCA
+		LD	(HL),A
+		JR	C,OFLOW_CLR	; to OFLOW_CLR
 
-		INC	HL		;
-		LD	(HL),A		;
-		DEC	HL		;
-		JR	L3195		; to OFLOW-CLR
+		INC	HL
+		LD	(HL),A
+		DEC	HL
+		JR	OFLOW_CLR	; to OFLOW_CLR
 
-					;; NORMALISE
-L316C	LD	B,$20		;
+					;; $316C
+NORMALISE:	LD	B,$20
 
-					;; SHIFT-ONE
-L316E	EXX			;
-		BIT	7,D		;
-		EXX			;
-		JR	NZ,L3186		; to NORML-NOW
+					;; $316E
+SHIFT_ONE:	EXX
+		BIT	7,D
+		EXX
+		JR	NZ,NORML_NOW	; to NORML_NOW
 
-		RLCA			;
-		RL	E		;
-		RL	D		;
-		EXX			;
-		RL	E		;
-		RL	D		;
-		EXX			;
-		DEC	(HL)		;
-		JR	Z,L3159		; to NEAR-ZERO
+		RLCA
+		RL	E
+		RL	D
+		EXX
+		RL	E
+		RL	D
+		EXX
+		DEC	(HL)
+		JR	Z,NEAR_ZERO	; to NEAR_ZERO
 
-		DJNZ	L316E		; to SHIFT-ONE
+		DJNZ	SHIFT_ONE	; to SHIFT_ONE
 
-		JR	L315D		; to ZERO-RSLT
+		JR	ZERO_RSLT	; to ZERO_RSLT
 
-					;; NORML-NOW
-L3186	RLA			;
-		JR	NC,L3195		; to OFLOW-CLR
+					;; $3186
+NORML_NOW:	RLA
+		JR	NC,OFLOW_CLR	; to OFLOW_CLR
 
-		CALL	L3004		; routine ADD-BACK
-		JR	NZ,L3195		; to OFLOW-CLR
+		CALL	ADD_BACK	; routine ADD_BACK
+		JR	NZ,OFLOW_CLR	; to OFLOW_CLR
 
-		EXX			;
-		LD	D,$80		;
-		EXX			;
-		INC	(HL)		;
-		JR	Z,L31AD		; to REPORT-6
+		EXX
+		LD	D,$80
+		EXX
+		INC	(HL)
+		JR	Z,REPORT_6	; to REPORT_6
 
-					;; OFLOW-CLR
-L3195	PUSH	HL		;
-		INC	HL		;
-		EXX			;
-		PUSH	DE		;
-		EXX			;
-		POP	BC		;
-		LD	A,B		;
-		RLA			;
-		RL	(HL)		;
-		RRA			;
-		LD	(HL),A		;
-		INC	HL		;
-		LD	(HL),C		;
-		INC	HL		;
-		LD	(HL),D		;
-		INC	HL		;
-		LD	(HL),E		;
-		POP	HL		;
-		POP	DE		;
-		EXX			;
-		POP	HL		;
-		EXX			;
-		RET			;
+					;; $3195
+OFLOW_CLR:	PUSH	HL
+		INC	HL
+		EXX
+		PUSH	DE
+		EXX
+		POP	BC
+		LD	A,B
+		RLA
+		RL	(HL)
+		RRA
+		LD	(HL),A
+		INC	HL
+		LD	(HL),C
+		INC	HL
+		LD	(HL),D
+		INC	HL
+		LD	(HL),E
+		POP	HL
+		POP	DE
+		EXX
+		POP	HL
+		EXX
+		RET
 
-					;; REPORT-6
-L31AD	RST	08H		; ERROR_1
+					;; $31AD
+REPORT_6:	RST	08H		; ERROR_1
 		DEFB	$05		; Error Report: Number too big
 
 ;---------------------
 ; Handle division (05)
 ;---------------------
-;
-;
 
-					;; division
-L31AF	CALL	L3293		; routine RE-ST-TWO
-		EX	DE,HL		;
-		XOR	A		;
-		CALL	L30C0		; routine PREP-M/D
-		JR	C,L31AD		; to REPORT-6
+					;; $31AF
+DIVISION:	CALL	L3293	; routine RE-ST-TWO
+		EX	DE,HL
+		XOR	A
+		CALL	PREP_M_D	; routine PREP_M_D
+		JR	C,REPORT_6	; to REPORT_6
 
-		EX	DE,HL		;
-		CALL	L30C0		; routine PREP-M/D
-		RET	C		;
+		EX	DE,HL
+		CALL	PREP_M_D	; routine PREP_M_D
+		RET	C
 
-		EXX			;
-		PUSH	HL		;
-		EXX			;
-		PUSH	DE		;
-		PUSH	HL		;
-		CALL	L2FBA		; routine FETCH-TWO
-		EXX			;
-		PUSH	HL		;
-		LD	H,B		;
-		LD	L,C		;
-		EXX			;
-		LD	H,C		;
-		LD	L,B		;
-		XOR	A		;
-		LD	B,$DF		;
-		JR	L31E2		; to DIV-START
+		EXX
+		PUSH	HL
+		EXX
+		PUSH	DE
+		PUSH	HL
+		CALL	FETCH_TWO	; routine FETCH_TWO
+		EXX
+		PUSH	HL
+		LD	H,B
+		LD	L,C
+		EXX
+		LD	H,C
+		LD	L,B
+		XOR	A
+		LD	B,$DF
+		JR	DIV_START	; to DIV_START
 
-					;; DIV-LOOP
-L31D2	RLA			;
-		RL	C		;
-		EXX			;
-		RL	C		;
-		RL	B		;
-		EXX			;
+					;; $31D2
+DIV_LOOP:	RLA
+		RL	C
+		EXX
+		RL	C
+		RL	B
+		EXX
 
-					;; div-34th
-L31DB	ADD	HL,HL		;
-		EXX			;
-		ADC	HL,HL		;
-		EXX			;
-		JR	C,L31F2		; to SUBN-ONLY
+					;; $31DB
+DIV_34TH:	ADD	HL,HL
+		EXX
+		ADC	HL,HL
+		EXX
+		JR	C,SUBN_ONLY	; to SUBN_ONLY
 
-					;; DIV-START
-L31E2	SBC	HL,DE		;
-		EXX			;
-		SBC	HL,DE		;
-		EXX			;
-		JR	NC,L31F9		; to NO-RSTORE
+					;; $31E2
+DIV_START:	SBC	HL,DE
+		EXX
+		SBC	HL,DE
+		EXX
+		JR	NC,NO_RSTORE	; to NO_RSTORE
 
-		ADD	HL,DE		;
-		EXX			;
-		ADC	HL,DE		;
-		EXX			;
-		AND	A		;
-		JR	L31FA		; to COUNT-ONE
+		ADD	HL,DE
+		EXX
+		ADC	HL,DE
+		EXX
+		AND	A
+		JR	COUNT_ONE	; to COUNT_ONE
 
-					;; SUBN-ONLY
-L31F2	AND	A		;
-		SBC	HL,DE		;
-		EXX			;
-		SBC	HL,DE		;
-		EXX			;
+					;; $31F2
+SUBN_ONLY:	AND	A
+		SBC	HL,DE
+		EXX
+		SBC	HL,DE
+		EXX
 
-					;; NO-RSTORE
-L31F9	SCF			; Set Carry Flag
+					;; $31F9
+NO_RSTORE:	SCF			; Set Carry Flag
 
-					;; COUNT-ONE
-L31FA	INC	B		;
-		JP	M,L31D2		; to DIV-LOOP
+					;; $31FA
+COUNT_ONE:	INC	B
+		JP	M,DIV_LOOP	; to DIV_LOOP
 
-		PUSH	AF		;
-		JR	Z,L31E2		; to DIV-START
+		PUSH	AF
+		JR	Z,DIV_START	; to DIV_START
 
-;
-;
-;
-;
-
-		LD	E,A		;
-		LD	D,C		;
-		EXX			;
-		LD	E,C		;
-		LD	D,B		;
-		POP	AF		;
-		RR	B		;
-		POP	AF		;
-		RR	B		;
-		EXX			;
-		POP	BC		;
-		POP	HL		;
-		LD	A,B		;
-		SUB	C		;
-		JP	L313D		; to DIVN-EXPT
+		LD	E,A
+		LD	D,C
+		EXX
+		LD	E,C
+		LD	D,B
+		POP	AF
+		RR	B
+		POP	AF
+		RR	B
+		EXX
+		POP	BC
+		POP	HL
+		LD	A,B
+		SUB	C
+		JP	DIVN_EXPT		; to DIVN_EXPT
 
 ;-------------------------------------
 ; Integer truncation towards zero ($3A)
 ;-------------------------------------
-;
-;
 
-					;; truncate
-L3214	LD	A,(HL)		;
-		AND	A		;
-		RET	Z		;
+					;; $3214
+TRUNCATE:	LD	A,(HL)	
+		AND	A
+		RET	Z
 
-		CP	$81		;
-		JR	NC,L3221		; to T-GR-ZERO
+		CP	$81
+		JR	NC,T_GR_ZERO	; to T_GR_ZERO
 
-		LD	(HL),$00		;
-		LD	A,$20		;
-		JR	L3272		; to NIL-BYTES
+		LD	(HL),$00
+		LD	A,$20
+		JR	NIL_BYTES	; to NIL_BYTES
 
-					;; T-GR-ZERO
-L3221	CP	$91		;
-		JR	NZ,L323F		; to T-SMALL
+					;; $3221
+T_GR_ZERO:	CP	$91
+		JR	NZ,T_SMALL	; to T_SMALL
 
-		INC	HL		;
-		INC	HL		;
-		INC	HL		;
-		LD	A,$80		;
-		AND	(HL)		;
-		DEC	HL		;
-		OR	(HL)		;
-		DEC	HL		;
-		JR	NZ,L3233		; to T-FIRST
+		INC	HL
+		INC	HL
+		INC	HL
+		LD	A,$80
+		AND	(HL)
+		DEC	HL
+		OR	(HL)
+		DEC	HL
+		JR	NZ,T_FIRST	; to T_FIRST
 
-		LD	A,$80		;
-		XOR	(HL)		;
+		LD	A,$80
+		XOR	(HL)
 
-					;; T-FIRST
-L3233	DEC	HL		;
-		JR	NZ,L326C		; to T-EXPNENT
+					;; $3233
+T_FIRST:	DEC	HL
+		JR	NZ,T_EXPNENT	; to T_EXPNENT
 
-		LD	(HL),A		;
-		INC	HL		;
-		LD	(HL),$FF		;
-		DEC	HL		;
-		LD	A,$18		;
-		JR	L3272		; to NIL-BYTES
+		LD	(HL),A
+		INC	HL
+		LD	(HL),$FF
+		DEC	HL
+		LD	A,$18
+		JR	NIL_BYTES	; to NIL_BYTES
 
-					;; T-SMALL
-L323F	JR	NC,L326D		; to X-LARGE
+					;; $323F
+T_SMALL:	JR	NC,X_LARGE	; to X_LARGE
 
-		PUSH	DE		;
-		CPL			;
-		ADD	A,$91		;
-		INC	HL		;
-		LD	D,(HL)		;
-		INC	HL		;
-		LD	E,(HL)		;
-		DEC	HL		;
-		DEC	HL		;
-		LD	C,$00		;
-		BIT	7,D		;
-		JR	Z,L3252		; to T-NUMERIC
+		PUSH	DE
+		CPL
+		ADD	A,$91
+		INC	HL
+		LD	D,(HL)
+		INC	HL
+		LD	E,(HL)
+		DEC	HL
+		DEC	HL
+		LD	C,$00
+		BIT	7,D
+		JR	Z,T_NUMERIC	; to T_NUMERIC
 
-		DEC	C		;
+		DEC	C
 
-					;; T-NUMERIC
-L3252	SET	7,D		;
-		LD	B,$08		;
-		SUB	B		;
-		ADD	A,B		;
-		JR	C,L325E		; to T-TEST
+					;; $3252
+T_NUMERIC:	SET	7,D
+		LD	B,$08
+		SUB	B
+		ADD	A,B
+		JR	C,T_TEST	; to T_TEST
 
-		LD	E,D		;
-		LD	D,$00		;
-		SUB	B		;
+		LD	E,D
+		LD	D,$00
+		SUB	B
 
-					;; T-TEST
-L325E	JR	Z,L3267		; to T-STORE
+					;; $325E
+T_TEST:		JR	Z,T_STORE	; to T_STORE
 
-		LD	B,A		;
+		LD	B,A
 
-					;; T-SHIFT
-L3261	SRL	D		;
-		RR	E		;
-		DJNZ	L3261		; to T-SHIFT
+					;; $3261
+T_SHIFT:	SRL	D
+		RR	E
+		DJNZ	T_SHIFT		; to T_SHIFT
 
-					;; T-STORE
-L3267	CALL	INT_STORE		; routine INT_STORE
-		POP	DE		;
-		RET			;
+					;; $3267
+T_STORE:	CALL	INT_STORE	; routine INT_STORE
+		POP	DE
+		RET
 
-					;; T-EXPNENT
-L326C	LD	A,(HL)		;
+					;; $326C
+T_EXPNENT:	LD	A,(HL)
 
-					;; X-LARGE
-L326D	SUB	$A0		;
-		RET	P		;
+					;; $326D
+X_LARGE:	SUB	$A0
+		RET	P
 
 		NEG			; Negate
 
-					;; NIL-BYTES
-L3272	PUSH	DE		;
-		EX	DE,HL		;
-		DEC	HL		;
-		LD	B,A		;
-		SRL	B		;
-		SRL	B		;
-		SRL	B		;
-		JR	Z,L3283		; to BITS-ZERO
+					;; $3272
+NIL_BYTES:	PUSH	DE
+		EX	DE,HL
+		DEC	HL
+		LD	B,A
+		SRL	B
+		SRL	B
+		SRL	B
+		JR	Z,BITS_ZERO	; to BITS_ZERO
 
-					;; BYTE-ZERO
-L327E	LD	(HL),$00		;
-		DEC	HL		;
-		DJNZ	L327E		; to BYTE-ZERO
+					;; $327E
+BYTE_ZERO:	LD	(HL),$00
+		DEC	HL
+		DJNZ	BYTE_ZERO	; to BYTE_ZERO
 
-					;; BITS-ZERO
-L3283	AND	$07		;
-		JR	Z,L3290		; to IX-END
+					;; BITS_ZERO
+BITS_ZERO:	AND	$07
+		JR	Z,IX_END	; to IX_END
 
-		LD	B,A		;
-		LD	A,$FF		;
+		LD	B,A
+		LD	A,$FF
 
-					;; LESS-MASK
-L328A	SLA	A		;
-		DJNZ	L328A		; to LESS-MASK
+					;; $328A
+LESS_MASK:	SLA	A
+		DJNZ	LESS_MASK	; to LESS_MASK
 
-		AND	(HL)		;
-		LD	(HL),A		;
+		AND	(HL)
+		LD	(HL),A
 
-					;; IX-END
-L3290	EX	DE,HL		;
-		POP	DE		;
-		RET			;
+					;; $3290
+IX_END:		EX	DE,HL
+		POP	DE
+		RET
 
 ; ----------------------------------
 ; Storage of numbers in 5 byte form.
@@ -15170,7 +15142,7 @@ L3290	EX	DE,HL		;
 ; way. Statistically it just increases the chances of trailing zeros which
 ; is an advantage elsewhere in saving ROM code.
 ;
-;		zero	sign	low	high	unused
+;             zero     sign     low      high    unused
 ; So +1 is  00000000 00000000 00000001 00000000 00000000
 ;
 ; and -1 is 00000000 11111111 11111111 11111111 00000000
@@ -15191,7 +15163,7 @@ L3290	EX	DE,HL		;
 ; be used for integers and larger (or fractional) numbers.
 ;
 ; In this form 1 is stored as
-;		10000001 00000000 00000000 00000000 00000000
+;           10000001 00000000 00000000 00000000 00000000
 ;
 ; When a small integer is converted to a floating point number the last two
 ; bytes are always blank so they are omitted in the following steps
@@ -15202,7 +15174,7 @@ L3290	EX	DE,HL		;
 ; 10010000 00000000 00000010 <-  now shift left and decrement exponent
 ; ...
 ; 10000010 01000000 00000000 <-  until a 1 abuts the imaginary point
-; 10000001 10000000 00000000	to the left of the mantissa.
+; 10000001 10000000 00000000     to the left of the mantissa.
 ;
 ; however since the leftmost bit of the mantissa is always set then it can
 ; be used to denote the sign of the mantissa and put back when needed by the
@@ -15356,9 +15328,9 @@ L32D7	DEFW	L368F		; $00 Address: $368F - jump-true
 
 ; true binary operations.
 
-		DEFW	L300F		; $03 Address: $300F - subtract
-		DEFW	L30CA		; $04 Address: $30CA - multiply
-		DEFW	L31AF		; $05 Address: $31AF - division
+		DEFW	SUBTRACT	; $03 Address: $300F - SUBTRACT
+		DEFW	MULTIPLY	; $04 Address: $30CA - MULTIPLY
+		DEFW	DIVISION	; $05 Address: $31AF - DIVISION
 		DEFW	L3851		; $06 Address: $3851 - to-power
 		DEFW	L351B		; $07 Address: $351B - or
 
@@ -15369,7 +15341,7 @@ L32D7	DEFW	L368F		; $00 Address: $368F - jump-true
 		DEFW	L353B		; $0C Address: $353B - no-grtr
 		DEFW	L353B		; $0D Address: $353B - no-less
 		DEFW	L353B		; $0E Address: $353B - nos-eql
-		DEFW	L3014		; $0F Address: $3014 - addition
+		DEFW	ADDITION	; $0F Address: $3014 - ADDITION
 
 		DEFW	L352D		; $10 Address: $352D - str-&-no
 		DEFW	L353B		; $11 Address: $353B - str-l-eql
@@ -15420,7 +15392,7 @@ L32D7	DEFW	L368F		; $00 Address: $368F - jump-true
 		DEFW	L34F9		; $37 Address: $34F9 - greater-0
 		DEFW	L369B		; $38 Address: $369B - end-calc
 		DEFW	L3783		; $39 Address: $3783 - get-argt
-		DEFW	L3214		; $3A Address: $3214 - truncate
+		DEFW	TRUNCATE	; $3A Address: $3214 - TRUNCATE
 		DEFW	L33A2		; $3B Address: $33A2 - FP_CALC_2
 		DEFW	E_TO_FP		; $3C Address: $2D4F - E_TO_FP
 		DEFW	L3297		; $3D Address: $3297 - re-stack
@@ -16395,7 +16367,7 @@ L354E	BIT	2,A		; test if a string comparison.
 		RRCA			; 2nd RRCA causes eql/neql to set carry.
 		PUSH	AF		; save A and carry
 
-		CALL	L300F		; routine subtract leaves result on stack.
+		CALL	SUBTRACT	; routine SUBTRACT leaves result on stack.
 		JR	L358C		; forward to END-TESTS
 
 ; ---
@@ -16698,7 +16670,7 @@ L361F	LD	BC,$0001		; create an initial byte in workspace
 
 		LD	A,$FF		; select system channel 'R'.
 		CALL	CHAN_OPEN	; routine CHAN_OPEN opens it.
-		CALL	L2DE3		; routine PRINT_FP outputs the number to
+		CALL	PRINT_FP		; routine PRINT_FP outputs the number to
 					; workspace updating K-CUR.
 
 		POP	HL		; restore current channel.

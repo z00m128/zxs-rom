@@ -70,6 +70,11 @@ ATTRT_MASKT	equ	$5C8F
 MASK_T		equ	$5C90
 P_FLAG		equ	$5C91
 MEM_0		equ	$5C92
+MEM_3		equ	$5CA1
+MEM_4		equ	$5CA6
+MEM_4_4		equ	$5CAA
+MEM_5_0		equ	$5CAB
+MEM_5_1		equ	$5CAC
 NMIADD		equ	$5CB0
 RAMTOP		equ	$5CB2
 P_RAMT		equ	$5CB4
