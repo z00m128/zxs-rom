@@ -92,7 +92,7 @@ NEXT_CHAR:	CALL	CH_ADD_1	; routine CH_ADD_1 fetches the next immediate character
 ; It is used on 77 occasions.
 
 					;; $0028
-FP_CALC:	JP	L335B		; jump forward to the CALCULATE routine.
+FP_CALC:	JP	CALCULATE	; jump forward to the CALCULATE routine.
 
 		DEFB	$FF, $FF, $FF	; spare - note that on the ZX81, space being a 
 		DEFB	$FF, $FF	; little cramped, these same locations were
@@ -1187,7 +1187,7 @@ BE_OCTAVE:	INC	B		; increment octave
 		LD	HL,SEMI_TONE	; Address: SEMI_TONE
 		CALL	L3406		; routine LOC-MEM
 					;  HL = 5*A + $046E
-		CALL	L33B4		; routine STACK-NUM
+		CALL	STACK_NUM	; routine STACK_NUM
 					;  read FP value (freq) from semitone table (HL) and push onto calc stack
 
 		RST	28H		;; FP_CALC
@@ -11266,7 +11266,7 @@ S_SD_SKIP:	INC	HL		; advance pointer
 		JR	NZ,S_SD_SKIP	; to S_SD_SKIP until a match it has to be here.
 
 		INC	HL		; point to first byte of number
-		CALL	L33B4	; routine STACK-NUM stacks it
+		CALL	STACK_NUM	; routine STACK_NUM stacks it
 		LD	(CH_ADD),HL	; update system variable CH_ADD
 
 					;; $26C3
@@ -11295,7 +11295,7 @@ S_LETTER:	CALL	LOOK_VARS	; routine LOOK_VARS
 		JR	C,S_CONT_1	; step forward to S_CONT_1 if string	===>
 
 		INC	HL		; advance pointer
-		CALL	L33B4	; routine STACK-NUM
+		CALL	STACK_NUM	; routine STACK_NUM
 
 					;; $26DD
 S_CONT_1:	JR	S_CONT_2	; forward to S_CONT_2			===>
@@ -12165,7 +12165,7 @@ SFA_MATCH:	BIT	5,C		; test if numeric
 
 		INC	HL		; point to start of string descriptor
 		LD	DE,(STKEND)	; set DE to STKEND
-		CALL	L33C0	; routine MOVE-FP puts parameters on stack.
+		CALL	MOVE_FP		; routine MOVE_FP puts parameters on stack.
 		EX	DE,HL		; new free location to HL.
 		LD	(STKEND),HL	; use it to set STKEND system variable.
 
@@ -12631,7 +12631,7 @@ STK_STO_D:	RES	6,(IY+$01)	; update FLAGS - signal string result.
 
 					;; $2AB6
 STK_STORE:	PUSH	BC		; save two registers
-		CALL	L33A9	; routine TEST-5-SP checks room and puts 5 
+		CALL	TEST_5_SP	; routine TEST_5_SP checks room and puts 5 
 					; in BC.
 		POP	BC		; fetch the saved registers.
 		LD	HL,(STKEND)	; make HL point to first empty location STKEND
@@ -13866,8 +13866,6 @@ PF_SAVE:	PUSH	DE		; save the part before decimal point.
 		EXX
 		JR	PF_BITS		; forward to PF_BITS
 
-					; ---------------------
-
 					; the branch was here when 'int x' was found to be zero as in say 0.5.
 					; The zero has been fetched from the calculator stack but not deleted and
 					; this should occur now. This omission leaves the stack unbalanced and while
@@ -13943,8 +13941,6 @@ PF_LARGE:	SUB	$80		; make exponent positive
 		NEG			; negate
 		CALL	E_TO_FP		; routine E_TO_FP
 		JR	PF_LOOP		; back to PF_LOOP
-
-					; ----------------------------
 
 					;; $2E6F
 PF_MEDIUM:	EX	DE,HL
@@ -14435,9 +14431,9 @@ ADD_BACK:	INC	E
 ALL_ADDED:	EXX
 		RET
 
-;------------------------
-; Handle subtraction (03)
-;------------------------
+;-------------------------
+; Handle subtraction ($03)
+;-------------------------
 ; Subtraction is done by switching the sign byte/bit of the second number
 ; which may be integer of floating point and continuing into addition.
 
@@ -14449,9 +14445,9 @@ SUBTRACT:	EX	DE,HL		; address second number with HL
 		EX	DE,HL		; address first number again
 					; and continue.
 
-;---------------------
-; Handle addition (0F)
-;---------------------
+;----------------------
+; Handle addition ($0F)
+;----------------------
 ; HL points to first number, DE to second.
 ; If they are both integers, then go for the easy route.
 
@@ -14675,9 +14671,9 @@ PREP_M_D:	CALL	L34E9		; routine TEST-ZERO  preserves accumulator.
 		DEC	HL		; point to exponent
 		RET			; return with carry reset
 
-;---------------------------
-; Handle multiplication (04)
-;---------------------------
+;----------------------------
+; Handle multiplication ($04)
+;----------------------------
 
 					;; $30CA
 MULTIPLY:	LD	A,(DE)
@@ -14901,9 +14897,9 @@ OFLOW_CLR:	PUSH	HL
 REPORT_6:	RST	08H		; ERROR_1
 		DEFB	$05		; Error Report: Number too big
 
-;---------------------
-; Handle division (05)
-;---------------------
+;----------------------
+; Handle division ($05)
+;----------------------
 
 					;; $31AF
 DIVISION:	CALL	RE_ST_TWO	; routine RE_ST_TWO
@@ -15282,34 +15278,33 @@ RS_STORE:	DEC	HL		; address 3rd byte
 ;-------------------
 ; Table of constants
 ;-------------------
-;
-;
 
 ; used 11 times
-					;; stk-zero							00 00 00 00 00
-L32C5	DEFB	$00		;;Bytes: 1
+					;; $32C5							00 00 00 00 00
+STK_ZERO:	DEFB	$00		;;Bytes: 1
 		DEFB	$B0		;;Exponent $00
 		DEFB	$00		;;(+00,+00,+00)
 
 ; used 19 times
-					;; stk-one							00 00 01 00 00
-L32C8	DEFB	$40		;;Bytes: 2
+					;; $32C8							00 00 01 00 00
+STK_ONE:	DEFB	$40		;;Bytes: 2
 		DEFB	$B0		;;Exponent $00
 		DEFB	$00,$01		;;(+00,+00)
 
 ; used 9 times
-					;; stk-half							80 00 00 00 00
-L32CC	DEFB	$30		;;Exponent: $80, Bytes: 1
+					;; $32CC							80 00 00 00 00
+STK_HALF:	DEFB	$30		;;Exponent: $80, Bytes: 1
 		DEFB	$00		;;(+00,+00,+00)
 
-; used 4 times.
+; used 4 times
+					;; $32CE
 					;; stk-pi/2							81 49 0F DA A2
-L32CE	DEFB	$F1		;;Exponent: $81, Bytes: 4
-		DEFB	$49,$0F,$DA,$A2 ;;
+STK_PI_2:	DEFB	$F1		;;Exponent: $81, Bytes: 4
+		DEFB	$49,$0F,$DA,$A2
 
-; used 3 times.
-					;; stk-ten							00 00 0A 00 00
-L32D3	DEFB	$40		;;Bytes: 2
+; used 3 times
+					;; $32D3							00 00 0A 00 00
+STK_TEN:	DEFB	$40		;;Bytes: 2
 		DEFB	$B0		;;Exponent $00
 		DEFB	$00,$0A		;;(+00,+00)
 
@@ -15321,12 +15316,12 @@ L32D3	DEFB	$40		;;Bytes: 2
 ; starts with binary operations which have two operands and one result.
 ; three pseudo binary operations first.
 
-					;; tbl-addrs
-L32D7	DEFW	L368F		; $00 Address: $368F - jump-true
+					;; $32D7
+TBL_ADDRS:	DEFW	L368F		; $00 Address: $368F - jump-true
 		DEFW	L343C		; $01 Address: $343C - exchange
-		DEFW	L33A1		; $02 Address: $33A1 - delete
+		DEFW	DELETE		; $02 Address: $33A1 - DELETE
 
-; true binary operations.
+					; true binary operations.
 
 		DEFW	SUBTRACT	; $03 Address: $300F - SUBTRACT
 		DEFW	MULTIPLY	; $04 Address: $30CA - MULTIPLY
@@ -15352,7 +15347,7 @@ L32D7	DEFW	L368F		; $00 Address: $368F - jump-true
 		DEFW	L353B		; $16 Address: $353B - strs-eql
 		DEFW	L359C		; $17 Address: $359C - strs-add
 
-; unary follow
+					; unary follow
 
 		DEFW	L35DE		; $18 Address: $35DE - val$
 		DEFW	L34BC		; $19 Address: $34BC - usr-$
@@ -15381,58 +15376,56 @@ L32D7	DEFW	L368F		; $00 Address: $368F - jump-true
 		DEFW	L35C9		; $2F Address: $35C9 - chrs
 		DEFW	L3501		; $30 Address: $3501 - not
 
-; end of true unary
+					; end of true unary
 
-		DEFW	L33C0		; $31 Address: $33C0 - duplicate
+		DEFW	MOVE_FP		; $31 Address: $33C0 - MOVE_FP
 		DEFW	L36A0		; $32 Address: $36A0 - n-mod-m
 		DEFW	L3686		; $33 Address: $3686 - jump
-		DEFW	L33C6		; $34 Address: $33C6 - stk-data
+		DEFW	STK_DATA	; $34 Address: $33C6 - STK_DATA
 		DEFW	L367A		; $35 Address: $367A - dec-jr-nz
 		DEFW	L3506		; $36 Address: $3506 - less-0
 		DEFW	L34F9		; $37 Address: $34F9 - greater-0
 		DEFW	L369B		; $38 Address: $369B - end-calc
 		DEFW	L3783		; $39 Address: $3783 - get-argt
 		DEFW	TRUNCATE	; $3A Address: $3214 - TRUNCATE
-		DEFW	L33A2		; $3B Address: $33A2 - FP_CALC_2
+		DEFW	FP_CALC_2	; $3B Address: $33A2 - FP_CALC_2
 		DEFW	E_TO_FP		; $3C Address: $2D4F - E_TO_FP
-		DEFW	RE_STACK		; $3D Address: $3297 - RE_STACK
+		DEFW	RE_STACK	; $3D Address: $3297 - RE_STACK
 
-; the following are just the next available slots for the 128 compound literals
-; which are in range $80 - $FF.
+					; the following are just the next available slots for the 128 compound literals
+					; which are in range $80 - $FF.
 
-		DEFW	L3449		; $3E Address: $3449 - series-xx	$80 - $9F.
+		DEFW	L3449		; $3E Address: $3449 - series-xx    $80 - $9F.
 		DEFW	L341B		; $3F Address: $341B - stk-const-xx $A0 - $BF.
-		DEFW	L342D		; $40 Address: $342D - st-mem-xx	$C0 - $DF.
-		DEFW	L340F		; $41 Address: $340F - get-mem-xx	$E0 - $FF.
+		DEFW	L342D		; $40 Address: $342D - st-mem-xx    $C0 - $DF.
+		DEFW	L340F		; $41 Address: $340F - get-mem-xx   $E0 - $FF.
 
-; Aside: 3E - 7F are therefore unused calculator literals.
-;		3E - 7B would be available for expansion.
+					; Aside: 3E - 7F are therefore unused calculator literals.
+					;        3E - 7B would be available for expansion.
 
 ;---------------
 ; The Calculator
 ;---------------
-;
-;
 
-					;; CALCULATE
-L335B	CALL	L35BF		; routine STK-PNTRS is called to set up the
+					;; $335B
+CALCULATE:	CALL	L35BF	; routine STK-PNTRS is called to set up the
 					; calculator stack pointers for a default
 					; unary operation. HL = last value on stack.
 					; DE = STKEND first location after stack.
 
-; the calculate routine is called at this point by the series generator...
+					; the calculate routine is called at this point by the series generator...
 
-					;; GEN-ENT-1
-L335E	LD	A,B		; fetch the Z80 B register to A
-		LD	($5C67),A	; and store value in system variable BREG.
+					;; $335E
+GEN_ENT_1:	LD	A,B		; fetch the Z80 B register to A
+		LD	(BREG),A	; and store value in system variable BREG.
 					; this will be the counter for dec-jr-nz
 					; or if used from FP_CALC2 the calculator
 					; instruction.
 
-; ... and again later at this point
+					; ... and again later at this point
 
-					;; GEN-ENT-2
-L3362	EXX			; switch sets
+					;; $3362
+GEN_ENT_2:	EXX			; switch sets
 		EX	(SP),HL		; and store the address of next instruction,
 					; the return address, in H'L'.
 					; If this is a recursive call the the H'L'
@@ -15440,29 +15433,29 @@ L3362	EXX			; switch sets
 					; c.f. end-calc.
 		EXX			; switch back to main set
 
-; this is the re-entry looping point when handling a string of literals.
+					; this is the re-entry looping point when handling a string of literals.
 
-					;; RE-ENTRY
-L3365	LD	(STKEND),DE	; save end of stack in system variable STKEND
+					;; $3365
+RE_ENTRY:	LD	(STKEND),DE	; save end of stack in system variable STKEND
 		EXX			; switch to alt
 		LD	A,(HL)		; get next literal
 		INC	HL		; increase pointer'
 
-; single operation jumps back to here
+					; single operation jumps back to here
 
-					;; SCAN-ENT
-L336C	PUSH	HL		; save pointer on stack
+					;; $336C
+SCAN_ENT:	PUSH	HL		; save pointer on stack
 		AND	A		; now test the literal
-		JP	P,L3380		; forward to FIRST-3D if in range $00 - $3D
+		JP	P,FIRST_3D	; forward to FIRST_3D if in range $00 - $3D
 					; anything with bit 7 set will be one of
 					; 128 compound literals.
 
-; compound literals have the following format.
-; bit 7 set indicates compound.
-; bits 6-5 the subgroup 0-3.
-; bits 4-0 the embedded parameter $00 - $1F.
-; The subgroup 0-3 needs to be manipulated to form the next available four
-; address places after the simple literals in the address table.
+					; compound literals have the following format.
+					; bit 7 set indicates compound.
+					; bits 6-5 the subgroup 0-3.
+					; bits 4-0 the embedded parameter $00 - $1F.
+					; The subgroup 0-3 needs to be manipulated to form the next available four
+					; address places after the simple literals in the address table.
 
 		LD	D,A		; save literal in D
 		AND	$60		; and with 01100000 to isolate subgroup
@@ -15475,49 +15468,48 @@ L336C	PUSH	HL		; save pointer on stack
 		LD	L,A		; store in L for later indexing.
 		LD	A,D		; bring back compound literal
 		AND	$1F		; use mask to isolate parameter bits
-		JR	L338E		; forward to ENT-TABLE
+		JR	ENT_TABLE	; forward to ENT_TABLE
 
-; the branch was here with simple literals.
+					; the branch was here with simple literals.
 
-					;; FIRST-3D
-L3380	CP	$18		; compare with first unary operations.
-		JR	NC,L338C		; to DOUBLE-A with unary operations
+					;; $3380
+FIRST_3D:	CP	$18		; compare with first unary operations.
+		JR	NC,DOUBLE_A	; to DOUBLE_A with unary operations
 
-; it is binary so adjust pointers.
+					; it is binary so adjust pointers.
 
 		EXX			;
-		LD	BC,$FFFB		; the value -5
+		LD	BC,$FFFB	; the value -5
 		LD	D,H		; transfer HL, the last value, to DE.
-		LD	E,L		;
-		ADD	HL,BC		; subtract 5 making HL point to second
-					; value.
-		EXX			;
+		LD	E,L
+		ADD	HL,BC		; subtract 5 making HL point to second  value.
+		EXX
 
-					;; DOUBLE-A
-L338C	RLCA			; double the literal
+					;; $338C
+DOUBLE_A:	RLCA			; double the literal
 		LD	L,A		; and store in L for indexing
 
-					;; ENT-TABLE
-L338E	LD	DE,L32D7		; Address: tbl-addrs
+					;; $338E
+ENT_TABLE:	LD	DE,TBL_ADDRS	; Address: TBL_ADDRS
 		LD	H,$00		; prepare to index
 		ADD	HL,DE		; add to get address of routine
 		LD	E,(HL)		; low byte to E
-		INC	HL		;
+		INC	HL
 		LD	D,(HL)		; high byte to D
-		LD	HL,L3365		; Address: RE-ENTRY
+		LD	HL,RE_ENTRY	; Address: RE_ENTRY
 		EX	(SP),HL		; goes to stack
 		PUSH	DE		; now address of routine
 		EXX			; main set
 					; avoid using IY register.
-		LD	BC,($5C66)	; STKEND_hi
+		LD	BC,(STKEND_HI)	; STKEND_hi
 					; nothing much goes to C but BREG to B
 					; and continue into next ret instruction
 					; which has a dual identity
 
 
-;-------------------
-; Handle delete (02)
-;-------------------
+;--------------------
+; Handle delete ($02)
+;--------------------
 ; A simple return but when used as a calculator literal this
 ; deletes the last value from the calculator stack.
 ; On entry, as always with binary operations,
@@ -15525,33 +15517,33 @@ L338E	LD	DE,L32D7		; Address: tbl-addrs
 ; On exit, HL=result, DE=stkend.
 ; So nothing to do
 
-					;; delete
-L33A1	RET			; return - indirect jump if from above.
+					;; $33A1
+DELETE:		RET			; return - indirect jump if from above.
 
-;----------------------
-; Single operation (3B)
-;----------------------
+;-----------------------
+; Single operation ($3B)
+;-----------------------
 ; this single operation is used, in the first instance, to evaluate most
 ; of the mathematical and string functions found in Basic expressions.
 
-					;; FP_CALC_2
-L33A2	POP	AF		; drop return address.
-		LD	A,($5C67)	; load accumulator from system variable BREG
+					;; $33A2
+FP_CALC_2:	POP	AF		; drop return address.
+		LD	A,(BREG)	; load accumulator from system variable BREG
 					; value will be literal eg. 'tan'
 		EXX			; switch to alt
-		JR	L336C		; back to SCAN-ENT
+		JR	SCAN_ENT	; back to SCAN_ENT
 					; next literal will be end-calc at $2758
 
 ;-----------------
 ; Test five-spaces
 ;-----------------
-; This routine is called from MOVE-FP, STK-CONST and STK_STORE to
+; This routine is called from MOVE_FP, STK_CONST and STK_STORE to
 ; test that there is enough space between the calculator stack and the
 ; machine stack for another five-byte value. It returns with BC holding
 ; the value 5 ready for any subsequent LDIR.
 
-					;; TEST-5-SP
-L33A9	PUSH	DE		; save
+					;; $33A9
+TEST_5_SP:	PUSH	DE		; save
 		PUSH	HL		; registers
 		LD	BC,$0005	; an overhead of five bytes
 		CALL	TEST_ROOM	; routine TEST_ROOM tests free RAM raising
@@ -15569,25 +15561,24 @@ L33A9	PUSH	DE		; save
 ; calculator suite of routines.
 ; On entry HL points to the number to be stacked.
 
-					;; STACK-NUM
-L33B4	LD	DE,(STKEND)	; load destination from STKEND system variable.
-		CALL	L33C0		; routine MOVE-FP puts on calculator stack 
+					;; $33B4
+STACK_NUM:	LD	DE,(STKEND)	; load destination from STKEND system variable.
+		CALL	MOVE_FP		; routine MOVE_FP puts on calculator stack 
 					; with a memory check.
 		LD	(STKEND),DE	; set STKEND to next free location.
 		RET			; return.
 
-;----------------------------------
-; Move a floating point number (31)
-;----------------------------------
+;-----------------------------------
+; Move a floating point number ($31)
+;-----------------------------------
 ; This simple routine is a 5-byte LDIR instruction
 ; that incorporates a memory check.
 ; When used as a calculator literal it duplicates the last value on the
 ; calculator stack.
 ; Unary so on entry HL points to last value, DE to stkend
 
-					;; duplicate
-					;; MOVE-FP
-L33C0	CALL	L33A9		; routine TEST-5-SP test free memory
+					;; $33C0
+MOVE_FP:	CALL	TEST_5_SP	; routine TEST_5_SP test free memory
 					; and sets BC to 5.
 		LDIR			; copy the five bytes.
 		RET			; return with DE addressing new STKEND
@@ -15601,12 +15592,12 @@ L33C0	CALL	L33A9		; routine TEST-5-SP test free memory
 ; variable number of following data bytes that convey to the routine
 ; the integer or floating point form as succinctly as is possible.
 
-					;; stk-data
-L33C6	LD	H,D		; transfer STKEND
+					;; $33C6
+STK_DATA:	LD	H,D		; transfer STKEND
 		LD	L,E		; to HL for result.
 
-					;; STK-CONST
-L33C8	CALL	L33A9		; routine TEST-5-SP tests that room exists
+					;; $33C8
+STK_CONST:	CALL	TEST_5_SP	; routine TEST_5_SP tests that room exists
 					; and sets BC to $05.
 
 		EXX			; switch to alternate set
@@ -15626,16 +15617,16 @@ L33C8	CALL	L33A9		; routine TEST-5-SP tests that room exists
 					; to read. $01 - $04
 		LD	A,(HL)		; reload the first byte
 		AND	$3F		; mask off to give possible exponent.
-		JR	NZ,L33DE		; forward to FORM-EXP if it was possible to
+		JR	NZ,FORM_EXP	; forward to FORM_EXP if it was possible to
 					; include the exponent.
 
-; else byte is just a byte count and exponent comes next.
+					; else byte is just a byte count and exponent comes next.
 
 		INC	HL		; address next byte and
 		LD	A,(HL)		; pick up the exponent ( - $50).
 
-					;; FORM-EXP
-L33DE	ADD	A,$50		; now add $50 to form actual exponent
+					;; $33DE
+FORM_EXP:	ADD	A,$50		; now add $50 to form actual exponent
 		LD	(DE),A		; and load into first destination byte.
 		LD	A,$05		; load accumulator with $05 and
 		SUB	C		; subtract C to give count of trailing
@@ -15659,15 +15650,15 @@ L33DE	ADD	A,$50		; now add $50 to form actual exponent
 		LD	B,A		; zero count to B
 		XOR	A		; clear accumulator
 
-					;; STK-ZEROS
-L33F1	DEC	B		; decrement B counter
+					;; $33F1
+STK_ZEROS:	DEC	B		; decrement B counter
 		RET	Z		; return if zero.		>>
 					; DE points to new STKEND
 					; HL to new number.
 
 		LD	(DE),A		; else load zero to destination
 		INC	DE		; increase destination
-		JR	L33F1		; loop back to STK-ZEROS until done.
+		JR	STK_ZEROS	; loop back to STK_ZEROS until done.
 
 ;---------------
 ; Skip constants
@@ -15676,26 +15667,26 @@ L33F1	DEC	B		; decrement B counter
 ; stacking intermediate, unwanted constants onto a dummy calculator stack,
 ; in the first five bytes of ROM.
 
-					;; SKIP-CONS
-L33F7	AND	A		; test if initially zero.
+					;; $33F7
+SKIP_CONS:	AND	A		; test if initially zero.
 
-					;; SKIP-NEXT
-L33F8	RET	Z		; return if zero.		>>
+					;; $33F8
+SKIP_NEXT:	RET	Z		; return if zero.		>>
 
 		PUSH	AF		; save count.
 		PUSH	DE		; and normal STKEND
 
-		LD	DE,$0000		; dummy value for STKEND at start of ROM
+		LD	DE,$0000	; dummy value for STKEND at start of ROM
 					; Note. not a fault but this has to be
 					; moved elsewhere when running in RAM.
 					; e.g. with Expandor Systems 'Soft Rom'.
-		CALL	L33C8		; routine STK-CONST works through variable
+		CALL	STK_CONST	; routine STK_CONST works through variable
 					; length records.
 
 		POP	DE		; restore real STKEND
 		POP	AF		; restore count
 		DEC	A		; decrease
-		JR	L33F8		; loop back to SKIP-NEXT
+		JR	SKIP_NEXT	; loop back to SKIP_NEXT
 
 ;----------------
 ; Memory location
@@ -15727,7 +15718,7 @@ L3406	LD	C,A		; store the original number $00-$1F.
 L340F	PUSH	DE		; save STKEND
 		LD	HL,(MEM)	; MEM is base address of the memory cells.
 		CALL	L3406		; routine LOC-MEM so that HL = first byte
-		CALL	L33C0		; routine MOVE-FP moves 5 bytes with memory
+		CALL	MOVE_FP		; routine MOVE_FP moves 5 bytes with memory
 					; check.
 					; DE now points to new STKEND.
 		POP	HL		; original STKEND is now RESULT pointer.
@@ -15745,17 +15736,16 @@ L340F	PUSH	DE		; save STKEND
 
 					;; stk-const-xx
 L341B	LD	H,D		; save STKEND - required for result
-		LD	L,E		;
+		LD	L,E
 		EXX			; swap
 		PUSH	HL		; save pointer to next literal
-		LD	HL,L32C5		; Address: stk-zero - start of table of
-					; constants
-		EXX			;
-		CALL	L33F7		; routine SKIP-CONS
-		CALL	L33C8		; routine STK-CONST
-		EXX			;
+		LD	HL,STK_ZERO	; Address: STK_ZERO - start of table of constants
+		EXX
+		CALL	SKIP_CONS	; routine SKIP_CONS
+		CALL	STK_CONST	; routine STK_CONST
+		EXX
 		POP	HL		; restore pointer to next literal.
-		EXX			;
+		EXX
 		RET			; return.
 
 ;---------------------------------
@@ -15777,7 +15767,7 @@ L342D	PUSH	HL		; save the result pointer.
 		LD	HL,(MEM)	; fetch MEM the base of memory area.
 		CALL	L3406		; routine LOC-MEM sets HL to the destination.
 		EX	DE,HL		; swap - HL is start, DE is destination.
-		CALL	L33C0		; routine MOVE-FP.
+		CALL	MOVE_FP		; routine MOVE_FP.
 					; note. a short ld bc,5; ldir
 					; the embedded memory check is not required
 					; so these instructions would be faster.
@@ -15828,7 +15818,7 @@ L343E	LD	A,(DE)		; each byte of second
 
 					;; series-xx
 L3449	LD	B,A		; parameter $00 - $1F to B counter
-		CALL	L335E		; routine GEN-ENT-1 is called.
+		CALL	GEN_ENT_1	; routine GEN_ENT_1 is called.
 					; A recursive call to a special entry point
 					; in the calculator that puts the B register
 					; in the system variable BREG. The return
@@ -15862,9 +15852,9 @@ L3453	DEFB	$31		;;duplicate	v,v.
 ; the previous pointer is fetched from the machine stack to H'L' where it
 ; addresses one of the numbers of the series following the series literal.
 
-		CALL	L33C6		; routine STK-DATA is called directly to
+		CALL	STK_DATA	; routine STK_DATA is called directly to
 					; push a value and advance H'L'.
-		CALL	L3362		; routine GEN-ENT-2 recursively re-enters
+		CALL	GEN_ENT_2	; routine GEN_ENT_2 recursively re-enters
 					; the calculator without disturbing
 					; system variable BREG
 					; H'L' value goes on the machine stack and is
@@ -16774,7 +16764,7 @@ L3674	CALL	STK_FETCH		; routine STK_FETCH to fetch and delete the
 L367A	EXX			; switch in set that addresses code
 
 		PUSH	HL		; save pointer to offset byte
-		LD	HL,$5C67		; address BREG in system variables
+		LD	HL,BREG		; address BREG in system variables
 		DEC	(HL)		; decrement it
 		POP	HL		; restore pointer
 
@@ -16838,7 +16828,7 @@ L368F	INC	DE		; collect the
 ; internal language.
 
 					;; end-calc
-L369B	POP	AF		; drop the calculator return address RE-ENTRY
+L369B	POP	AF		; drop the calculator return address RE_ENTRY
 		EXX			; switch to the other set.
 
 		EX	(SP),HL		; transfer H'L' to machine stack for the

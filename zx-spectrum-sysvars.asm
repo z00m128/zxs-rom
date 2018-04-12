@@ -42,6 +42,8 @@ X_PTR		equ	$5C5F
 WORKSP		equ	$5C61
 STKBOT		equ	$5C63
 STKEND		equ	$5C65
+STKEND_HI	equ	$5C66
+BREG		equ	$5C67
 MEM		equ	$5C68
 FLAGS2		equ	$5C6A
 DF_SZ		equ	$5C6B
