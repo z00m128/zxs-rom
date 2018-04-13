@@ -352,7 +352,7 @@ TKN_TABLE:	DEFB	'?'+$80
 		DEFB	"O",'R'+$80
 		DEFB	"AN",'D'+$80
 		DEFB	$3C,'='+$80	; <=
-		DEFB	$3D,'='+$80	; >=
+		DEFB	$3E,'='+$80	; >=
 		DEFB	$3C,$3E+$80	; <>
 		DEFB	"LIN",'E'+$80
 		DEFB	"THE",'N'+$80
