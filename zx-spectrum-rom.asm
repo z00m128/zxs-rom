@@ -38,6 +38,7 @@
 ; This location can also be 'called' to reset the machine.
 ; Typically with PRINT USR 0.
 
+		ORG	$0000
 					;;;$0000
 START:		DI			; disable interrupts.
 		XOR	A		; signal coming from START.
