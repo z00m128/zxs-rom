@@ -1,7 +1,9 @@
 ;************************************************************************
 ;** An assembly file listing to generate a 16K Rom for the ZX Spectrum **
 ;************************************************************************
-
+;
+; Copyright (c) Amstrad plc. All rights reserved.
+;
 ; Acknowledgements
 ; -----------------
 ; Sean Irvine		for default list of section headings
@@ -17,7 +19,7 @@
 ; Hob of c.s.s		for full relocatability implementation and testing.
 ;			
 ; z00m^SinDiKAT		sjasmplus adaptation and dirty reformat.
-
+;
 ; obsolete labels
 ; L1C16 JUMP-C-R
 
@@ -1952,7 +1954,7 @@ SA_DATA_1:	EX	DE,HL		; save var pointer in DE
 
 					; the branch was here to consider a 'SCREEN$', the display file.
 
-					;;;$ 06A0
+					;;;$06A0
 SA_SCR: 	CP	$AA		; is character the token 'SCREEN$' ?
 		JR	NZ,SA_CODE	; forward to SA_CODE if not.
 
