@@ -1,648 +1,595 @@
-	device	zxspectrum48
-;
-	ORG	#0000
-;
-START:
-L_0000	DI
-L_0001	XOR	A
-L_0002	LD	DE,#FFFF
-L_0003	EQU	$-2
-L_0004	EQU	$-1
-L_0005	JP	L_3931
-L_0006	EQU	$-2
-;
-L_0008	LD	HL,(#5C5D)
-L_000A	EQU	$-1
-	CALL	L_0FEC
-L_000E	JR	L_0053
-L_000F	EQU	$-1
-;
-L_0010	JP	L_15F2
-L_0011	EQU	$-2
-;
-;#0013
-	DEFB	#FF
-L_0014	DEFB	#FF
-L_0015	DEFB	#FF
-L_0016	DEFB	#FF
-	DEFB	#FF
-;
-L_0018	LD	HL,(#5C5D)
-	LD	A,(HL)
-L_001C	CALL	L_007D
-	RET	NC
-L_0020	CALL	L_0074
-	JR	L_001C
-;
-;#0025
-	DEFB	#FF
-	DEFB	#FF
-	DEFB	#FF
-;
-;#0028
-	JP	L_335B
-;
-;#002B
-	DEFB	#FF
-	DEFB	#FF
-	DEFB	#FF
-	DEFB	#FF
-	DEFB	#FF
-;
-;#0030
-	PUSH	BC
-	LD	HL,(#5C61)
-L_0032	EQU	$-2
-	PUSH	HL
-	JP	L_169E
-;
-	PUSH	AF
-	PUSH	HL
-	LD	HL,(#5C78)
-	INC	HL
-	LD	(#5C78),HL
-L_0040	EQU	$-1
-	LD	A,H
-	OR	L
-	JR	NZ,L_0048
-	INC	(IY+#40)
-L_0048	PUSH	BC
-	PUSH	DE
-	CALL	L_02BF
-	POP	DE
-	POP	BC
-	POP	HL
-L_0050	POP	AF
-	EI
-	RET
-;
-L_0053	POP	HL
-	LD	L,(HL)
-L_0055	LD	(IY+#00),L
-	LD	SP,(#5C3D)
-	JP	L_16C5
-;
-;#005F
-	DEFB	#FF
-	DEFB	#FF
-	DEFB	#FF
-	DEFB	#FF
-	DEFB	#FF
-	DEFB	#FF
-	DEFB	#FF
-;
-;#0066
-	JP	L_3931
-;
-	OR	B
-	LD	E,H
-	LD	A,H
-	OR	L
-	JR	NZ,L_0070
-	JP	(HL)
-;
-L_0070	POP	HL
-	POP	AF
-	RETN
-L_0074	LD	HL,(#5C5D)
-L_0077	INC	HL
-L_0078	LD	(#5C5D),HL
-	LD	A,(HL)
-	RET
-;
-L_007D	CP	#21
-	RET	NC
-	CP	#0D
-	RET	Z
-	CP	#10
-	RET	C
-	CP	#18
-	CCF
-	RET	C
-	INC	HL
-	CP	#16
-	JR	C,L_0090
-	INC	HL
-L_0090	SCF
-	LD	(#5C5D),HL
-	RET
-;
-L_0095	DEFB	#BF
-;
-;#0096
-	DEFM	"RN"
-	DEFB	#C4	;D
-	DEFM	"INKEY"
-	DEFB	#A4	;$
-	DEFM	"P"
-	DEFB	#C9	;I
-	DEFM	"F"
-	DEFB	#CE	;N
-	DEFM	"POIN"
-	DEFB	#D4	;T
-L_00A8	DEFM	"SCREEN"
-	DEFB	#A4	;$
-	DEFM	"ATT"
-	DEFB	#D2	;R
-	DEFM	"A"
-	DEFB	#D4	;T
-	DEFM	"TA"
-	DEFB	#C2	;B
-	DEFM	"VAL"
-	DEFB	#A4	;$
-	DEFM	"COD"
-	DEFB	#C5	;E
-	DEFM	"VA"
-	DEFB	#CC	;L
-	DEFM	"LE"
-	DEFB	#CE	;N
-	DEFM	"SI"
-L_00C8	DEFB	#CE	;N
-	DEFM	"CO"
-	DEFB	#D3	;S
-	DEFM	"TA"
-L_00CE	DEFB	#CE	;N
-	DEFM	"AS"
-	DEFB	#CE	;N
-	DEFM	"AC"
-	DEFB	#D3	;S
-	DEFM	"AT"
-	DEFB	#CE	;N
-	DEFM	"L"
-	DEFB	#CE	;N
-	DEFM	"EX"
-	DEFB	#D0	;P
-	DEFM	"IN"
-	DEFB	#D4	;T
-	DEFM	"SQ"
-	DEFB	#D2	;R
-	DEFM	"SG"
-	DEFB	#CE	;N
-	DEFM	"AB"
-	DEFB	#D3	;S
-	DEFM	"PEE"
-	DEFB	#CB	;K
-	DEFM	"I"
-	DEFB	#CE	;N
-	DEFM	"US"
-	DEFB	#D2	;R
-	DEFM	"STR"
-	DEFB	#A4	;$
-	DEFM	"CHR"
-	DEFB	#A4	;$
-	DEFM	"NO"
-	DEFB	#D4	;T
-	DEFM	"BI"
-	DEFB	#CE	;N
-L_0100	DEFM	"O"
-	DEFB	#D2	;R
-	DEFM	"AN"
-	DEFB	#C4	;D
-	DEFM	"<"
-	DEFB	#BD	;=
-	DEFM	">"
-	DEFB	#BD	;=
-	DEFM	"<"
-	DEFB	#BE	;>
-	DEFM	"LIN"
-	DEFB	#C5	;E
-	DEFM	"THE"
-	DEFB	#CE	;N
-	DEFM	"T"
-L_0114	DEFB	#CF	;O
-L_0115	DEFM	"STE"
-	DEFB	#D0	;P
-	DEFM	"DEF F"
-	DEFB	#CE	;N
-	DEFM	"CA"
-	DEFB	#D4	;T
-	DEFM	"FORMA"
-	DEFB	#D4	;T
-	DEFM	"MOV"
-	DEFB	#C5	;E
-	DEFM	"ERAS"
-	DEFB	#C5	;E
-	DEFM	"OPEN "
-	DEFB	#A3	;#
-	DEFM	"CLOSE "
-	DEFB	#A3	;#
-	DEFM	"MERG"
-	DEFB	#C5	;E
-	DEFM	"VERIF"
-	DEFB	#D9	;Y
-	DEFM	"BEE"
-	DEFB	#D0	;P
-	DEFM	"CIRCL"
-	DEFB	#C5	;E
-	DEFM	"IN"
-	DEFB	#CB	;K
-	DEFM	"PAPE"
-	DEFB	#D2	;R
-	DEFM	"FLAS"
-	DEFB	#C8	;H
-	DEFM	"BRIGH"
-	DEFB	#D4	;T
-	DEFM	"INVERS"
-	DEFB	#C5	;E
-	DEFM	"OVE"
-	DEFB	#D2	;R
-	DEFM	"OU"
-	DEFB	#D4	;T
-	DEFM	"LPRIN"
-	DEFB	#D4	;T
-	DEFM	"LLIS"
-	DEFB	#D4	;T
-	DEFM	"STO"
-	DEFB	#D0	;P
-	DEFM	"REA"
-	DEFB	#C4	;D
-	DEFM	"DAT"
-	DEFB	#C1	;A
-	DEFM	"RESTOR"
-L_0190	EQU	$-1
-	DEFB	#C5	;E
-	DEFM	"NE"
-	DEFB	#D7	;W
-	DEFM	"BORDE"
-	DEFB	#D2	;R
-	DEFM	"CONTINU"
-	DEFB	#C5	;E
-	DEFM	"DI"
-	DEFB	#CD	;M
-	DEFM	"RE"
-	DEFB	#CD	;M
-	DEFM	"FO"
-	DEFB	#D2	;R
-	DEFM	"GO T"
-	DEFB	#CF	;O
-	DEFM	"GO SU"
-	DEFB	#C2	;B
-	DEFM	"INPU"
-	DEFB	#D4	;T
-	DEFM	"LOA"
-	DEFB	#C4	;D
-	DEFM	"LIS"
-	DEFB	#D4	;T
-	DEFM	"LE"
-	DEFB	#D4	;T
-	DEFM	"PAUS"
-	DEFB	#C5	;E
-	DEFM	"NEX"
-	DEFB	#D4	;T
-	DEFM	"POK"
-	DEFB	#C5	;E
-	DEFM	"PRIN"
-	DEFB	#D4	;T
-	DEFM	"PLO"
-	DEFB	#D4	;T
-	DEFM	"RU"
-	DEFB	#CE	;N
-	DEFM	"SAV"
-	DEFB	#C5	;E
-	DEFM	"RANDOMIZ"
-L_01EB	EQU	$-1
-	DEFB	#C5	;E
-	DEFM	"I"
-	DEFB	#C6	;F
-	DEFM	"CL"
-	DEFB	#D3	;S
-	DEFM	"DRA"
-	DEFB	#D7	;W
-	DEFM	"CLEA"
-	DEFB	#D2	;R
-	DEFM	"RETUR"
-L_0200	DEFB	#CE	;N
-	DEFM	"COP"
-	DEFB	#D9	;Y
-;
-L_0205	DEFB	#42	;B
-	DEFB	#48	;H
-	DEFB	#59	;Y
-	DEFB	#36	;6
-	DEFB	#35	;5
-	DEFB	#54	;T
-	DEFB	#47	;G
-	DEFB	#56	;V
-	DEFB	#4E	;N
-	DEFB	#4A	;J
-	DEFB	#55	;U
-	DEFB	#37	;7
-	DEFB	#34	;4
-	DEFB	#52	;R
-	DEFB	#46	;F
-	DEFB	#43	;C
-	DEFB	#4D	;M
-	DEFB	#4B	;K
-	DEFB	#49	;I
-	DEFB	#38	;8
-	DEFB	#33	;3
-	DEFB	#45	;E
-	DEFB	#44	;D
-	DEFB	#58	;X
-	DEFB	#0E	;.
-	DEFB	#4C	;L
-	DEFB	#4F	;O
-	DEFB	#39	;9
-	DEFB	#32	;2
-	DEFB	#57	;W
-	DEFB	#53	;S
-	DEFB	#5A	;Z
-	DEFB	#20	; 
-	DEFB	#0D	;.
-	DEFB	#50	;P
-	DEFB	#30	;0
-L_0229	DEFB	#31	;1
-	DEFB	#51	;Q
-	DEFB	#41	;A
-;
-;#022C
-	DEFB	#E3
-	DEFB	#C4
-	DEFB	#E0
-	DEFB	#E4
-L_0230	DEFB	#B4
-	DEFB	#BC
-	DEFB	#BD
-	DEFB	#BB
-	DEFB	#AF
-	DEFB	#B0
-	DEFB	#B1
-	DEFB	#C0
-	DEFB	#A7
-	DEFB	#A6
-	DEFB	#BE
-	DEFB	#AD
-	DEFB	#B2
-	DEFB	#BA
-	DEFB	#E5
-	DEFB	#A5
-	DEFB	#C2
-	DEFB	#E1
-	DEFB	#B3
-	DEFB	#B9
-	DEFB	#C1
-	DEFB	#B8
-	DEFB	#7E
-	DEFB	#DC
-	DEFB	#DA
-	DEFB	#5C
-	DEFB	#B7
-	DEFB	#7B
-	DEFB	#7D
-	DEFB	#D8
-	DEFB	#BF
-	DEFB	#AE
-	DEFB	#AA
-	DEFB	#AB
-	DEFB	#DD
-	DEFB	#DE
-L_0254	DEFB	#DF
-	DEFB	#7F
-	DEFB	#B5
-	DEFB	#D6
-	DEFB	#7C
-	DEFB	#D5
-	DEFB	#5D
-	DEFB	#DB
-	DEFB	#B6
-	DEFB	#D9
-	DEFB	#5B
-	DEFB	#D7
-	DEFB	#0C
-	DEFB	#07
-	DEFB	#06
-	DEFB	#04
-	DEFB	#05
-	DEFB	#08
-	DEFB	#0A
-	DEFB	#0B
-	DEFB	#09
-	DEFB	#0F
-	DEFB	#E2
-	DEFB	#2A
-	DEFB	#3F
-	DEFB	#CD
-	DEFB	#C8
-	DEFB	#CC
-	DEFB	#CB
-	DEFB	#5E
-	DEFB	#AC
-	DEFB	#2D
-	DEFB	#2B
-	DEFB	#3D
-	DEFB	#2E
-	DEFB	#2C
-	DEFB	#3B
-	DEFB	#22
-	DEFB	#C7
-	DEFB	#3C
-	DEFB	#C3
-	DEFB	#3E
-	DEFB	#C5
-	DEFB	#2F
-	DEFB	#C9
-	DEFB	#60
-	DEFB	#C6
-	DEFB	#3A
-	DEFB	#D0
-	DEFB	#CE
-	DEFB	#A8
-	DEFB	#CA
-	DEFB	#D3
-	DEFB	#D4
-	DEFB	#D1
-	DEFB	#D2
-	DEFB	#A9
-	DEFB	#CF
-;
-L_028E	LD	L,#2F
-	LD	DE,#FFFF
-	LD	BC,#FEFE
-L_0296	IN	A,(C)
-	CPL
-	AND	#1F
-	JR	Z,L_02AB
-	LD	H,A
-	LD	A,L
-L_029F	INC	D
-	RET	NZ
-L_02A1	SUB	#08
-	SRL	H
-	JR	NC,L_02A1
-	LD	D,E
-	LD	E,A
-	JR	NZ,L_029F
-L_02AB	DEC	L
-	RLC	B
-	JR	C,L_0296
-	LD	A,D
-	INC	A
-	RET	Z
-	CP	#28
-	RET	Z
-	CP	#19
-	RET	Z
-	LD	A,E
-	LD	E,D
-	LD	D,A
-	CP	#18
-	RET
-;
-L_02BF	CALL	L_028E
-L_02C0	EQU	$-2
-	RET	NZ
-	LD	HL,#5C00
-L_02C6	BIT	7,(HL)
-	JR	NZ,L_02D1
-	INC	HL
-	DEC	(HL)
-	DEC	HL
-	JR	NZ,L_02D1
-	LD	(HL),#FF
-L_02D1	LD	A,L
-	LD	HL,#5C04
-	CP	L
-	JR	NZ,L_02C6
-	CALL	L_031E
-	RET	NC
-	LD	HL,#5C00
-	CP	(HL)
-	JR	Z,L_0310
-	EX	DE,HL
-	LD	HL,#5C04
-	CP	(HL)
-	JR	Z,L_0310
-	BIT	7,(HL)
-	JR	NZ,L_02F1
-	EX	DE,HL
-	BIT	7,(HL)
-	RET	Z
-L_02F1	LD	E,A
-	LD	(HL),A
-	INC	HL
-	LD	(HL),#05
-	INC	HL
-	LD	A,(#5C09)
-	LD	(HL),A
-	INC	HL
-	LD	C,(IY+#07)
-	LD	D,(IY+#01)
-	PUSH	HL
-	CALL	L_0333
-	POP	HL
-	LD	(HL),A
-L_0308	LD	(#5C08),A
-	SET	5,(IY+#01)
-	RET
-;
-L_0310	INC	HL
-	LD	(HL),#05
-	INC	HL
-	DEC	(HL)
-	RET	NZ
-	LD	A,(#5C0A)
-	LD	(HL),A
-	INC	HL
-	LD	A,(HL)
-	JR	L_0308
-;
-L_031E	LD	B,D
-	LD	D,#00
-	LD	A,E
-	CP	#27
-	RET	NC
-	CP	#18
-	JR	NZ,L_032C
-	BIT	7,B
-	RET	NZ
-L_032C	LD	HL,L_0205
-	ADD	HL,DE
-	LD	A,(HL)
-	SCF
-	RET
-;
-L_0333	LD	A,E
-	CP	#3A
-	JR	C,L_0367
-	DEC	C
-	JP	M,L_034F
-	JR	Z,L_0341
-	ADD	A,#4F
-	RET
-;
-L_0341	LD	HL,L_01EB
-	INC	B
-	JR	Z,L_034A
-	LD	HL,L_0205
-L_034A	LD	D,#00
-	ADD	HL,DE
-	LD	A,(HL)
-	RET
-;
-L_034F	LD	HL,L_0229
-	BIT	0,B
-	JR	Z,L_034A
-	BIT	3,D
-	JR	Z,L_0364
-	BIT	3,(IY+#30)
-	RET	NZ
-	INC	B
-	RET	NZ
-	ADD	A,#20
-	RET
-;
-L_0364	ADD	A,#A5
-	RET
-;
-L_0367	CP	#30
-	RET	C
-	DEC	C
-	JP	M,L_039D
-	JR	NZ,L_0389
-	LD	HL,L_0254
-	BIT	5,B
-	JR	Z,L_034A
-	CP	#38
-	JR	NC,L_0382
-	SUB	#20
-	INC	B
-	RET	Z
-	ADD	A,#08
-	RET
-;
-L_0382	SUB	#36
-	INC	B
-	RET	Z
-	ADD	A,#FE
-	RET
-;
-L_0389	LD	HL,L_0230
-	CP	#39
-	JR	Z,L_034A
-	CP	#30
-	JR	Z,L_034A
-	AND	#07
-	ADD	A,#80
-	INC	B
-	RET	Z
-	XOR	#0F
-	RET
-;
-L_039D	INC	B
-	RET	Z
-	BIT	5,B
-	LD	HL,L_0230
-	JR	NZ,L_034A
-	SUB	#10
-	CP	#22
-	JR	Z,L_03B2
-	CP	#20
-	RET	NZ
-	LD	A,#5F
-	RET
-;
-L_03B2	LD	A,#40
-	RET
+		device	zxspectrum48
+
+		ORG	#0000
+
+START:		DI
+		XOR	A
+		LD	DE,#FFFF
+		JP	NMI_MENU
+
+; Error restart
+; RST #08
+ERROR_1:	LD	HL,(#5C5D)
+		CALL	TOERR
+		JR	ERROR_2
+
+; Print a character
+; RST #10
+PRINT_A:	JP	PRINT_A_2
+
+; Unused bytes
+		DB	#FF
+		DB	#FF
+		DB	#FF
+		DB	#FF
+		DB	#FF
+
+; Collect a character
+GET_CHAR:	LD	HL,(#5C5D)
+		LD	A,(HL)
+TEST_CHAR:	CALL	SKIP_OVER
+		RET	NC
+NEXT_CHAR:	CALL	CH_ADD_1
+		JR	TEST_CHAR
+
+; Unused bytes
+		DB	#FF
+		DB	#FF
+		DB	#FF
+
+; Calculator restart
+; RST #28
+		JP	CALCULATE
+
+; Unused bytes
+		DB	#FF
+		DB	#FF
+		DB	#FF
+		DB	#FF
+		DB	#FF
+
+; Create free locations in work space
+; RST #30
+BC_SPACES:	PUSH	BC
+		LD	HL,(#5C61)
+		PUSH	HL
+		JP	RESERVE
+
+; Maskable interrupt routine
+; RST #38
+MASK_INT:	PUSH	AF
+		PUSH	HL
+		LD	HL,(#5C78)
+		INC	HL
+		LD	(#5C78),HL
+		LD	A,H
+		OR	L
+		JR	NZ,KEY_INT
+		INC	(IY+#40)
+KEY_INT:	PUSH	BC
+		PUSH	DE
+		CALL	KEYBOARD
+		POP	DE
+		POP	BC
+		POP	HL
+		POP	AF
+		EI
+		RET
+
+; A continuation of the code at #0008
+ERROR_2:	POP	HL
+		LD	L,(HL)
+ERROR_3:	LD	(IY+#00),L
+		LD	SP,(#5C3D)
+		JP	SET_STK
+
+; Unused bytes
+		DB	#FF
+		DB	#FF
+		DB	#FF
+		DB	#FF
+		DB	#FF
+		DB	#FF
+		DB	#FF
+
+; Non-maskable interrupt routine
+; RST #66
+RESET:		JP	NMI_MENU
+
+		OR	B			; Looks like this is unused torso 
+		LD	E,H			; of the original reset routine.
+		LD	A,H			; It was replaced with jump to NMI menu.
+		OR	L			;
+		JR	NZ,NO_RESET		;
+		JP	(HL)			;
+NO_RESET:	POP	HL			;
+		POP	AF			;
+		RETN				; End of unused bytes.
+
+; Fetch the next immediate character following the current valid character address
+; and update the associated system variable.
+CH_ADD_1:	LD	HL,(#5C5D)
+TEMP_PTR1:	INC	HL
+TEMP_PTR2:	LD	(#5C5D),HL
+		LD	A,(HL)
+		RET
+
+; Skip over white-space and other characters irrelevant to the parsing of a basic line
+SKIP_OVER:	CP	#21
+		RET	NC
+		CP	#0D
+		RET	Z
+		CP	#10
+		RET	C
+		CP	#18
+		CCF
+		RET	C
+		INC	HL
+		CP	#16
+		JR	C,SKIPS
+		INC	HL
+SKIPS:		SCF
+		LD	(#5C5D),HL
+		RET
+
+; Six look-up tables for keyboard reading routine to decode the key values.
+; Table for tokenized characters (134d-255d).
+; Begins with function type words without a leading space.
+; The last byte of a token is inverted to denote the end of the word.
+TKN_TABLE:	DC	"?"				
+		DC	"RND"
+		DC	"INKEY$"
+		DC	"PI"
+		DC	"FN"
+		DC	"POINT"
+		DC	"SCREEN$"
+		DC	"ATTR"
+		DC	"AT"
+		DC	"TAB"
+		DC	"VAL$"
+		DC	"CODE"
+		DC	"VAL"
+		DC	"LEN"
+		DC	"SIN"
+		DC	"COS"
+		DC	"TAN"
+		DC	"ASN"
+		DC	"ACS"
+		DC	"ATN"
+		DC	"LN"
+		DC	"EXP"
+		DC	"INT"
+		DC	"SQR"
+		DC	"SGN"
+		DC	"ABS"
+		DC	"PEEK"
+		DC	"IN"
+		DC	"USR"
+		DC	"STR$"
+		DC	"CHR$"
+		DC	"NOT"
+		DC	"BIN"
+		
+; Function type words with a leading space
+; if they begin with a letter.	
+		DC	"OR"			
+		DC	"AND"
+		DC	"<="
+		DC	">="
+		DC	"<>"
+		DC	"LINE"
+		DC	"THEN"
+		DC	"TO"
+		DC	"STEP"
+		DC	"DEF FN"
+		DC	"CAT"
+		DC	"FORMAT"
+		DC	"MOVE"
+		DC	"ERASE"
+		DC	"OPEN #"
+		DC	"CLOSE #"
+		DC	"MERGE"
+		DC	"VERIFY"
+		DC	"BEEP"
+		DC	"CIRCLE"
+		DC	"INK"
+		DC	"PAPER"
+		DC	"FLASH"
+		DC	"BRIGHT"
+		DC	"INVERSE"
+		DC	"OVER"
+		DC	"OUT"
+		DC	"LPRINT"
+		DC	"LLIST"
+		DC	"STOP"
+		DC	"READ"
+		DC	"DATA"
+		DC	"RESTORE"
+		DC	"NEW"
+		DC	"BORDER"
+		DC	"CONTINUE"
+		DC	"DIM"
+		DC	"REM"
+		DC	"FOR"
+		DC	"GO TO"
+		DC	"GO SUB"
+		DC	"INPUT"
+		DC	"LOAD"
+		DC	"LIST"
+		DC	"LET"
+		DC	"PAUSE"
+		DC	"NEXT"
+		DC	"POKE"
+		DC	"PRINT"
+		DC	"PLOT"
+		DC	"RUN"
+		DC	"SAVE"
+		DC	"RANDOMIZE"
+		DC	"IF"
+		DC	"CLS"
+		DC	"DRAW"
+		DC	"CLEAR"
+		DC	"RETURN"
+		DC	"COPY"
+
+; maps for the standard 40-key ZX Spectrum keyboard
+; SHIFT (#27) is read directly.
+MAIN_KEYS:	DB	#42				;B
+		DB	#48				;H
+		DB	#59				;Y
+		DB	#36				;6
+		DB	#35				;5
+		DB	#54				;T
+		DB	#47				;G
+		DB	#56				;V
+		DB	#4E				;N
+		DB	#4A				;J
+		DB	#55				;U
+		DB	#37				;7
+		DB	#34				;4
+		DB	#52				;R
+		DB	#46				;F
+		DB	#43				;C
+		DB	#4D				;M
+		DB	#4B				;K
+		DB	#49				;I
+		DB	#38				;8
+		DB	#33				;3
+		DB	#45				;E
+		DB	#44				;D
+		DB	#58				;X
+		DB	#0E				;Symbol shift
+		DB	#4C				;L
+		DB	#4F				;O
+		DB	#39				;9
+		DB	#32				;2
+		DB	#57				;W
+		DB	#53				;S
+		DB	#5A				;Z
+		DB	#20				;Space
+		DB	#0D				;Enter
+		DB	#50				;P
+		DB	#30				;0
+		DB	#31				;1
+		DB	#51				;Q
+		DB	#41				;A
+
+; Unshifted extended mode keys.
+; The green keywords on the original keyboard.
+E_UNSHIFT:	DB	#E3				;READ
+		DB	#C4				;BIN
+		DB	#E0				;LPRINT
+		DB	#E4				;DATA
+		DB	#B4				;TAN
+		DB	#BC				;SGN
+		DB	#BD				;ABS
+		DB	#BB				;SQR
+		DB	#AF				;CODE
+		DB	#B0				;VAL
+		DB	#B1				;LEN
+		DB	#C0				;USR
+		DB	#A7				;PI
+		DB	#A6				;INKEY$
+		DB	#BE				;PEEK
+		DB	#AD				;TAB
+		DB	#B2				;SIN
+		DB	#BA				;INT
+		DB	#E5				;RESTORE
+		DB	#A5				;RND
+		DB	#C2				;CHR$
+		DB	#E1				;LLIST
+		DB	#B3				;COS
+		DB	#B9				;EXP
+		DB	#C1				;STR$
+		DB	#B8				;LN
+
+; Shifted extended mode keys.
+; The red keywords below keys on the original keyboard.
+EXT_SHIFT:	DB	#7E				;~
+		DB	#DC				;BRIGHT
+		DB	#DA				;PAPER
+		DB	#5C				;\
+		DB	#B7				;ATN
+		DB	#7B				;{
+		DB	#7D				;}
+		DB	#D8				;CIRCLE
+		DB	#BF				;IN
+		DB	#AE				;VAL$
+		DB	#AA				;SCREEN$
+		DB	#AB				;ATTR
+		DB	#DD				;INVERSE
+		DB	#DE				;OVER
+		DB	#DF				;OUT
+		DB	#7F				;(c)
+		DB	#B5				;ASN
+		DB	#D6				;VERIFY
+		DB	#7C				;|
+		DB	#D5				;MERGE
+		DB	#5D				;]
+		DB	#DB				;FLASH
+		DB	#B6				;ACS
+		DB	#D9				;INK
+		DB	#5B				;[
+		DB	#D7				;BEEP
+
+; Shift key control codes assigned to the digits.
+; White labels above the number characters on the digits keys on the orig. keyboard.
+CTL_CODES:	DB	#0C				;DELETE
+		DB	#07				;EDIT
+		DB	#06				;Caps lock
+		DB	#04				;True video
+		DB	#05				;Inverse video
+		DB	#08				;Cursor left
+		DB	#0A				;Cursor down
+		DB	#0B				;Cursor up
+		DB	#09				;Cursor right
+		DB	#0F				;GRAPH
+
+; Keys shifted with Symbol shift.
+; Red symbols on the alphabetic characters on the original keyboard.
+SYM_CODES:	DB	#E2				;STOP
+		DB	#2A				;*
+		DB	#3F				;?
+		DB	#CD				;STEP
+		DB	#C8				;>=
+		DB	#CC				;TO
+		DB	#CB				;THEN
+		DB	#5E				;^
+		DB	#AC				;AT
+		DB	#2D				;-
+		DB	#2B				;+
+		DB	#3D				;=
+		DB	#2E				;.
+		DB	#2C				;,
+		DB	#3B				;;
+		DB	#22				;"
+		DB	#C7				;<=
+		DB	#3C				;<
+		DB	#C3				;NOT
+		DB	#3E				;>
+		DB	#C5				;OR
+		DB	#2F				;/
+		DB	#C9				;<>
+		DB	#60				;£
+		DB	#C6				;AND
+		DB	#3A				;:
+
+; Keywords assigned to the digits in extended mode.
+; On the original keyboard those are remaining red keywords below the keys.
+E_DIGITS:	DB	#D0				;FORMAT
+		DB	#CE				;DEF FN
+		DB	#A8				;FN
+		DB	#CA				;LINE
+		DB	#D3				;OPEN #
+		DB	#D4				;CLOSE #
+		DB	#D1				;MOVE
+		DB	#D2				;ERASE
+		DB	#A9				;POINT
+		DB	#CF				;CAT
+
+; Keyboard scanning
+; returns 1 or 2 keys in DE
+KEY_SCAN:	LD	L,#2F
+		LD	DE,#FFFF
+		LD	BC,#FEFE
+KEY_LINE:	IN	A,(C)
+		CPL
+		AND	#1F
+		JR	Z,KEY_DONE
+		LD	H,A
+		LD	A,L
+KEY_3KEYS:	INC	D
+		RET	NZ
+KEY_BITS:	SUB	#08
+		SRL	H
+		JR	NC,KEY_BITS
+		LD	D,E
+		LD	E,A
+		JR	NZ,KEY_3KEYS
+KEY_DONE:	DEC	L
+		RLC	B
+		JR	C,KEY_LINE
+		LD	A,D
+		INC	A
+		RET	Z
+		CP	#28
+		RET	Z
+		CP	#19
+		RET	Z
+		LD	A,E
+		LD	E,D
+		LD	D,A
+		CP	#18
+		RET
+
+; Scan keyboard and decode value
+KEYBOARD:	CALL	KEY_SCAN
+		RET	NZ
+		LD	HL,#5C00
+K_ST_LOOP:	BIT	7,(HL)
+		JR	NZ,K_CH_SET
+		INC	HL
+		DEC	(HL)
+		DEC	HL
+		JR	NZ,K_CH_SET
+		LD	(HL),#FF
+K_CH_SET:	LD	A,L
+		LD	HL,#5C04
+		CP	L
+		JR	NZ,K_ST_LOOP
+		CALL	K_TEST
+		RET	NC
+		LD	HL,#5C00
+		CP	(HL)
+		JR	Z,K_REPEAT
+		EX	DE,HL
+		LD	HL,#5C04
+		CP	(HL)
+		JR	Z,K_REPEAT
+		BIT	7,(HL)
+		JR	NZ,K_NEW
+		EX	DE,HL
+		BIT	7,(HL)
+		RET	Z
+K_NEW:		LD	E,A
+		LD	(HL),A
+		INC	HL
+		LD	(HL),#05
+		INC	HL
+		LD	A,(#5C09)
+		LD	(HL),A
+		INC	HL
+		LD	C,(IY+#07)
+		LD	D,(IY+#01)
+		PUSH	HL
+		CALL	K_DECODE
+		POP	HL
+		LD	(HL),A
+K_END:		LD	(#5C08),A
+		SET	5,(IY+#01)
+		RET
+
+; Repeat key routine
+K_REPEAT:	INC	HL
+		LD	(HL),#05
+		INC	HL
+		DEC	(HL)
+		RET	NZ
+		LD	A,(#5C0A)
+		LD	(HL),A
+		INC	HL
+		LD	A,(HL)
+		JR	K_END
+
+; Test key value
+K_TEST:		LD	B,D
+		LD	D,#00
+		LD	A,E
+		CP	#27
+		RET	NC
+		CP	#18
+		JR	NZ,K_MAIN
+		BIT	7,B
+		RET	NZ
+K_MAIN:		LD	HL,MAIN_KEYS
+		ADD	HL,DE
+		LD	A,(HL)
+		SCF
+		RET
+
+; Keyboard decoding
+K_DECODE:	LD	A,E
+		CP	#3A
+		JR	C,K_DIGIT
+		DEC	C
+		JP	M,K_KLC_LET
+		JR	Z,K_E_LET
+		ADD	A,#4F
+		RET
+
+; Test if B is empty (i.e. not a shift)
+; forward to K_LOOK_UP if neither shift
+K_E_LET:	LD	HL,#01EB		;E_UNSHIFT-#41
+		INC	B
+		JR	Z,K_LOOK_UP
+		LD	HL,#0205		;EXT_SHIFT-#41
+
+; Prepare to index
+K_LOOK_UP:	LD	D,#00
+		ADD	HL,DE
+		LD	A,(HL)
+		RET
+
+; Prepare base of SYM_CODES
+K_KLC_LET:	LD	HL,#0229		;SYM_CODES-#41
+		BIT	0,B
+		JR	Z,K_LOOK_UP
+		BIT	3,D
+		JR	Z,K_TOKENS
+		BIT	3,(IY+#30)
+		RET	NZ
+		INC	B
+		RET	NZ
+		ADD	A,#20
+		RET
+; Add offset to main code to get tokens
+K_TOKENS:	ADD	A,#A5
+		RET
+; Digits, space, enter and symbol shift decoding
+K_DIGIT:	CP	#30
+		RET	C
+		DEC	C
+		JP	M,K_KLC_DGT
+		JR	NZ,K_GRA_DGT
+		LD	HL,#0254		;E_DIGITS-#30
+		BIT	5,B
+		JR	Z,K_LOOK_UP
+		CP	#38
+		JR	NC,K_8_AND_9
+		SUB	#20
+		INC	B
+		RET	Z
+		ADD	A,#08
+		RET
+
+; Digits 8 and 9 decoding
+K_8_AND_9:	SUB	#36
+		INC	B
+		RET	Z
+		ADD	A,#FE
+		RET
+
+; Graphics mode with digits
+K_GRA_DGT:	LD	HL,#0230		;CTL_CODES-#30
+		CP	#39
+		JR	Z,K_LOOK_UP
+		CP	#30
+		JR	Z,K_LOOK_UP
+		AND	#07
+		ADD	A,#80
+		INC	B
+		RET	Z
+		XOR	#0F
+		RET
+
+; Digits in 'KLC' mode
+K_KLC_DGT:	INC	B
+		RET	Z
+		BIT	5,B
+		LD	HL,#0230		;CTL_CODES-#30
+		JR	NZ,K_LOOK_UP
+		SUB	#10
+		CP	#22
+		JR	Z,K_AT_CHAR
+		CP	#20
+		RET	NZ
+		LD	A,#5F
+		RET
+
+; Substitute ascii '@'
+K_AT_CHAR	LD	A,#40
+		RET
+		
 ;
 L_03B5	DI
 	LD	A,L
@@ -694,20 +641,20 @@ L_03F6	EI
 L_03F8	RST	#28	;*calc
 ;
 ;#03F9
-	DEFB	#31
-	DEFB	#27
-	DEFB	#C0
-	DEFB	#03
-	DEFB	#34
-	DEFB	#EC
-	DEFB	#6C
-	DEFB	#98
-	DEFB	#1F
-	DEFB	#F5
-	DEFB	#04
-	DEFB	#A1
-	DEFB	#0F
-	DEFB	#38
+	DB	#31
+	DB	#27
+	DB	#C0
+	DB	#03
+	DB	#34
+	DB	#EC
+	DB	#6C
+	DB	#98
+	DB	#1F
+	DB	#F5
+	DB	#04
+	DB	#A1
+	DB	#0F
+	DB	#38
 ;
 ;#0407
 	LD	HL,#5C92
@@ -742,8 +689,8 @@ L_0427	INC	B
 	RST	#28	;*calc
 ;
 ;#0439
-	DEFB	#04
-	DEFB	#38
+	DB	#04
+	DB	#38
 ;
 ;#043B
 	POP	AF
@@ -752,10 +699,10 @@ L_0427	INC	B
 	RST	#28	;*calc
 ;
 ;#043F
-	DEFB	#C0
-	DEFB	#02
-	DEFB	#31
-	DEFB	#38
+	DB	#C0
+	DB	#02
+	DB	#31
+	DB	#38
 ;
 ;#0443
 	CALL	L_1E94
@@ -764,22 +711,22 @@ L_0427	INC	B
 	RST	#28	;*calc
 ;
 ;#044B
-	DEFB	#E0
-	DEFB	#04
-	DEFB	#E0
-	DEFB	#34
-	DEFB	#80
-	DEFB	#43
-	DEFB	#55
-	DEFB	#9F
-	DEFB	#80
-	DEFB	#01
-	DEFB	#05
-	DEFB	#34
-	DEFB	#35
-	DEFB	#71
-	DEFB	#03
-	DEFB	#38
+	DB	#E0
+	DB	#04
+	DB	#E0
+	DB	#34
+	DB	#80
+	DB	#43
+	DB	#55
+	DB	#9F
+	DB	#80
+	DB	#01
+	DB	#05
+	DB	#34
+	DB	#35
+	DB	#71
+	DB	#03
+	DB	#38
 ;
 ;#045B
 	CALL	L_1E99
@@ -797,71 +744,71 @@ L_0427	INC	B
 L_046C	RST	#08
 ;
 ;#046D
-	DEFB	#0A
-L_046E	DEFB	#89
-	DEFB	#02
-	DEFB	#D0
-	DEFB	#12
-	DEFB	#86
-	DEFB	#89
-	DEFB	#0A
-	DEFB	#97
-	DEFB	#60
-	DEFB	#75
-	DEFB	#89
-	DEFB	#12
-	DEFB	#D5
-	DEFB	#17
-	DEFB	#1F
-	DEFB	#89
-	DEFB	#1B
-	DEFB	#90
-	DEFB	#41
-	DEFB	#02
-	DEFB	#89
-	DEFB	#24
-	DEFB	#D0
-	DEFB	#53
-	DEFB	#CA
-	DEFB	#89
-	DEFB	#2E
-	DEFB	#9D
-	DEFB	#36
-	DEFB	#B1
-	DEFB	#89
-	DEFB	#38
-	DEFB	#FF
-	DEFB	#49
-	DEFB	#3E
-	DEFB	#89
-	DEFB	#43
-	DEFB	#FF
-	DEFB	#6A
-	DEFB	#73
-	DEFB	#89
-	DEFB	#4F
-	DEFB	#A7
-	DEFB	#00
-	DEFB	#54
-	DEFB	#89
-	DEFB	#5C
-	DEFB	#00
-	DEFB	#00
-	DEFB	#00
-	DEFB	#89
-	DEFB	#69
-	DEFB	#14
-	DEFB	#F6
-	DEFB	#24
-	DEFB	#89
-	DEFB	#76
-	DEFB	#F1
-	DEFB	#10
-	DEFB	#05
+	DB	#0A
+L_046E	DB	#89
+	DB	#02
+	DB	#D0
+	DB	#12
+	DB	#86
+	DB	#89
+	DB	#0A
+	DB	#97
+	DB	#60
+	DB	#75
+	DB	#89
+	DB	#12
+	DB	#D5
+	DB	#17
+	DB	#1F
+	DB	#89
+	DB	#1B
+	DB	#90
+	DB	#41
+	DB	#02
+	DB	#89
+	DB	#24
+	DB	#D0
+	DB	#53
+	DB	#CA
+	DB	#89
+	DB	#2E
+	DB	#9D
+	DB	#36
+	DB	#B1
+	DB	#89
+	DB	#38
+	DB	#FF
+	DB	#49
+	DB	#3E
+	DB	#89
+	DB	#43
+	DB	#FF
+	DB	#6A
+	DB	#73
+	DB	#89
+	DB	#4F
+	DB	#A7
+	DB	#00
+	DB	#54
+	DB	#89
+	DB	#5C
+	DB	#00
+	DB	#00
+	DB	#00
+	DB	#89
+	DB	#69
+	DB	#14
+	DB	#F6
+	DB	#24
+	DB	#89
+	DB	#76
+	DB	#F1
+	DB	#10
+	DB	#05
 ;
 L_04AA	RST	#18
 	LD	HL,L_04BB
-	LD	BC,L_0005
+	LD	BC,#0005
 	CPIR
 	JP	NZ,L_1C8C
 	LD	C,#00
@@ -869,7 +816,7 @@ L_04AA	RST	#18
 ;
 L_04BB	LD	A,(#AA0D)
 	XOR	A
-	CALL	PO,L_0000
+	CALL	PO,#0000
 L_04C2	LD	HL,L_053F
 	PUSH	HL
 L_04C6	LD	HL,L_1F80
@@ -962,7 +909,7 @@ L_053F	PUSH	AF
 	RST	#08
 ;
 ;#0553
-	DEFB	#0C
+	DB	#0C
 ;
 L_0554	POP	AF
 	RET
@@ -984,7 +931,7 @@ L_0565	AND	#20
 L_056B	RET	NZ
 L_056C	CALL	L_05E7
 	JR	NC,L_056B
-	LD	HL,L_0115
+	LD	HL,#0115
 L_0574	DJNZ	L_0574
 	DEC	HL
 	LD	A,H
@@ -1086,7 +1033,7 @@ L_0605	POP	AF
 	CALL	L_04AA
 	CALL	L_2530
 	JR	Z,L_0652
-	LD	BC,L_0011
+	LD	BC,#0011
 	LD	A,(#5C74)
 	AND	A
 	JR	Z,L_0621
@@ -1112,12 +1059,12 @@ L_0629	LD	(DE),A
 	RST	#08
 ;
 ;#0643
-	DEFB	#0E
+	DB	#0E
 ;
 L_0644	LD	A,B
 	OR	C
 	JR	Z,L_0652
-	LD	BC,L_000A
+	LD	BC,#000A
 L_064B	PUSH	IX
 	POP	HL
 	INC	HL
@@ -1133,14 +1080,14 @@ L_0652	RST	#18
 	CALL	L_28B2
 	SET	7,C
 	JR	NC,L_0672
-	LD	HL,L_0000
+	LD	HL,#0000
 	LD	A,(#5C74)
 	DEC	A
 	JR	Z,L_0685
 	RST	#08
 ;
 ;#0671
-	DEFB	#01
+	DB	#01
 ;
 L_0672	JP	NZ,L_1C8A
 	CALL	L_2530
@@ -1251,10 +1198,10 @@ L_075A	LD	A,(#5C74)
 	AND	A
 	JP	Z,L_0970
 	PUSH	HL
-	LD	BC,L_0011
+	LD	BC,#0011
 	ADD	IX,BC
 L_0767	PUSH	IX
-	LD	DE,L_0011
+	LD	DE,#0011
 	XOR	A
 	SCF
 	CALL	L_0556
@@ -1270,7 +1217,7 @@ L_0767	PUSH	IX
 	LD	C,#F6
 L_078A	CP	#04
 	JR	NC,L_0767
-	LD	DE,L_09C0
+			LD	DE,TAPE_MSGS2	;#09C0
 	PUSH	BC
 	CALL	L_0C0A
 	POP	BC
@@ -1340,7 +1287,7 @@ L_0802	CALL	L_0556
 L_0806	RST	#08
 ;
 ;#0807
-	DEFB	#1A
+	DB	#1A
 ;
 L_0808	LD	E,(IX+#0B)
 	LD	D,(IX+#0C)
@@ -1360,7 +1307,7 @@ L_0819	LD	L,(IX-#06)
 	SCF
 	SBC	HL,DE
 	JR	C,L_082E
-L_0825	LD	DE,L_0005
+L_0825	LD	DE,#0005
 	ADD	HL,DE
 	LD	B,H
 	LD	C,L
@@ -1393,7 +1340,7 @@ L_084C	LD	HL,(#5C59)
 	INC	BC
 	LD	A,(IX-#03)
 	PUSH	AF
-	CALL	L_1655
+	CALL	MAKE_ROOM
 	INC	HL
 	POP	AF
 	LD	(HL),A
@@ -1420,7 +1367,7 @@ L_0873	EX	DE,HL
 	POP	BC
 	PUSH	HL
 	PUSH	BC
-	CALL	L_1655
+	CALL	MAKE_ROOM
 	LD	IX,(#5C5F)
 	INC	HL
 	LD	C,(IX+#0F)
@@ -1541,11 +1488,11 @@ L_093E	EX	AF,AF'
 	EX	AF,AF'
 	JR	C,L_0955
 	DEC	HL
-	CALL	L_1655
+	CALL	MAKE_ROOM
 	INC	HL
 	JR	L_0958
 ;
-L_0955	CALL	L_1655
+L_0955	CALL	MAKE_ROOM
 L_0958	INC	HL
 	POP	BC
 	POP	DE
@@ -1566,12 +1513,12 @@ L_0970	PUSH	HL
 	LD	A,#FD
 	CALL	L_1601
 	XOR	A
-	LD	DE,L_09A1
+	LD	DE,TAPE_MSGS
 	CALL	L_0C0A
 	SET	5,(IY+#02)
 	CALL	L_15D4
 	PUSH	IX
-	LD	DE,L_0011
+	LD	DE,#0011
 	XOR	A
 	CALL	L_04C2
 	POP	IX
@@ -1584,39 +1531,17 @@ L_0991	HALT
 	LD	A,#FF
 	JP	L_04C2
 ;
-L_09A1	DEFB	#80
-;
-;#09A2
-	DEFM	"Press REC & PLAY, then any key"
-;
-L_09C0	DEFB	#AE
-	DEFB	#0D
-;
-;#09C2
-	DEFM	"Program:"
-;
-;#09CA
-	DEFB	#A0
-	DEFB	#0D
-;
-;#09CC
-	DEFM	"Number array:"
-;
-;#09D9
-	DEFB	#A0
-	DEFB	#0D
-;
-L_09DB	DEFM	"Character array:"
-;
-;#09EB
-	DEFB	#A0
-	DEFB	#0D
-;
-;#09ED
-	DEFM	"Bytes:"
-;
-;#09F3
-	DEFB	#A0
+TAPE_MSGS:	DB	#80
+		DC	"Press REC & PLAY, then any key."
+TAPE_MSGS2:	EQU	$-1
+		DB	#0D
+		DC	"Program: "
+		DB	#0D
+		DC	"Number array: "
+		DB	#0D
+		DC	"Character array: "
+		DB	#0D
+		DC	"Bytes: "
 ;
 L_09F4	CALL	L_3A01
 	CP	#1E
@@ -1635,24 +1560,24 @@ L_0A0B	LD	E,(HL)
 	JP	L_0B03
 ;
 ;#0A11
-	DEFB	#4E
-	DEFB	#57
-	DEFB	#10
-	DEFB	#29
-	DEFB	#54
-	DEFB	#53
-	DEFB	#52
-	DEFB	#37
-	DEFB	#50
-	DEFB	#4F
-	DEFB	#5F
-	DEFB	#5E
-	DEFB	#5D
-	DEFB	#5C
-	DEFB	#5B
-	DEFB	#5A
-	DEFB	#54
-	DEFB	#53
+	DB	#4E
+	DB	#57
+	DB	#10
+	DB	#29
+	DB	#54
+	DB	#53
+	DB	#52
+	DB	#37
+	DB	#50
+	DB	#4F
+	DB	#5F
+	DB	#5E
+	DB	#5D
+	DB	#5C
+	DB	#5B
+	DB	#5A
+	DB	#54
+	DB	#53
 ;
 ;#0A23
 	INC	C
@@ -1934,7 +1859,7 @@ L_0C0A	PUSH	HL
 	EX	(SP),HL
 	JR	L_0C14
 ;
-L_0C10	LD	DE,L_0095
+L_0C10	LD	DE,TKN_TABLE
 L_0C13	PUSH	AF
 L_0C14	CALL	L_0C41
 	JR	C,L_0C22
@@ -2004,7 +1929,7 @@ L_0C55	BIT	1,(IY+#01)
 L_0C86	RST	#08
 ;
 ;#0C87
-	DEFB	#04
+	DB	#04
 ;
 L_0C88	DEC	(IY+#52)
 	JR	NZ,L_0CD2
@@ -2078,7 +2003,7 @@ L_0CF8	ADD	A,B
 L_0D00	RST	#08
 ;
 ;#0D01
-	DEFB	#0C
+	DB	#0C
 ;
 L_0D02	CP	#02
 	JR	C,L_0C86
@@ -2171,7 +2096,7 @@ L_0DA0	LD	(HL),E
 	LD	BC,L_1721
 	JR	L_0DD9
 ;
-L_0DAF	LD	HL,L_0000
+L_0DAF	LD	HL,#0000
 	LD	(#5C7D),HL
 	RES	0,(IY+#30)
 	CALL	L_0D94
@@ -2219,7 +2144,7 @@ L_0E0D	EX	DE,HL
 	LD	HL,#F8E0
 	ADD	HL,DE
 	EX	DE,HL
-	LD	BC,L_0020
+	LD	BC,#0020
 	DEC	A
 	LDIR
 L_0E19	EX	DE,HL
@@ -2387,7 +2312,7 @@ L_0EFD	CALL	L_1F54
 	RST	#08
 ;
 ;#0F0B
-	DEFB	#0C
+	DB	#0C
 ;
 L_0F0C	IN	A,(#FB)
 	ADD	A,A
@@ -2419,7 +2344,7 @@ L_0F38	CALL	L_15D4
 	PUSH	AF
 	LD	D,#00
 	LD	E,(IY-#01)
-	LD	HL,L_00C8
+	LD	HL,#00C8
 	CALL	L_03B5
 	POP	AF
 	LD	HL,L_0F38
@@ -2430,7 +2355,7 @@ L_0F38	CALL	L_15D4
 	JR	C,L_0F81
 	CP	#10
 	JR	C,L_0F92
-	LD	BC,L_0002
+	LD	BC,#0002
 	LD	D,A
 	CP	#16
 	JR	C,L_0F6C
@@ -2443,7 +2368,7 @@ L_0F6C	CALL	L_15D4
 	PUSH	DE
 	LD	HL,(#5C5B)
 	RES	0,(IY+#07)
-	CALL	L_1655
+	CALL	MAKE_ROOM
 	POP	BC
 	INC	HL
 	LD	(HL),B
@@ -2453,7 +2378,7 @@ L_0F6C	CALL	L_15D4
 ;
 L_0F81	RES	0,(IY+#07)
 	LD	HL,(#5C5B)
-	CALL	L_1652
+	CALL	ONE_SPACE
 L_0F8B	LD	(DE),A
 	INC	DE
 	LD	(#5C5B),DE
@@ -2470,15 +2395,15 @@ L_0F99	LD	E,(HL)
 	RET
 ;
 ;#0FA0
-	DEFB	#09
-	DEFB	#66
-	DEFB	#6A
-	DEFB	#50
-	DEFB	#B5
-	DEFB	#70
-	DEFB	#7E
-	DEFB	#CF
-	DEFB	#D4
+	DB	#09
+	DB	#66
+	DB	#6A
+	DB	#50
+	DB	#B5
+	DB	#70
+	DB	#7E
+	DB	#CF
+	DB	#D4
 ;
 L_0FA9	LD	HL,(#5C49)
 	BIT	5,(IY+#37)
@@ -2492,7 +2417,7 @@ L_0FA9	LD	HL,(#5C49)
 	LD	C,(HL)
 	INC	HL
 	LD	B,(HL)
-	LD	HL,L_000A
+	LD	HL,#000A
 	ADD	HL,BC
 	LD	B,H
 	LD	C,L
@@ -2506,16 +2431,16 @@ L_0FA9	LD	HL,(#5C49)
 	POP	HL
 	DEC	HL
 	CALL	L_1855
-	LD	DE,L_0005
+	LD	DE,#0005
 	LD	HL,(#5C59)
 	ADD	HL,DE
 	LD	(#5C5B),HL
 	POP	HL
 	JP	L_1615
-;
-L_0FEC	LD	(#5C5F),HL
-	LD	(#5C5B),HL
-	RET
+
+TOERR:		LD	(#5C5F),HL
+		LD	(#5C5B),HL
+		RET
 ;
 	CALL	L_3A8B
 	BIT	5,(IY+#37)
@@ -2538,7 +2463,7 @@ L_1011	LD	(#5C5B),HL
 	RET
 ;
 	CALL	L_1031
-L_1018	LD	BC,L_0001
+L_1018	LD	BC,#0001
 	JP	L_19E8
 ;
 L_101E	CALL	L_15D4
@@ -2604,7 +2529,7 @@ L_107F	BIT	4,(IY+#30)
 	LD	(IY+#00),#FF
 	LD	D,#00
 	LD	E,(IY-#02)
-	LD	HL,L_0190
+	LD	HL,#0190
 	CALL	L_03B5
 	JP	L_0F30
 ;
@@ -2720,7 +2645,7 @@ L_115E	LD	A,#20
 ;
 L_1167	LD	D,#00
 	LD	E,(IY-#02)
-	LD	HL,L_0190
+	LD	HL,#0190
 	CALL	L_03B5
 	LD	(IY+#00),#FF
 	LD	DE,(#5C8A)
@@ -2751,7 +2676,7 @@ L_1195	LD	DE,(#5C59)
 ;
 L_11A7	LD	A,(HL)
 	CP	#0E
-	LD	BC,L_0006
+	LD	BC,#0006
 	CALL	Z,L_19E8
 	LD	A,(HL)
 	INC	HL
@@ -2806,14 +2731,14 @@ L_11F0	EXX
 	JR	Z,L_1219
 L_1200	LD	(#5CB4),HL
 	LD	DE,L_3EAF
-	LD	BC,L_00A8
+	LD	BC,#00A8
 	EX	DE,HL
 	LDDR
 	EX	DE,HL
 	INC	HL
 	LD	(#5C7B),HL
 	DEC	HL
-	LD	BC,L_0040
+	LD	BC,#0040
 	LD	(#5C38),BC
 L_1219	LD	(#5CB2),HL
 	LD	HL,L_3C00
@@ -2831,7 +2756,7 @@ L_1219	LD	(#5CB2),HL
 	LD	HL,#5CB6
 	LD	(#5C4F),HL
 	LD	DE,L_15AF
-	LD	BC,L_0015
+	LD	BC,#0015
 	EX	DE,HL
 	LDIR
 	EX	DE,HL
@@ -2854,13 +2779,13 @@ L_1256	LD	(HL),#0D
 	LD	(#5C8D),A
 	LD	(#5C8F),A
 	LD	(#5C48),A
-	LD	HL,L_0114
+	LD	HL,#0114
 	LD	(#5C09),HL
 	DEC	(IY-#3A)
 	DEC	(IY-#36)
 	LD	HL,L_15C6
 	LD	DE,#5C10
-	LD	BC,L_000E
+	LD	BC,#000E
 	LDIR
 	LD	(IY+#31),#02
 	LD	(IY+#0E),#0F
@@ -2914,11 +2839,11 @@ L_1303	RST	#38
 	LD	A,(#5C3A)
 	INC	A
 L_1313	PUSH	AF
-	LD	HL,L_0000
+	LD	HL,#0000
 	LD	(IY+#37),H
 	LD	(IY+#26),H
 	LD	(#5C0B),HL
-	LD	HL,L_0001
+	LD	HL,#0001
 	LD	(#5C16),HL
 	CALL	L_16B0
 	RES	5,(IY+#37)
@@ -2933,10 +2858,10 @@ L_133C	CALL	L_15EF
 	LD	A,#20
 	RST	#10
 	LD	A,B
-	LD	DE,L_1391
+	LD	DE,RPT_MESGS
 	CALL	L_0C0A
 	XOR	A
-	LD	DE,L_1536
+			LD	DE,COMMA_SP - 1
 	CALL	L_0C0A
 	LD	BC,(#5C45)
 	CALL	L_1A1B
@@ -2954,7 +2879,7 @@ L_133C	CALL	L_15EF
 	CP	#15
 	JR	NZ,L_1376
 L_1373	INC	(IY+#0D)
-L_1376	LD	BC,L_0003
+L_1376	LD	BC,#0003
 	LD	DE,#5C70
 	LD	HL,#5C44
 	BIT	7,(HL)
@@ -2964,104 +2889,58 @@ L_1384	LDDR
 L_1386	LD	(IY+#0A),#FF
 	RES	3,(IY+#01)
 	JP	L_12AC
-;
-L_1391	DEFB	#80
-;
-;#1392
-	DEFM	"O"
-	DEFB	#CB	;K
-	DEFM	"NEXT without FO"
-	DEFB	#D2	;R
-	DEFM	"Variable not foun"
-	DEFB	#E4	;d
-	DEFM	"Subscript wron"
-	DEFB	#E7	;g
-	DEFM	"Out of memor"
-	DEFB	#F9	;y
-	DEFM	"Out of scree"
-	DEFB	#EE	;n
-	DEFM	"Number too bi"
-	DEFB	#E7	;g
-	DEFM	"RETURN without GOSU"
-	DEFB	#C2	;B
-	DEFM	"End of fil"
-	DEFB	#E5	;e
-	DEFM	"STOP statemen"
-	DEFB	#F4	;t
-	DEFM	"Invalid argumen"
-	DEFB	#F4	;t
-	DEFM	"Integer out of rang"
-	DEFB	#E5	;e
-	DEFM	"Nonsense in BASI"
-	DEFB	#C3	;C
-	DEFM	"BREAK - CONT repeat"
-	DEFB	#F3	;s
-	DEFM	"Out of DAT"
-	DEFB	#C1	;A
-	DEFM	"Invalid file nam"
-	DEFB	#E5	;e
-	DEFM	"No room for lin"
-	DEFB	#E5	;e
-	DEFM	"STOP in INPU"
-	DEFB	#D4	;T
-	DEFM	"FOR without NEX"
-	DEFB	#D4	;T
-	DEFM	"Invalid I/O devic"
-	DEFB	#E5	;e
-	DEFM	"Invalid colou"
-	DEFB	#F2	;r
-	DEFM	"BREAK into progra"
-	DEFB	#ED	;m
-	DEFM	"RAMTOP no goo"
-	DEFB	#E4	;d
-	DEFM	"Statement los"
-	DEFB	#F4	;t
-	DEFM	"Invalid strea"
-	DEFB	#ED	;m
-	DEFM	"FN without DE"
-	DEFB	#C6	;F
-	DEFM	"Parameter erro"
-	DEFB	#F2	;r
-	DEFM	"Tape loading erro"
-L_1536	DEFB	#F2	;r
-;
-;#1537
-	DEFB	#2C
-	DEFB	#A0
-;
-;#1539
-	DEFM	"Rom 14"
-L_153E	EQU	$-1
-	DEFB	#B0	;0
-	DEFM	"Prog"
-;
-;#1544
-	DEFB	#BA	;:
-;
-;#1545
-	DEFB	#16
-	DEFB	#00
-	DEFB	#0B
-;
-;#1548
-	DEFM	"Vars"
-;
-;#154C
-	DEFB	#BA	;:
-;
-;#154D
-	DEFB	#16
-	DEFB	#00
-	DEFB	#16
-;
-;#1550
-	DEFM	"Free"
-;
-;#1554
-	DEFB	#BA	;:
+
+;The error mesages, with last byte inverted.
+;The first #80 entry is dummy entry.
+RPT_MESGS:	DB	#80
+		DC	"OK"
+		DC	"NEXT without FOR"
+		DC	"Variable not found"
+		DC	"Subscript wrong"
+		DC	"Out of memory"
+		DC	"Out of screen"
+		DC	"Number too big"
+		DC	"RETURN without GOSUB"
+		DC	"End of file"
+		DC	"STOP statement"
+		DC	"Invalid argument"
+		DC	"Integer out of range"
+		DC	"Nonsense in BASIC"
+		DC	"BREAK - CONT repeats"
+		DC	"Out of DATA"
+		DC	"Invalid file name"
+		DC	"No room for line"
+		DC	"STOP in INPUT"
+		DC	"FOR without NEXT"
+		DC	"Invalid I/O device"
+		DC	"Invalid colour"
+		DC	"BREAK into program"
+		DC	"RAMTOP no good"
+		DC	"Statement lost"
+		DC	"Invalid stream"
+		DC	"FN without DEF"
+		DC	"Parameter error"
+		DC	"Tape loading error"
+COMMA_SP:	DC	", "
+
+;Here is copyright message in the original ZX Spectrum ROM.
+		DC	"Rom 140"
+L_153E		EQU	$-2
+
+		DC	"Prog:"
+		DB	#16
+		DB	#00
+		DB	#0B
+
+		DC	"Vars:"
+		DB	#16
+		DB	#00
+		DB	#16
+
+		DC	"Free:"
 ;
 L_1555	LD	A,#10
-	LD	BC,L_0000
+	LD	BC,#0000
 	JP	L_1313
 ;
 L_155D	LD	(#5C49),BC
@@ -3092,7 +2971,7 @@ L_157D	POP	BC
 	DEC	HL
 	LD	DE,(#5C53)
 	PUSH	DE
-	CALL	L_1655
+	CALL	MAKE_ROOM
 	POP	HL
 	LD	(#5C53),HL
 	POP	BC
@@ -3115,65 +2994,65 @@ L_157D	POP	BC
 L_15AB	POP	AF
 	JP	L_12A2
 ;
-L_15AF	DEFB	#F4
-	DEFB	#09
-	DEFB	#A8
-	DEFB	#10
+L_15AF	DB	#F4
+	DB	#09
+	DB	#A8
+	DB	#10
 ;
 ;#15B3
-	DEFM	"K"
+	DB	"K"
 ;
 ;#15B4
-	DEFB	#F4
-	DEFB	#09
+	DB	#F4
+	DB	#09
 ;
 ;#15B6
-	DEFW	L_15C4
+	DW	L_15C4
 ;
 ;#15B8
-	DEFB	#53	;S
+	DB	#53	;S
 ;
 ;#15B9
-	DEFB	#81
-	DEFB	#0F
+	DB	#81
+	DB	#0F
 ;
 ;#15BB
-	DEFW	L_15C4
+	DW	L_15C4
 ;
 ;#15BD
-	DEFM	"R"
+	DB	"R"
 ;
 ;#15BE
-	DEFB	#F4
-	DEFB	#09
+	DB	#F4
+	DB	#09
 ;
 ;#15C0
-	DEFW	L_15C4
+	DW	L_15C4
 ;
 ;#15C2
-	DEFM	"P"
+	DB	"P"
 ;
 ;#15C3
-	DEFB	#80
+	DB	#80
 ;
 L_15C4	RST	#08
 ;
 ;#15C5
-	DEFB	#12
-L_15C6	DEFB	#01
-	DEFB	#00
-	DEFB	#06
-	DEFB	#00
-	DEFB	#0B
-	DEFB	#00
-	DEFB	#01
-	DEFB	#00
-	DEFB	#01
-	DEFB	#00
-	DEFB	#06
-	DEFB	#00
-	DEFB	#10
-	DEFB	#00
+	DB	#12
+L_15C6	DB	#01
+	DB	#00
+	DB	#06
+	DB	#00
+	DB	#0B
+	DB	#00
+	DB	#01
+	DB	#00
+	DB	#01
+	DB	#00
+	DB	#06
+	DB	#00
+	DB	#10
+	DB	#00
 ;
 L_15D4	BIT	5,(IY+#02)
 	JR	NZ,L_15DE
@@ -3190,19 +3069,19 @@ L_15E6	EXX
 	INC	HL
 	JR	L_15F7
 ;
-L_15EF	LD	E,#30
-	ADD	A,E
-L_15F2	EXX
-	PUSH	HL
-	LD	HL,(#5C51)
-L_15F7	LD	E,(HL)
-	INC	HL
-	LD	D,(HL)
-	EX	DE,HL
-	CALL	L_162C
-	POP	HL
-	EXX
-	RET
+L_15EF		LD	E,#30
+		ADD	A,E
+PRINT_A_2:	EXX
+		PUSH	HL
+		LD	HL,(#5C51)
+L_15F7		LD	E,(HL)
+		INC	HL
+		LD	D,(HL)
+		EX	DE,HL
+		CALL	L_162C
+		POP	HL
+		EXX
+		RET
 ;
 L_1601	ADD	A,A
 	ADD	A,#16
@@ -3217,7 +3096,7 @@ L_1601	ADD	A,A
 L_160E	RST	#08
 ;
 ;#160F
-	DEFB	#17
+	DB	#17
 ;
 L_1610	DEC	DE
 	LD	HL,(#5C4F)
@@ -3237,23 +3116,23 @@ L_1615	LD	(#5C51),HL
 	ADD	HL,DE
 L_162C	JP	(HL)
 ;
-L_162D	DEFM	"K"
+L_162D	DB	"K"
 ;
 ;#162E
-	DEFB	#06
+	DB	#06
 ;
 ;#162F
-	DEFM	"S"
+	DB	"S"
 ;
 ;#1630
-	DEFB	#12
+	DB	#12
 ;
 ;#1631
-	DEFM	"P"
+	DB	"P"
 ;
 ;#1632
-	DEFB	#1B
-	DEFB	#00
+	DB	#1B
+	DB	#00
 ;
 ;#1634
 	SET	0,(IY+#02)
@@ -3267,16 +3146,16 @@ L_1646	RES	1,(IY+#01)
 ;
 	SET	1,(IY+#01)
 	RET
-;
-L_1652	LD	BC,L_0001
-L_1655	PUSH	HL
-	CALL	L_1F05
-	POP	HL
-	CALL	L_1664
-	LD	HL,(#5C65)
-	EX	DE,HL
-	LDDR
-	RET
+; Create a single space in workspace by ADD_CHAR
+ONE_SPACE:	LD	BC,#0001
+MAKE_ROOM:	PUSH	HL		; Create BC spaces in various areas
+		CALL	L_1F05
+		POP	HL
+		CALL	L_1664
+		LD	HL,(#5C65)
+		EX	DE,HL
+		LDDR
+		RET
 ;
 L_1664	PUSH	AF
 	PUSH	HL
@@ -3315,8 +3194,8 @@ L_167F	INC	HL
 	EX	DE,HL
 	RET
 ;
-L_168F	DEFB	#00
-	DEFB	#00
+L_168F	DB	#00
+	DB	#00
 ;
 L_1691	EX	DE,HL
 	LD	DE,L_168F
@@ -3327,18 +3206,18 @@ L_1695	LD	A,(HL)
 	INC	HL
 	LD	E,(HL)
 	RET
-;
-L_169E	LD	HL,(#5C63)
-	DEC	HL
-	CALL	L_1655
-	INC	HL
-	INC	HL
-	POP	BC
-	LD	(#5C61),BC
-	POP	BC
-	EX	DE,HL
-	INC	HL
-	RET
+; Handle reserve room, continuation of the restart BC_SPACES
+RESERVE:	LD	HL,(#5C63)
+		DEC	HL
+		CALL	MAKE_ROOM
+		INC	HL
+		INC	HL
+		POP	BC
+		LD	(#5C61),BC
+		POP	BC
+		EX	DE,HL
+		INC	HL
+		RET
 ;
 L_16B0	LD	HL,(#5C59)
 	LD	(HL),#0D
@@ -3349,13 +3228,13 @@ L_16B0	LD	HL,(#5C59)
 	LD	(#5C61),HL
 L_16BF	LD	HL,(#5C61)
 	LD	(#5C63),HL
-L_16C5	LD	HL,(#5C63)
-	LD	(#5C65),HL
-	PUSH	HL
-	LD	HL,#5C92
-	LD	(#5C68),HL
-	POP	HL
-	RET
+SET_STK:	LD	HL,(#5C63)
+		LD	(#5C65),HL
+		PUSH	HL
+		LD	HL,#5C92
+		LD	(#5C68),HL
+		POP	HL
+		RET
 ;
 	LD	DE,(#5C59)
 	JP	L_19E5
@@ -3372,7 +3251,7 @@ L_16DC	LD	A,(HL)
 ;
 L_16E5	CALL	L_171E
 	CALL	L_1701
-	LD	BC,L_0000
+	LD	BC,#0000
 	LD	DE,#A3E2
 	EX	DE,HL
 	ADD	HL,DE
@@ -3403,22 +3282,22 @@ L_1701	PUSH	HL
 	ADD	HL,BC
 	JP	(HL)
 ;
-L_1716	DEFM	"K"
+L_1716	DB	"K"
 ;
 ;#1717
-	DEFB	#05
+	DB	#05
 ;
 ;#1718
-	DEFM	"S"
+	DB	"S"
 ;
 ;#1719
-	DEFB	#03
+	DB	#03
 ;
 ;#171A
-	DEFM	"P"
+	DB	"P"
 ;
 ;#171B
-	DEFB	#01
+	DB	#01
 ;
 ;#171C
 	POP	HL
@@ -3430,7 +3309,7 @@ L_1721	CP	#10
 L_1725	RST	#08
 ;
 ;#1726
-	DEFB	#17
+	DB	#17
 ;
 L_1727	ADD	A,#03
 	RLCA
@@ -3478,7 +3357,7 @@ L_175D	PUSH	HL
 L_1765	RST	#08
 ;
 ;#1766
-	DEFB	#0E
+	DB	#0E
 ;
 L_1767	PUSH	BC
 	LD	A,(DE)
@@ -3493,23 +3372,23 @@ L_1767	PUSH	BC
 	POP	BC
 	JP	(HL)
 ;
-L_177A	DEFM	"K"
+L_177A	DB	"K"
 ;
 ;#177B
-	DEFB	#06
+	DB	#06
 ;
 ;#177C
-	DEFM	"S"
+	DB	"S"
 ;
 ;#177D
-	DEFB	#08
+	DB	#08
 ;
 ;#177E
-	DEFM	"P"
+	DB	"P"
 ;
 ;#177F
-	DEFB	#0A
-	DEFB	#00
+	DB	#0A
+	DB	#00
 ;
 ;#1781
 	LD	E,#01
@@ -3545,7 +3424,7 @@ L_1795	LD	(#5C3F),SP
 	JR	C,L_17E1
 	PUSH	DE
 	CALL	L_196E
-	LD	DE,L_02C0
+	LD	DE,#02C0
 	EX	DE,HL
 	SBC	HL,DE
 	EX	(SP),HL
@@ -3848,7 +3727,7 @@ L_19B8	PUSH	HL
 	ADD	A,A
 	JP	M,L_19C7
 	CCF
-L_19C7	LD	BC,L_0005
+L_19C7	LD	BC,#0005
 	JR	NC,L_19CE
 	LD	C,#12
 L_19CE	RLA
@@ -3903,7 +3782,7 @@ L_19FB	LD	HL,(#5C59)
 	LD	HL,#C000
 	ADD	HL,BC
 L_1A15	JP	C,L_1C8A
-	JP	L_16C5
+	JP	SET_STK
 ;
 L_1A1B	PUSH	DE
 	PUSH	HL
@@ -3933,343 +3812,343 @@ L_1A42	CALL	L_15EF
 	POP	DE
 	RET
 ;
-L_1A48	DEFB	#B1
-	DEFB	#CB
-	DEFB	#BC
-	DEFB	#BF
-	DEFB	#C4
-	DEFB	#AF
-	DEFB	#B4
-	DEFB	#93
-	DEFB	#91
-	DEFB	#92
-	DEFB	#95
-	DEFB	#98
-	DEFB	#98
-	DEFB	#98
-	DEFB	#98
-	DEFB	#98
-	DEFB	#98
-	DEFB	#98
-	DEFB	#7F
-	DEFB	#81
-	DEFB	#2E
-	DEFB	#6C
-	DEFB	#6E
-	DEFB	#70
-	DEFB	#48
-	DEFB	#94
-	DEFB	#56
-	DEFB	#3F
-	DEFB	#41
-	DEFB	#2B
-	DEFB	#17
-	DEFB	#1F
-	DEFB	#37
-	DEFB	#77
-	DEFB	#44
-	DEFB	#0F
-	DEFB	#59
-	DEFB	#2B
-	DEFB	#43
-	DEFB	#2D
-	DEFB	#51
-	DEFB	#3A
-	DEFB	#6D
-	DEFB	#42
-	DEFB	#0D
-	DEFB	#49
-	DEFB	#5C
-	DEFB	#44
-	DEFB	#15
-	DEFB	#5D
-	DEFB	#01
+L_1A48	DB	#B1
+	DB	#CB
+	DB	#BC
+	DB	#BF
+	DB	#C4
+	DB	#AF
+	DB	#B4
+	DB	#93
+	DB	#91
+	DB	#92
+	DB	#95
+	DB	#98
+	DB	#98
+	DB	#98
+	DB	#98
+	DB	#98
+	DB	#98
+	DB	#98
+	DB	#7F
+	DB	#81
+	DB	#2E
+	DB	#6C
+	DB	#6E
+	DB	#70
+	DB	#48
+	DB	#94
+	DB	#56
+	DB	#3F
+	DB	#41
+	DB	#2B
+	DB	#17
+	DB	#1F
+	DB	#37
+	DB	#77
+	DB	#44
+	DB	#0F
+	DB	#59
+	DB	#2B
+	DB	#43
+	DB	#2D
+	DB	#51
+	DB	#3A
+	DB	#6D
+	DB	#42
+	DB	#0D
+	DB	#49
+	DB	#5C
+	DB	#44
+	DB	#15
+	DB	#5D
+	DB	#01
 ;
 ;#1A7B
-	DEFM	"="
+	DB	"="
 ;
 ;#1A7C
-	DEFB	#02
-	DEFB	#03
+	DB	#02
+	DB	#03
 ;
 ;#1A7E
-	DEFW	L_1E67
+	DW	L_1E67
 ;
 ;#1A80
-	DEFB	#00
-	DEFB	#06
-	DEFB	#CB
-	DEFB	#05
+	DB	#00
+	DB	#06
+	DB	#CB
+	DB	#05
 ;
 ;#1A84
-	DEFW	L_1CF0
+	DW	L_1CF0
 ;
 ;#1A86
-	DEFB	#03
+	DB	#03
 ;
 ;#1A87
-	DEFW	L_1EED
+	DW	L_1EED
 ;
 ;#1A89
-	DEFB	#00
-	DEFB	#00
+	DB	#00
+	DB	#00
 ;
 ;#1A8B
-	DEFW	L_1CEE
+	DW	L_1CEE
 ;
 ;#1A8D
-	DEFB	#00
+	DB	#00
 ;
 ;#1A8E
-	DEFW	L_1F23
+	DW	L_1F23
 ;
 ;#1A90
-	DEFB	#04
+	DB	#04
 ;
 ;#1A91
-	DEFM	"="
+	DB	"="
 ;
 ;#1A92
-	DEFB	#06
-	DEFB	#CC
-	DEFB	#06
-	DEFB	#05
+	DB	#06
+	DB	#CC
+	DB	#06
+	DB	#05
 ;
 ;#1A96
-	DEFW	L_1D03
+	DW	L_1D03
 ;
 ;#1A98
-	DEFB	#04
-	DEFB	#00
+	DB	#04
+	DB	#00
 ;
 ;#1A9A
-	DEFW	L_1DAB
+	DW	L_1DAB
 ;
 ;#1A9C
-	DEFB	#05
+	DB	#05
 ;
 ;#1A9D
-	DEFW	L_1FCD
+	DW	L_1FCD
 ;
 ;#1A9F
-	DEFB	#05
+	DB	#05
 ;
 ;#1AA0
-	DEFW	L_2089
+	DW	L_2089
 ;
 ;#1AA2
-	DEFB	#05
+	DB	#05
 ;
 ;#1AA3
-	DEFW	L_2C02
+	DW	L_2C02
 ;
 ;#1AA5
-	DEFB	#05
+	DB	#05
 ;
 ;#1AA6
-	DEFW	L_1BB2
+	DW	L_1BB2
 ;
 ;#1AA8
-	DEFB	#00
+	DB	#00
 ;
 ;#1AA9
-	DEFW	L_11B7
+	DW	L_11B7
 ;
 ;#1AAB
-	DEFB	#03
+	DB	#03
 ;
 ;#1AAC
-	DEFW	L_1EA1
+	DW	L_1EA1
 ;
 ;#1AAE
-	DEFB	#05
+	DB	#05
 ;
 ;#1AAF
-	DEFW	L_17F9
+	DW	L_17F9
 ;
 ;#1AB1
-	DEFB	#06
-	DEFB	#05
+	DB	#06
+	DB	#05
 ;
 ;#1AB3
-	DEFW	L_3BAB
+	DW	L_3BAB
 ;
 ;#1AB5
-	DEFB	#03
+	DB	#03
 ;
 ;#1AB6
-	DEFW	L_1E4F
+	DW	L_1E4F
 ;
 ;#1AB8
-	DEFB	#03
+	DB	#03
 ;
 ;#1AB9
-	DEFW	L_11E6
+	DW	L_11E6
 ;
 ;#1ABB
-	DEFB	#03
+	DB	#03
 ;
 ;#1ABC
-	DEFW	L_1EAC
+	DW	L_1EAC
 ;
 ;#1ABE
-	DEFB	#03
+	DB	#03
 ;
 ;#1ABF
-	DEFW	L_3B10
+	DW	L_3B10
 ;
 ;#1AC1
-	DEFB	#09
-	DEFB	#00
+	DB	#09
+	DB	#00
 ;
 ;#1AC3
-	DEFW	L_22DC
+	DW	L_22DC
 ;
 ;#1AC5
-	DEFB	#03
+	DB	#03
 ;
 ;#1AC6
-	DEFW	L_1F3A
+	DW	L_1F3A
 ;
 ;#1AC8
-	DEFB	#00
-	DEFB	#05
+	DB	#00
+	DB	#05
 ;
 ;#1ACA
-	DEFW	L_1DED
+	DW	L_1DED
 ;
 ;#1ACC
-	DEFB	#05
+	DB	#05
 ;
 ;#1ACD
-	DEFW	L_1E27
+	DW	L_1E27
 ;
 ;#1ACF
-	DEFB	#03
+	DB	#03
 ;
 ;#1AD0
-	DEFW	L_1E42
+	DW	L_1E42
 ;
 ;#1AD2
-	DEFB	#09
-	DEFB	#05
+	DB	#09
+	DB	#05
 ;
 ;#1AD4
-	DEFW	L_2382
+	DW	L_2382
 ;
 ;#1AD6
-	DEFB	#00
+	DB	#00
 ;
 ;#1AD7
-	DEFW	L_0EAC
+	DW	L_0EAC
 ;
 ;#1AD9
-	DEFB	#05
+	DB	#05
 ;
 ;#1ADA
-	DEFW	L_1FC9
+	DW	L_1FC9
 ;
 ;#1ADC
-	DEFB	#05
+	DB	#05
 ;
 ;#1ADD
-	DEFW	L_17F5
+	DW	L_17F5
 ;
 ;#1ADF
-	DEFB	#0B
-	DEFB	#0B
-	DEFB	#0B
-	DEFB	#0B
-	DEFB	#08
-	DEFB	#00
+	DB	#0B
+	DB	#0B
+	DB	#0B
+	DB	#0B
+	DB	#08
+	DB	#00
 ;
 ;#1AE5
-	DEFW	L_03F8
+	DW	L_03F8
 ;
 ;#1AE7
-	DEFB	#09
-	DEFB	#05
+	DB	#09
+	DB	#05
 ;
 ;#1AE9
-	DEFW	L_2320
+	DW	L_2320
 ;
 ;#1AEB
-	DEFB	#07
-	DEFB	#07
-	DEFB	#07
-	DEFB	#07
-	DEFB	#07
-	DEFB	#07
-	DEFB	#08
-	DEFB	#00
+	DB	#07
+	DB	#07
+	DB	#07
+	DB	#07
+	DB	#07
+	DB	#07
+	DB	#08
+	DB	#00
 ;
 ;#1AF3
-	DEFW	L_1E7A
+	DW	L_1E7A
 ;
 ;#1AF5
-	DEFB	#03
+	DB	#03
 ;
 ;#1AF6
-	DEFW	L_2294
+	DW	L_2294
 ;
 ;#1AF8
-	DEFB	#00
-	DEFB	#05
+	DB	#00
+	DB	#05
 ;
 ;#1AFA
-	DEFW	L_1F60
+	DW	L_1F60
 ;
 ;#1AFC
-	DEFB	#06
+	DB	#06
 ;
 ;#1AFD
-	DEFM	","
+	DB	","
 ;
 ;#1AFE
-	DEFB	#0A
-	DEFB	#00
+	DB	#0A
+	DB	#00
 ;
-L_1B00	DEFW	L_1736
+L_1B00	DW	L_1736
 ;
 ;#1B02
-	DEFB	#06
-	DEFB	#00
+	DB	#06
+	DB	#00
 ;
 ;#1B04
-	DEFW	L_16E5
+	DW	L_16E5
 ;
 ;#1B06
-	DEFB	#0A
-	DEFB	#00
+	DB	#0A
+	DB	#00
 ;
 ;#1B08
-	DEFW	L_1793
+	DW	L_1793
 ;
 ;#1B0A
-	DEFB	#0A
+	DB	#0A
 ;
 ;#1B0B
-	DEFM	","
+	DB	","
 ;
 ;#1B0C
-	DEFB	#0A
-	DEFB	#00
+	DB	#0A
+	DB	#00
 ;
 ;#1B0E
-	DEFW	L_1793
+	DW	L_1793
 ;
 ;#1B10
-	DEFB	#0A
-	DEFB	#00
+	DB	#0A
+	DB	#00
 ;
 ;#1B12
-	DEFW	L_1793
+	DW	L_1793
 ;
 ;#1B14
-	DEFB	#00
+	DB	#00
 ;
 ;#1B15
-	DEFW	L_1793
+	DW	L_1793
 ;
 L_1B17	RES	7,(IY+#01)
 	CALL	L_19FB
@@ -4332,7 +4211,7 @@ L_1B76	CALL	L_1F54
 	RST	#08
 ;
 ;#1B7C
-	DEFB	#14
+	DB	#14
 ;
 L_1B7D	BIT	7,(IY+#0A)
 	JR	NZ,L_1BF4
@@ -4361,7 +4240,7 @@ L_1B9E	CALL	L_196E
 	RST	#08
 ;
 ;#1BB1
-	DEFB	#FF
+	DB	#FF
 ;
 L_1BB2	POP	BC
 L_1BB3	CALL	L_2530
@@ -4399,7 +4278,7 @@ L_1BD1	LD	(#5C55),HL
 L_1BEC	RST	#08
 ;
 ;#1BED
-	DEFB	#16
+	DB	#16
 ;
 L_1BEE	CALL	L_2530
 	RET	NZ
@@ -4412,18 +4291,18 @@ L_1BF4	RST	#18
 	JP	Z,L_1B28
 	JP	L_1C8A
 ;
-L_1C01	DEFB	#0F
-	DEFB	#1D
-	DEFB	#4B
-	DEFB	#09
-	DEFB	#67
-	DEFB	#0B
-	DEFB	#7B
-	DEFB	#8E
-	DEFB	#71
-	DEFB	#B4
-	DEFB	#81
-	DEFB	#CF
+L_1C01	DB	#0F
+	DB	#1D
+	DB	#4B
+	DB	#09
+	DB	#67
+	DB	#0B
+	DB	#7B
+	DB	#8E
+	DB	#71
+	DB	#B4
+	DB	#81
+	DB	#CF
 ;
 ;#1C0D
 	CALL	L_1CDE
@@ -4447,7 +4326,7 @@ L_1C22	LD	(IY+#37),#00
 L_1C2E	RST	#08
 ;
 ;#1C2F
-	DEFB	#01
+	DB	#01
 ;
 L_1C30	CALL	Z,L_2996
 	BIT	6,(IY+#01)
@@ -4500,7 +4379,7 @@ L_1C82	CALL	L_24FB
 L_1C8A	RST	#08
 ;
 ;#1C8B
-	DEFB	#0B
+	DB	#0B
 ;
 L_1C8C	CALL	L_24FB
 	BIT	6,(IY+#01)
@@ -4550,8 +4429,8 @@ L_1CE6	CALL	L_2530
 	RST	#28	;*calc
 ;
 ;#1CEB
-	DEFB	#A0
-	DEFB	#38
+	DB	#A0
+	DB	#38
 ;
 ;#1CED
 	RET
@@ -4559,7 +4438,7 @@ L_1CE6	CALL	L_2530
 L_1CEE	RST	#08
 ;
 ;#1CEF
-	DEFB	#08
+	DB	#08
 ;
 L_1CF0	POP	BC
 	CALL	L_2530
@@ -4567,8 +4446,8 @@ L_1CF0	POP	BC
 	RST	#28	;*calc
 ;
 ;#1CF7
-	DEFB	#02
-	DEFB	#38
+	DB	#02
+	DB	#38
 ;
 ;#1CF9
 	EX	DE,HL
@@ -4587,15 +4466,15 @@ L_1D10	CALL	L_1BEE
 	RST	#28	;*calc
 ;
 ;#1D14
-	DEFB	#A1
-	DEFB	#38
-L_1D16	DEFB	#EF
-	DEFB	#C0
-	DEFB	#02
-	DEFB	#01
-	DEFB	#E0
-	DEFB	#01
-	DEFB	#38
+	DB	#A1
+	DB	#38
+L_1D16	DB	#EF
+	DB	#C0
+	DB	#02
+	DB	#01
+	DB	#E0
+	DB	#01
+	DB	#38
 ;
 ;#1D1D
 	CALL	L_2AFF
@@ -4603,20 +4482,20 @@ L_1D16	DEFB	#EF
 	DEC	HL
 	LD	A,(HL)
 	SET	7,(HL)
-	LD	BC,L_0006
+	LD	BC,#0006
 	ADD	HL,BC
 	RLCA
 	JR	C,L_1D34
 	LD	C,#0D
-	CALL	L_1655
+	CALL	MAKE_ROOM
 	INC	HL
 L_1D34	PUSH	HL
 	RST	#28	;*calc
 ;
 ;#1D36
-	DEFB	#02
-	DEFB	#02
-	DEFB	#38
+	DB	#02
+	DB	#02
+	DB	#38
 ;
 ;#1D39
 	POP	HL
@@ -4664,7 +4543,7 @@ L_1D7C	RST	#20
 L_1D84	RST	#08
 ;
 ;#1D85
-	DEFB	#11
+	DB	#11
 ;
 L_1D86	LD	A,(HL)
 	CP	#3A
@@ -4704,18 +4583,18 @@ L_1DAB	BIT	1,(IY+#37)
 	RST	#28	;*calc
 ;
 ;#1DBE
-	DEFB	#E0
-	DEFB	#E2
-	DEFB	#0F
-	DEFB	#C0
-	DEFB	#02
-	DEFB	#38
+	DB	#E0
+	DB	#E2
+	DB	#0F
+	DB	#C0
+	DB	#02
+	DB	#38
 ;
 ;#1DC4
 	CALL	L_1DDA
 	RET	C
 	LD	HL,(#5C68)
-	LD	DE,L_000F
+	LD	DE,#000F
 	ADD	HL,DE
 	LD	E,(HL)
 	INC	HL
@@ -4728,30 +4607,30 @@ L_1DAB	BIT	1,(IY+#37)
 L_1DD8	RST	#08
 ;
 ;#1DD9
-	DEFB	#00
+	DB	#00
 ;
 L_1DDA	RST	#28	;*calc
 ;
 ;#1DDB
-	DEFB	#E1
-	DEFB	#E0
-	DEFB	#E2
-	DEFB	#36
-	DEFB	#00
-	DEFB	#02
-	DEFB	#01
-	DEFB	#03
-	DEFB	#37
-	DEFB	#00
-	DEFB	#04
-	DEFB	#38
+	DB	#E1
+	DB	#E0
+	DB	#E2
+	DB	#36
+	DB	#00
+	DB	#02
+	DB	#01
+	DB	#03
+	DB	#37
+	DB	#00
+	DB	#04
+	DB	#38
 ;
 ;#1DE7
 	AND	A
 	RET
 ;
 ;#1DE9
-	DEFB	#38
+	DB	#38
 ;
 ;#1DEA
 	SCF
@@ -4773,15 +4652,15 @@ L_1DED	CALL	L_1C1F
 	RST	#08
 ;
 ;#1E09
-	DEFB	#0D
+	DB	#0D
 ;
-L_1E0A	CALL	L_0077
+L_1E0A	CALL	TEMP_PTR1
 	CALL	L_1C56
 	RST	#18
 	LD	(#5C57),HL
 	LD	HL,(#5C5F)
 	LD	(IY+#26),#00
-	CALL	L_0078
+	CALL	TEMP_PTR2
 L_1E1E	RST	#18
 	CP	#2C
 	JR	Z,L_1DEC
@@ -4799,7 +4678,7 @@ L_1E2C	CALL	L_24FB
 L_1E37	LD	A,#E4
 L_1E39	LD	B,A
 	CPDR
-	LD	DE,L_0200
+	LD	DE,#0200
 	JP	L_198B
 ;
 L_1E42	CALL	L_1E99
@@ -4858,10 +4737,10 @@ L_1E99	CALL	L_2DA2
 L_1E9F	RST	#08
 ;
 ;#1EA0
-	DEFB	#0A
+	DB	#0A
 ;
 L_1EA1	CALL	L_1E67
-	LD	BC,L_0000
+	LD	BC,#0000
 	CALL	L_1E45
 	JR	L_1EAF
 ;
@@ -4877,7 +4756,7 @@ L_1EB7	PUSH	BC
 	CALL	L_19E5
 	CALL	L_0D6B
 	LD	HL,(#5C65)
-	LD	DE,L_0032
+	LD	DE,#0032
 	ADD	HL,DE
 	POP	DE
 	SBC	HL,DE
@@ -4889,7 +4768,7 @@ L_1EB7	PUSH	BC
 L_1EDA	RST	#08
 ;
 ;#1EDB
-	DEFB	#15
+	DB	#15
 ;
 L_1EDC	EX	DE,HL
 	LD	(#5CB2),HL
@@ -4914,20 +4793,20 @@ L_1EED	POP	DE
 	LD	(#5C3D),SP
 	PUSH	DE
 	CALL	L_1E67
-	LD	BC,L_0014
+	LD	BC,#0014
 L_1F05	LD	HL,(#5C65)
 	ADD	HL,BC
 	JR	C,L_1F15
 	EX	DE,HL
-	LD	HL,L_0050
+	LD	HL,#0050
 	ADD	HL,DE
 	JR	C,L_1F15
 	SBC	HL,SP
 	RET	C
 L_1F15	LD	L,#03
-	JP	L_0055
+	JP	ERROR_3
 ;
-	LD	BC,L_0000
+	LD	BC,#0000
 	CALL	L_1F05
 	LD	B,H
 	LD	C,L
@@ -4951,7 +4830,7 @@ L_1F36	PUSH	DE
 	RST	#08
 ;
 ;#1F39
-	DEFB	#06
+	DB	#06
 ;
 L_1F3A	CALL	L_1E99
 L_1F3D	HALT
@@ -5006,8 +4885,8 @@ L_1F89	JP	NC,L_1C8A
 	EX	DE,HL
 	RST	#20
 L_1F94	EX	DE,HL
-	LD	BC,L_0006
-	CALL	L_1655
+	LD	BC,#0006
+	CALL	MAKE_ROOM
 	INC	HL
 	INC	HL
 	LD	(HL),#0E
@@ -5198,7 +5077,7 @@ L_20FA	CALL	L_2530
 	LD	HL,#5C71
 	RES	6,(HL)
 	SET	5,(HL)
-	LD	BC,L_0001
+	LD	BC,#0001
 	BIT	7,(HL)
 	JR	NZ,L_211C
 	LD	A,(#5C3B)
@@ -5289,14 +5168,14 @@ L_21B9	LD	HL,(#5C61)
 	RST	#08
 ;
 ;#21CF
-	DEFB	#0B
+	DB	#0B
 ;
 L_21D0	CALL	L_2530
 	RET	Z
 	RST	#08
 ;
 ;#21D5
-	DEFB	#10
+	DB	#10
 ;
 L_21D6	LD	HL,(#5C51)
 	INC	HL
@@ -5375,7 +5254,7 @@ L_223E	LD	C,A
 L_2244	RST	#08
 ;
 ;#2245
-	DEFB	#13
+	DB	#13
 ;
 L_2246	LD	HL,#5C8F
 	CP	#08
@@ -5532,9 +5411,9 @@ L_2320	RST	#18
 	RST	#28	;*calc
 ;
 ;#232E
-	DEFB	#2A
-	DEFB	#3D
-	DEFB	#38
+	DB	#2A
+	DB	#3D
+	DB	#38
 ;
 ;#2331
 	LD	A,(HL)
@@ -5543,8 +5422,8 @@ L_2320	RST	#18
 	RST	#28	;*calc
 ;
 ;#2337
-	DEFB	#02
-	DEFB	#38
+	DB	#02
+	DB	#38
 ;
 ;#2339
 	JR	L_22DC
@@ -5552,17 +5431,17 @@ L_2320	RST	#18
 L_233B	RST	#28	;*calc
 ;
 ;#233C
-	DEFB	#A3
-	DEFB	#38
+	DB	#A3
+	DB	#38
 ;
 ;#233E
 	LD	(HL),#83
 	RST	#28	;*calc
 ;
 ;#2341
-	DEFB	#C5
-	DEFB	#02
-	DEFB	#38
+	DB	#C5
+	DB	#02
+	DB	#38
 ;
 ;#2344
 	CALL	L_247D
@@ -5570,10 +5449,10 @@ L_233B	RST	#28	;*calc
 	RST	#28	;*calc
 ;
 ;#2349
-	DEFB	#31
-	DEFB	#E1
-	DEFB	#04
-	DEFB	#38
+	DB	#31
+	DB	#E1
+	DB	#04
+	DB	#38
 ;
 ;#234D
 	LD	A,(HL)
@@ -5582,9 +5461,9 @@ L_233B	RST	#28	;*calc
 	RST	#28	;*calc
 ;
 ;#2353
-	DEFB	#02
-	DEFB	#02
-	DEFB	#38
+	DB	#02
+	DB	#02
+	DB	#38
 ;
 ;#2356
 	POP	BC
@@ -5593,25 +5472,25 @@ L_233B	RST	#28	;*calc
 L_235A	RST	#28	;*calc
 ;
 ;#235B
-	DEFB	#C2
-	DEFB	#01
-	DEFB	#C0
-	DEFB	#02
-	DEFB	#03
-	DEFB	#01
-	DEFB	#E0
-	DEFB	#0F
-	DEFB	#C0
-	DEFB	#01
-	DEFB	#31
-	DEFB	#E0
-	DEFB	#01
-	DEFB	#31
-	DEFB	#E0
-	DEFB	#A0
-	DEFB	#C1
-	DEFB	#02
-	DEFB	#38
+	DB	#C2
+	DB	#01
+	DB	#C0
+	DB	#02
+	DB	#03
+	DB	#01
+	DB	#E0
+	DB	#0F
+	DB	#C0
+	DB	#01
+	DB	#31
+	DB	#E0
+	DB	#01
+	DB	#31
+	DB	#E0
+	DB	#A0
+	DB	#C1
+	DB	#02
+	DB	#38
 ;
 ;#236E
 	INC	(IY+#62)
@@ -5637,40 +5516,40 @@ L_238D	RST	#20
 	RST	#28	;*calc
 ;
 ;#2395
-	DEFB	#C5
-	DEFB	#A2
-	DEFB	#04
-	DEFB	#1F
-	DEFB	#31
-	DEFB	#30
-	DEFB	#30
-	DEFB	#00
-	DEFB	#06
-	DEFB	#02
-	DEFB	#38
+	DB	#C5
+	DB	#A2
+	DB	#04
+	DB	#1F
+	DB	#31
+	DB	#30
+	DB	#30
+	DB	#00
+	DB	#06
+	DB	#02
+	DB	#38
 ;
 ;#23A0
 	JP	L_2477
 ;
 ;#23A3
-	DEFB	#C0
-	DEFB	#02
-	DEFB	#C1
-	DEFB	#02
-	DEFB	#31
-	DEFB	#2A
-	DEFB	#E1
-	DEFB	#01
-	DEFB	#E1
-	DEFB	#2A
-	DEFB	#0F
-	DEFB	#E0
-	DEFB	#05
-	DEFB	#2A
-	DEFB	#E0
-	DEFB	#01
-	DEFB	#3D
-	DEFB	#38
+	DB	#C0
+	DB	#02
+	DB	#C1
+	DB	#02
+	DB	#31
+	DB	#2A
+	DB	#E1
+	DB	#01
+	DB	#E1
+	DB	#2A
+	DB	#0F
+	DB	#E0
+	DB	#05
+	DB	#2A
+	DB	#E0
+	DB	#01
+	DB	#3D
+	DB	#38
 ;
 ;#23B5
 	LD	A,(HL)
@@ -5679,9 +5558,9 @@ L_238D	RST	#20
 	RST	#28	;*calc
 ;
 ;#23BB
-	DEFB	#02
-	DEFB	#02
-	DEFB	#38
+	DB	#02
+	DB	#02
+	DB	#38
 ;
 ;#23BE
 	JP	L_2477
@@ -5691,61 +5570,61 @@ L_23C1	CALL	L_247D
 	RST	#28	;*calc
 ;
 ;#23C6
-	DEFB	#02
-	DEFB	#E1
-	DEFB	#01
-	DEFB	#05
-	DEFB	#C1
-	DEFB	#02
-	DEFB	#01
-	DEFB	#31
-	DEFB	#E1
-	DEFB	#04
-	DEFB	#C2
-	DEFB	#02
-	DEFB	#01
-	DEFB	#31
-	DEFB	#E1
-	DEFB	#04
-	DEFB	#E2
-	DEFB	#E5
-	DEFB	#E0
-	DEFB	#03
-	DEFB	#A2
-	DEFB	#04
-	DEFB	#31
-	DEFB	#1F
-	DEFB	#C5
-	DEFB	#02
-	DEFB	#20
-	DEFB	#C0
-	DEFB	#02
-	DEFB	#C2
-	DEFB	#02
-	DEFB	#C1
-	DEFB	#E5
-	DEFB	#04
-	DEFB	#E0
-	DEFB	#E2
-	DEFB	#04
-	DEFB	#0F
-	DEFB	#E1
-	DEFB	#01
-	DEFB	#C1
-	DEFB	#02
-	DEFB	#E0
-	DEFB	#04
-	DEFB	#E2
-	DEFB	#E5
-	DEFB	#04
-	DEFB	#03
-	DEFB	#C2
-	DEFB	#2A
-	DEFB	#E1
-	DEFB	#2A
-	DEFB	#0F
-	DEFB	#02
-	DEFB	#38
+	DB	#02
+	DB	#E1
+	DB	#01
+	DB	#05
+	DB	#C1
+	DB	#02
+	DB	#01
+	DB	#31
+	DB	#E1
+	DB	#04
+	DB	#C2
+	DB	#02
+	DB	#01
+	DB	#31
+	DB	#E1
+	DB	#04
+	DB	#E2
+	DB	#E5
+	DB	#E0
+	DB	#03
+	DB	#A2
+	DB	#04
+	DB	#31
+	DB	#1F
+	DB	#C5
+	DB	#02
+	DB	#20
+	DB	#C0
+	DB	#02
+	DB	#C2
+	DB	#02
+	DB	#C1
+	DB	#E5
+	DB	#04
+	DB	#E0
+	DB	#E2
+	DB	#04
+	DB	#0F
+	DB	#E1
+	DB	#01
+	DB	#C1
+	DB	#02
+	DB	#E0
+	DB	#04
+	DB	#E2
+	DB	#E5
+	DB	#04
+	DB	#03
+	DB	#C2
+	DB	#2A
+	DB	#E1
+	DB	#2A
+	DB	#0F
+	DB	#02
+	DB	#38
 ;
 ;#23FD
 	LD	A,(DE)
@@ -5756,8 +5635,8 @@ L_23C1	CALL	L_247D
 	RST	#28	;*calc
 ;
 ;#2406
-	DEFB	#01
-	DEFB	#38
+	DB	#01
+	DB	#38
 ;
 ;#2408
 	LD	A,(#5C7D)
@@ -5765,10 +5644,10 @@ L_23C1	CALL	L_247D
 	RST	#28	;*calc
 ;
 ;#240F
-	DEFB	#C0
-	DEFB	#0F
-	DEFB	#01
-	DEFB	#38
+	DB	#C0
+	DB	#0F
+	DB	#01
+	DB	#38
 ;
 ;#2413
 	LD	A,(#5C7E)
@@ -5776,11 +5655,11 @@ L_23C1	CALL	L_247D
 	RST	#28	;*calc
 ;
 ;#241A
-	DEFB	#C5
-	DEFB	#0F
-	DEFB	#E0
-	DEFB	#E5
-	DEFB	#38
+	DB	#C5
+	DB	#0F
+	DB	#E0
+	DB	#E5
+	DB	#38
 ;
 ;#241F
 	POP	BC
@@ -5791,36 +5670,36 @@ L_2420	DEC	B
 L_2425	RST	#28	;*calc
 ;
 ;#2426
-	DEFB	#E1
-	DEFB	#31
-	DEFB	#E3
-	DEFB	#04
-	DEFB	#E2
-	DEFB	#E4
-	DEFB	#04
-	DEFB	#03
-	DEFB	#C1
-	DEFB	#02
-	DEFB	#E4
-	DEFB	#04
-	DEFB	#E2
-	DEFB	#E3
-	DEFB	#04
-	DEFB	#0F
-	DEFB	#C2
-	DEFB	#02
-	DEFB	#38
+	DB	#E1
+	DB	#31
+	DB	#E3
+	DB	#04
+	DB	#E2
+	DB	#E4
+	DB	#04
+	DB	#03
+	DB	#C1
+	DB	#02
+	DB	#E4
+	DB	#04
+	DB	#E2
+	DB	#E3
+	DB	#04
+	DB	#0F
+	DB	#C2
+	DB	#02
+	DB	#38
 ;
 L_2439	PUSH	BC
 	RST	#28	;*calc
 ;
 ;#243B
-	DEFB	#C0
-	DEFB	#02
-	DEFB	#E1
-	DEFB	#0F
-	DEFB	#31
-	DEFB	#38
+	DB	#C0
+	DB	#02
+	DB	#E1
+	DB	#0F
+	DB	#31
+	DB	#38
 ;
 ;#2441
 	LD	A,(#5C7D)
@@ -5828,14 +5707,14 @@ L_2439	PUSH	BC
 	RST	#28	;*calc
 ;
 ;#2448
-	DEFB	#03
-	DEFB	#E0
-	DEFB	#E2
-	DEFB	#0F
-	DEFB	#C0
-	DEFB	#01
-	DEFB	#E0
-	DEFB	#38
+	DB	#03
+	DB	#E0
+	DB	#E2
+	DB	#0F
+	DB	#C0
+	DB	#01
+	DB	#E0
+	DB	#38
 ;
 ;#2450
 	LD	A,(#5C7E)
@@ -5843,8 +5722,8 @@ L_2439	PUSH	BC
 	RST	#28	;*calc
 ;
 ;#2457
-	DEFB	#03
-	DEFB	#38
+	DB	#03
+	DB	#38
 ;
 ;#2459
 	CALL	L_24B7
@@ -5853,10 +5732,10 @@ L_2439	PUSH	BC
 L_245F	RST	#28	;*calc
 ;
 ;#2460
-	DEFB	#02
-	DEFB	#02
-	DEFB	#01
-	DEFB	#38
+	DB	#02
+	DB	#02
+	DB	#01
+	DB	#38
 ;
 ;#2464
 	LD	A,(#5C7D)
@@ -5864,9 +5743,9 @@ L_245F	RST	#28	;*calc
 	RST	#28	;*calc
 ;
 ;#246B
-	DEFB	#03
-	DEFB	#01
-	DEFB	#38
+	DB	#03
+	DB	#01
+	DB	#38
 ;
 ;#246E
 	LD	A,(#5C7E)
@@ -5874,8 +5753,8 @@ L_245F	RST	#28	;*calc
 	RST	#28	;*calc
 ;
 ;#2475
-	DEFB	#03
-	DEFB	#38
+	DB	#03
+	DB	#38
 ;
 L_2477	CALL	L_24B7
 	JP	L_0D4D
@@ -5883,18 +5762,18 @@ L_2477	CALL	L_24B7
 L_247D	RST	#28	;*calc
 ;
 ;#247E
-	DEFB	#31
-	DEFB	#28
-	DEFB	#34
-	DEFB	#32
-	DEFB	#00
-	DEFB	#01
-	DEFB	#05
-	DEFB	#E5
-	DEFB	#01
-	DEFB	#05
-	DEFB	#2A
-	DEFB	#38
+	DB	#31
+	DB	#28
+	DB	#34
+	DB	#32
+	DB	#00
+	DB	#01
+	DB	#05
+	DB	#E5
+	DB	#01
+	DB	#05
+	DB	#2A
+	DB	#38
 ;
 ;#248A
 	CALL	L_2DD5
@@ -5908,31 +5787,31 @@ L_2497	PUSH	AF
 	RST	#28	;*calc
 ;
 ;#249C
-	DEFB	#E5
-	DEFB	#01
-	DEFB	#05
-	DEFB	#31
-	DEFB	#1F
-	DEFB	#C4
-	DEFB	#02
-	DEFB	#31
-	DEFB	#A2
-	DEFB	#04
-	DEFB	#1F
-	DEFB	#C1
-	DEFB	#01
-	DEFB	#C0
-	DEFB	#02
-	DEFB	#31
-	DEFB	#04
-	DEFB	#31
-	DEFB	#0F
-	DEFB	#A1
-	DEFB	#03
-	DEFB	#1B
-	DEFB	#C3
-	DEFB	#02
-	DEFB	#38
+	DB	#E5
+	DB	#01
+	DB	#05
+	DB	#31
+	DB	#1F
+	DB	#C4
+	DB	#02
+	DB	#31
+	DB	#A2
+	DB	#04
+	DB	#1F
+	DB	#C1
+	DB	#01
+	DB	#C0
+	DB	#02
+	DB	#31
+	DB	#04
+	DB	#31
+	DB	#0F
+	DB	#A1
+	DB	#03
+	DB	#1B
+	DB	#C3
+	DB	#02
+	DB	#38
 ;
 ;#24B5
 	POP	BC
@@ -5994,7 +5873,7 @@ L_24F7	JR	Z,L_24EC
 L_24F9	RST	#08
 ;
 ;#24FA
-	DEFB	#0A
+	DB	#0A
 ;
 L_24FB	RST	#18
 	LD	B,#00
@@ -6009,13 +5888,13 @@ L_24FF	LD	C,A
 	ADD	HL,BC
 	JP	(HL)
 ;
-L_250F	CALL	L_0074
+L_250F	CALL	CH_ADD_1
 	INC	BC
 	CP	#0D
 	JP	Z,L_1C8A
 	CP	#22
 	JR	NZ,L_250F
-	CALL	L_0074
+	CALL	CH_ADD_1
 	CP	#22
 	RET
 ;
@@ -6031,7 +5910,7 @@ L_2530	BIT	7,(IY+#01)
 ;
 L_2535	CALL	L_2307
 	LD	HL,(#5C36)
-	LD	DE,L_0100
+	LD	DE,#0100
 	ADD	HL,DE
 	LD	A,C
 	RRCA
@@ -6068,13 +5947,13 @@ L_255D	INC	D
 	POP	BC
 	LD	A,#80
 	SUB	B
-	LD	BC,L_0001
+	LD	BC,#0001
 	RST	#30
 	LD	(DE),A
 	JR	L_257D
 ;
 L_2573	POP	HL
-	LD	DE,L_0008
+	LD	DE,#0008
 	ADD	HL,DE
 	POP	DE
 	POP	BC
@@ -6101,31 +5980,31 @@ L_2580	EQU	$-2
 	LD	A,(HL)
 	JP	L_2D28
 ;
-L_2596	DEFB	#22
-	DEFB	#1C
-	DEFB	#28
-	DEFB	#4F
-	DEFB	#2E
-	DEFB	#F2
-	DEFB	#2B
-	DEFB	#12
-	DEFB	#A8
-	DEFB	#56
-	DEFB	#A5
-	DEFB	#57
-	DEFB	#A7
-	DEFB	#84
-	DEFB	#A6
-	DEFB	#8F
-	DEFB	#C4
-	DEFB	#E6
-	DEFB	#AA
-	DEFB	#BF
-	DEFB	#AB
-	DEFB	#C7
-	DEFB	#A9
-	DEFB	#CE
-	DEFB	#00
+L_2596	DB	#22
+	DB	#1C
+	DB	#28
+	DB	#4F
+	DB	#2E
+	DB	#F2
+	DB	#2B
+	DB	#12
+	DB	#A8
+	DB	#56
+	DB	#A5
+	DB	#57
+	DB	#A7
+	DB	#84
+	DB	#A6
+	DB	#8F
+	DB	#C4
+	DB	#E6
+	DB	#AA
+	DB	#BF
+	DB	#AB
+	DB	#C7
+	DB	#A9
+	DB	#CE
+	DB	#00
 ;
 ;#25AF
 	RST	#20
@@ -6134,7 +6013,7 @@ L_2596	DEFB	#22
 	RST	#18
 	INC	HL
 	PUSH	HL
-	LD	BC,L_0000
+	LD	BC,#0000
 	CALL	L_250F
 	JR	NZ,L_25D9
 L_25BE	CALL	L_250F
@@ -6178,24 +6057,24 @@ L_25DB	LD	HL,#5C3B
 	RST	#28	;*calc
 ;
 ;#2605
-	DEFB	#A1
-	DEFB	#0F
-	DEFB	#34
-	DEFB	#37
-	DEFB	#16
-	DEFB	#04
-	DEFB	#34
-	DEFB	#80
-	DEFB	#41
-	DEFB	#00
-	DEFB	#00
-	DEFB	#80
-	DEFB	#32
-	DEFB	#02
-	DEFB	#A1
-	DEFB	#03
-	DEFB	#31
-	DEFB	#38
+	DB	#A1
+	DB	#0F
+	DB	#34
+	DB	#37
+	DB	#16
+	DB	#04
+	DB	#34
+	DB	#80
+	DB	#41
+	DB	#00
+	DB	#00
+	DB	#80
+	DB	#32
+	DB	#02
+	DB	#A1
+	DB	#03
+	DB	#31
+	DB	#38
 ;
 ;#2617
 	CALL	L_2DA2
@@ -6212,8 +6091,8 @@ L_2625	JR	L_2630
 	RST	#28	;*calc
 ;
 ;#262D
-	DEFB	#A3
-	DEFB	#38
+	DB	#A3
+	DB	#38
 ;
 ;#262F
 	INC	(HL)
@@ -6228,16 +6107,16 @@ L_2630	RST	#20
 	RES	6,(HL)
 	BIT	7,(HL)
 	JR	Z,L_2665
-	CALL	L_028E
+	CALL	KEY_SCAN
 	LD	C,#00
 	JR	NZ,L_2660
-	CALL	L_031E
+	CALL	K_TEST
 	JR	NC,L_2660
 	DEC	D
 	LD	E,A
-	CALL	L_0333
+	CALL	K_DECODE
 	PUSH	AF
-	LD	BC,L_0001
+	LD	BC,#0001
 	RST	#30
 	POP	AF
 	LD	(DE),A
@@ -6269,8 +6148,8 @@ L_2684	CALL	L_2C88
 	JR	NZ,L_26B5
 	CALL	L_2C9B
 L_2695	RST	#18
-	LD	BC,L_0006
-	CALL	L_1655
+	LD	BC,#0006
+	CALL	MAKE_ROOM
 	INC	HL
 	LD	(HL),#0E
 	INC	HL
@@ -6283,7 +6162,7 @@ L_2695	RST	#18
 	LDIR
 	EX	DE,HL
 	DEC	HL
-	CALL	L_0077
+	CALL	TEMP_PTR1
 	JR	L_26C3
 ;
 L_26B5	RST	#18
@@ -6307,7 +6186,7 @@ L_26C9	CALL	L_28B2
 	CALL	L_33B4
 L_26DD	JR	L_2712
 ;
-L_26DF	LD	BC,L_09DB
+L_26DF	LD	BC,#09DB
 	CP	#2D
 	JR	Z,L_270D
 	LD	BC,L_1018
@@ -6355,7 +6234,7 @@ L_2734	POP	DE
 	CP	B
 	JR	C,L_2773
 	AND	A
-	JP	Z,L_0018
+	JP	Z,GET_CHAR
 	PUSH	BC
 	LD	HL,#5C3B
 	LD	A,E
@@ -6373,8 +6252,8 @@ L_274C	PUSH	DE
 	RST	#28	;*calc
 ;
 ;#2757
-	DEFB	#3B
-	DEFB	#38
+	DB	#3B
+	DB	#38
 ;
 ;#2759
 	JR	L_2764
@@ -6412,76 +6291,76 @@ L_2790	PUSH	BC
 	RST	#20
 	JP	L_24FF
 ;
-L_2795	DEFM	"+"
+L_2795	DB	"+"
 ;
 ;#2796
-	DEFB	#CF
+	DB	#CF
 ;
 ;#2797
-	DEFM	"-"
+	DB	"-"
 ;
 ;#2798
-	DEFB	#C3
+	DB	#C3
 ;
 ;#2799
-	DEFM	"*"
+	DB	"*"
 ;
 ;#279A
-	DEFB	#C4
+	DB	#C4
 ;
 ;#279B
-	DEFM	"/"
+	DB	"/"
 ;
 ;#279C
-	DEFB	#C5
+	DB	#C5
 ;
 ;#279D
-	DEFM	"^"
+	DB	"^"
 ;
 ;#279E
-	DEFB	#C6
+	DB	#C6
 ;
 ;#279F
-	DEFM	"="
+	DB	"="
 ;
 ;#27A0
-	DEFB	#CE
+	DB	#CE
 ;
 ;#27A1
-	DEFM	">"
+	DB	">"
 ;
 ;#27A2
-	DEFB	#CC
+	DB	#CC
 ;
 ;#27A3
-	DEFM	"<"
+	DB	"<"
 ;
 ;#27A4
-	DEFB	#CD
-	DEFB	#C7
-	DEFB	#C9
-	DEFB	#C8
-	DEFB	#CA
-	DEFB	#C9
-	DEFB	#CB
-	DEFB	#C5
-	DEFB	#C7
-	DEFB	#C6
-	DEFB	#C8
-	DEFB	#00
-	DEFB	#06
-	DEFB	#08
-	DEFB	#08
-	DEFB	#0A
-	DEFB	#02
-	DEFB	#03
-	DEFB	#05
-	DEFB	#05
-	DEFB	#05
-	DEFB	#05
-	DEFB	#05
-	DEFB	#05
-	DEFB	#06
+	DB	#CD
+	DB	#C7
+	DB	#C9
+	DB	#C8
+	DB	#CA
+	DB	#C9
+	DB	#CB
+	DB	#C5
+	DB	#C7
+	DB	#C6
+	DB	#C8
+	DB	#00
+	DB	#06
+	DB	#08
+	DB	#08
+	DB	#0A
+	DB	#02
+	DB	#03
+	DB	#05
+	DB	#05
+	DB	#05
+	DB	#05
+	DB	#05
+	DB	#05
+	DB	#06
 ;
 L_27BD	CALL	L_2530
 	JR	NZ,L_27F7
@@ -6527,7 +6406,7 @@ L_2802	RST	#20
 	PUSH	HL
 	LD	HL,(#5C53)
 	DEC	HL
-L_2808	LD	DE,L_00CE
+L_2808	LD	DE,#00CE
 	PUSH	BC
 	CALL	L_1D86
 	POP	BC
@@ -6535,7 +6414,7 @@ L_2808	LD	DE,L_00CE
 	RST	#08
 ;
 ;#2813
-	DEFB	#18
+	DB	#18
 ;
 L_2814	PUSH	HL
 	CALL	L_28AB
@@ -6548,7 +6427,7 @@ L_2814	PUSH	HL
 	JR	Z,L_2831
 L_2825	POP	HL
 	DEC	HL
-	LD	DE,L_0200
+	LD	DE,#0200
 	PUSH	BC
 	CALL	L_198B
 	POP	BC
@@ -6583,7 +6462,7 @@ L_2852	INC	HL
 	POP	HL
 	EX	DE,HL
 	LD	HL,(#5C65)
-	LD	BC,L_0005
+	LD	BC,#0005
 	SBC	HL,BC
 	LD	(#5C65),HL
 	LDIR
@@ -6608,7 +6487,7 @@ L_2885	PUSH	HL
 L_288B	RST	#08
 ;
 ;#288C
-	DEFB	#19
+	DB	#19
 ;
 L_288D	POP	DE
 	EX	DE,HL
@@ -6827,7 +6706,7 @@ L_29E0	RST	#18
 	LD	(#5C5D),HL
 	JR	L_2A45
 ;
-L_29E7	LD	HL,L_0000
+L_29E7	LD	HL,#0000
 L_29EA	PUSH	HL
 	RST	#20
 	POP	HL
@@ -6865,11 +6744,11 @@ L_2A12	JR	NZ,L_2A7A
 L_2A20	RST	#08
 ;
 ;#2A21
-	DEFB	#02
+	DB	#02
 ;
 L_2A22	RST	#20
 	POP	HL
-	LD	DE,L_0005
+	LD	DE,#0005
 	CALL	L_2AF4
 	ADD	HL,BC
 	RET
@@ -6905,7 +6784,7 @@ L_2A52	CALL	L_2530
 	XOR	A
 	PUSH	AF
 	PUSH	BC
-	LD	DE,L_0001
+	LD	DE,#0001
 	RST	#18
 	POP	HL
 	CP	#CC
@@ -6946,7 +6825,7 @@ L_2A94	POP	AF
 	EX	(SP),HL
 	AND	A
 	SBC	HL,DE
-	LD	BC,L_0000
+	LD	BC,#0000
 	JR	C,L_2AA8
 	INC	HL
 	AND	A
@@ -7017,7 +6896,7 @@ L_2AF4	CALL	L_2530
 L_2AFF	LD	HL,(#5C4D)
 	BIT	1,(IY+#37)
 	JR	Z,L_2B66
-	LD	BC,L_0005
+	LD	BC,#0005
 L_2B0B	INC	BC
 L_2B0C	INC	HL
 	LD	A,(HL)
@@ -7038,7 +6917,7 @@ L_2B1F	CALL	L_2C88
 L_2B29	LD	A,C
 	LD	HL,(#5C59)
 	DEC	HL
-	CALL	L_1655
+	CALL	MAKE_ROOM
 	INC	HL
 	INC	HL
 	EX	DE,HL
@@ -7068,19 +6947,19 @@ L_2B59	PUSH	HL
 	RST	#28	;*calc
 ;
 ;#2B5B
-	DEFB	#02
-	DEFB	#38
+	DB	#02
+	DB	#38
 ;
 ;#2B5D
 	POP	HL
-	LD	BC,L_0005
+	LD	BC,#0005
 	AND	A
 	SBC	HL,BC
 	JR	L_2BA6
 ;
 L_2B66	BIT	6,(IY+#01)
 	JR	Z,L_2B72
-	LD	DE,L_0006
+	LD	DE,#0006
 	ADD	HL,DE
 	JR	L_2B59
 ;
@@ -7157,7 +7036,7 @@ L_2BC6	PUSH	AF
 	INC	BC
 	LD	HL,(#5C59)
 	DEC	HL
-	CALL	L_1655
+	CALL	MAKE_ROOM
 	LD	HL,(#5C4D)
 	POP	BC
 	PUSH	BC
@@ -7205,7 +7084,7 @@ L_2C15	JR	C,L_2C1F
 L_2C1F	SET	7,C
 	LD	B,#00
 	PUSH	BC
-	LD	HL,L_0001
+	LD	HL,#0001
 	BIT	6,C
 	JR	NZ,L_2C2D
 	LD	L,#05
@@ -7244,7 +7123,7 @@ L_2C2E	RST	#20
 	LD	C,L
 	LD	HL,(#5C59)
 	DEC	HL
-	CALL	L_1655
+	CALL	MAKE_ROOM
 	INC	HL
 	LD	(HL),A
 	POP	BC
@@ -7293,7 +7172,7 @@ L_2C8D	CP	#41
 ;
 L_2C9B	CP	#C4
 	JR	NZ,L_2CB8
-	LD	DE,L_0000
+	LD	DE,#0000
 L_2CA2	RST	#20
 	SUB	#31
 	ADC	A,#00
@@ -7325,16 +7204,16 @@ L_2CCF	JP	C,L_1C8A
 	RST	#28	;*calc
 ;
 ;#2CD3
-	DEFB	#A0
-	DEFB	#38
+	DB	#A0
+	DB	#38
 ;
 L_2CD5	RST	#28	;*calc
 ;
 ;#2CD6
-	DEFB	#A1
-	DEFB	#C0
-	DEFB	#02
-	DEFB	#38
+	DB	#A1
+	DB	#C0
+	DB	#02
+	DB	#38
 ;
 L_2CDA	RST	#18
 	CALL	L_2D22
@@ -7342,13 +7221,13 @@ L_2CDA	RST	#18
 	RST	#28	;*calc
 ;
 ;#2CE1
-	DEFB	#E0
-	DEFB	#A4
-	DEFB	#05
-	DEFB	#C0
-	DEFB	#04
-	DEFB	#0F
-	DEFB	#38
+	DB	#E0
+	DB	#A4
+	DB	#05
+	DB	#C0
+	DB	#04
+	DB	#0F
+	DB	#38
 ;
 ;#2CE8
 	RST	#20
@@ -7401,7 +7280,7 @@ L_2D2B	LD	IY,#5C3A
 	RST	#28	;*calc
 ;
 ;#2D38
-	DEFB	#38
+	DB	#38
 ;
 ;#2D39
 	AND	A
@@ -7411,8 +7290,8 @@ L_2D3B	PUSH	AF
 	RST	#28	;*calc
 ;
 ;#2D3D
-	DEFB	#A0
-	DEFB	#38
+	DB	#A0
+	DB	#38
 ;
 ;#2D3F
 	POP	AF
@@ -7421,14 +7300,14 @@ L_2D40	CALL	L_2D22
 	RST	#28	;*calc
 ;
 ;#2D45
-	DEFB	#01
-	DEFB	#A4
-	DEFB	#04
-	DEFB	#0F
-	DEFB	#38
+	DB	#01
+	DB	#A4
+	DB	#04
+	DB	#0F
+	DB	#38
 ;
 ;#2D4A
-	CALL	L_0074
+	CALL	CH_ADD_1
 	JR	L_2D40
 ;
 L_2D4F	RLCA
@@ -7442,8 +7321,8 @@ L_2D55	PUSH	AF
 	RST	#28	;*calc
 ;
 ;#2D5D
-	DEFB	#A4
-	DEFB	#38
+	DB	#A4
+	DB	#38
 ;
 ;#2D5F
 	POP	AF
@@ -7453,16 +7332,16 @@ L_2D60	SRL	A
 	RST	#28	;*calc
 ;
 ;#2D66
-	DEFB	#C1
-	DEFB	#E0
-	DEFB	#00
-	DEFB	#04
-	DEFB	#04
-	DEFB	#33
-	DEFB	#02
-	DEFB	#05
-	DEFB	#E1
-	DEFB	#38
+	DB	#C1
+	DB	#E0
+	DB	#00
+	DB	#04
+	DB	#04
+	DB	#33
+	DB	#02
+	DB	#05
+	DB	#E1
+	DB	#38
 ;
 ;#2D70
 	POP	AF
@@ -7471,9 +7350,9 @@ L_2D71	JR	Z,L_2D7B
 	RST	#28	;*calc
 ;
 ;#2D75
-	DEFB	#31
-	DEFB	#04
-	DEFB	#38
+	DB	#31
+	DB	#04
+	DB	#38
 ;
 ;#2D78
 	POP	AF
@@ -7482,8 +7361,8 @@ L_2D71	JR	Z,L_2D7B
 L_2D7B	RST	#28	;*calc
 ;
 ;#2D7C
-	DEFB	#02
-	DEFB	#38
+	DB	#02
+	DB	#38
 ;
 ;#2D7E
 	RET
@@ -7525,7 +7404,7 @@ L_2D8E	PUSH	HL
 L_2DA2	RST	#28	;*calc
 ;
 ;#2DA3
-	DEFB	#38
+	DB	#38
 ;
 ;#2DA4
 	LD	A,(HL)
@@ -7534,16 +7413,16 @@ L_2DA2	RST	#28	;*calc
 	RST	#28	;*calc
 ;
 ;#2DA9
-	DEFB	#A2
-	DEFB	#0F
-	DEFB	#27
-	DEFB	#38
+	DB	#A2
+	DB	#0F
+	DB	#27
+	DB	#38
 ;
 L_2DAD	RST	#28	;*calc
 ;
 ;#2DAE
-	DEFB	#02
-	DEFB	#38
+	DB	#02
+	DB	#38
 ;
 ;#2DB0
 	PUSH	HL
@@ -7572,15 +7451,15 @@ L_2DC1	LD	D,A
 	RST	#28	;*calc
 ;
 ;#2DCC
-	DEFB	#34
-	DEFB	#EF
-	DEFB	#1A
-	DEFB	#20
-	DEFB	#9A
-	DEFB	#85
-	DEFB	#04
-	DEFB	#27
-	DEFB	#38
+	DB	#34
+	DB	#EF
+	DB	#1A
+	DB	#20
+	DB	#9A
+	DB	#85
+	DB	#04
+	DB	#27
+	DB	#38
 ;
 L_2DD5	CALL	L_2DA2
 	RET	C
@@ -7598,16 +7477,16 @@ L_2DE1	POP	AF
 L_2DE3	RST	#28	;*calc
 ;
 ;#2DE4
-	DEFB	#31
-	DEFB	#36
-	DEFB	#00
-	DEFB	#0B
-	DEFB	#31
-	DEFB	#37
-	DEFB	#00
-	DEFB	#0D
-	DEFB	#02
-	DEFB	#38
+	DB	#31
+	DB	#36
+	DB	#00
+	DB	#0B
+	DB	#31
+	DB	#37
+	DB	#00
+	DB	#0D
+	DB	#02
+	DB	#38
 ;
 ;#2DEE
 	LD	A,#30
@@ -7615,8 +7494,8 @@ L_2DE3	RST	#28	;*calc
 	RET
 ;
 ;#2DF2
-	DEFB	#2A
-	DEFB	#38
+	DB	#2A
+	DB	#38
 ;
 ;#2DF4
 	LD	A,#2D
@@ -7624,12 +7503,12 @@ L_2DE3	RST	#28	;*calc
 	RST	#28	;*calc
 ;
 ;#2DF8
-	DEFB	#A0
-	DEFB	#C3
-	DEFB	#C4
-	DEFB	#C5
-	DEFB	#02
-	DEFB	#38
+	DB	#A0
+	DB	#C3
+	DB	#C4
+	DB	#C5
+	DB	#02
+	DB	#38
 ;
 ;#2DFE
 	EXX
@@ -7638,15 +7517,15 @@ L_2DE3	RST	#28	;*calc
 L_2E01	RST	#28	;*calc
 ;
 ;#2E02
-	DEFB	#31
-	DEFB	#27
-	DEFB	#C2
-	DEFB	#03
-	DEFB	#E2
-	DEFB	#01
-	DEFB	#C2
-	DEFB	#02
-	DEFB	#38
+	DB	#31
+	DB	#27
+	DB	#C2
+	DB	#03
+	DB	#E2
+	DB	#01
+	DB	#C2
+	DB	#02
+	DB	#38
 ;
 ;#2E0B
 	LD	A,(HL)
@@ -7670,8 +7549,8 @@ L_2E1E	PUSH	DE
 L_2E24	RST	#28	;*calc
 ;
 ;#2E25
-	DEFB	#E2
-	DEFB	#38
+	DB	#E2
+	DB	#38
 ;
 ;#2E27
 	LD	A,(HL)
@@ -7686,12 +7565,12 @@ L_2E24	RST	#28	;*calc
 	RST	#28	;*calc
 ;
 ;#2E3A
-	DEFB	#31
-	DEFB	#27
-	DEFB	#C1
-	DEFB	#03
-	DEFB	#E1
-	DEFB	#38
+	DB	#31
+	DB	#27
+	DB	#C1
+	DB	#03
+	DB	#E1
+	DB	#38
 ;
 ;#2E40
 	CALL	L_2DD5
@@ -7778,9 +7657,9 @@ L_2EB8	DJNZ	L_2EA1
 L_2ECB	RST	#28	;*calc
 ;
 ;#2ECC
-	DEFB	#02
-	DEFB	#E2
-	DEFB	#38
+	DB	#02
+	DB	#E2
+	DB	#38
 ;
 L_2ECF	EX	DE,HL
 	CALL	L_2FBA
@@ -7799,7 +7678,7 @@ L_2EDF	LD	A,(IY+#71)
 	EXX
 	JR	L_2F0C
 ;
-L_2EEC	LD	BC,L_0200
+L_2EEC	LD	BC,#0200
 L_2EEF	LD	A,E
 	CALL	L_2F8B
 	LD	E,A
@@ -7842,8 +7721,8 @@ L_2F2D	LD	(IY+#71),B
 	RST	#28	;*calc
 ;
 ;#2F31
-	DEFB	#02
-	DEFB	#38
+	DB	#02
+	DB	#38
 ;
 ;#2F33
 	EXX
@@ -7929,7 +7808,7 @@ L_2F9B	LD	A,(HL)
 	DEC	HL
 	RET	Z
 	PUSH	BC
-	LD	BC,L_0005
+	LD	BC,#0005
 	ADD	HL,BC
 	LD	B,C
 	LD	C,A
@@ -8004,7 +7883,7 @@ L_2FFB	LD	L,#00
 	LD	D,A
 	LD	E,L
 	EXX
-	LD	DE,L_0000
+	LD	DE,#0000
 	RET
 ;
 L_3004	INC	E
@@ -8144,7 +8023,7 @@ L_30A9	PUSH	BC
 	LD	B,#10
 	LD	A,H
 	LD	C,L
-	LD	HL,L_0000
+	LD	HL,#0000
 L_30B1	ADD	HL,HL
 	JR	C,L_30BE
 	RL	C
@@ -8333,7 +8212,7 @@ L_3195	PUSH	HL
 L_31AD	RST	#08
 ;
 ;#31AE
-	DEFB	#05
+	DB	#05
 ;
 L_31AF	CALL	L_3293
 	EX	DE,HL
@@ -8433,7 +8312,7 @@ L_322E	CALL	L_2DD5
 	RET	C
 	RET	Z
 	POP	AF
-	LD	DE,L_0001
+	LD	DE,#0001
 	LD	BC,#FFFF
 	JP	L_35D7
 ;
@@ -8535,93 +8414,94 @@ L_32BD	DEC	HL
 	POP	DE
 	RET
 ;
-L_32C5	DEFB	#00
-	DEFB	#B0
-	DEFB	#00
-	DEFB	#40
-	DEFB	#B0
-	DEFB	#00
-	DEFB	#01
-	DEFB	#30
-	DEFB	#00
-	DEFB	#F1
-	DEFB	#49
-	DEFB	#0F
-	DEFB	#DA
-	DEFB	#A2
-	DEFB	#40
-	DEFB	#B0
-	DEFB	#00
-	DEFB	#0A
+L_32C5	DB	#00
+	DB	#B0
+	DB	#00
+	DB	#40
+	DB	#B0
+	DB	#00
+	DB	#01
+	DB	#30
+	DB	#00
+	DB	#F1
+	DB	#49
+	DB	#0F
+	DB	#DA
+	DB	#A2
+	DB	#40
+	DB	#B0
+	DB	#00
+	DB	#0A
 ;
-L_32D7	DEFW	L_368F
-	DEFW	L_343C
-	DEFW	L_33A1
-	DEFW	L_300F
-	DEFW	L_30CA
-	DEFW	L_31AF
-	DEFW	L_3851
-	DEFW	L_351B
-	DEFW	L_3524
-	DEFW	L_353B
-	DEFW	L_353B
-	DEFW	L_353B
-	DEFW	L_353B
-	DEFW	L_353B
-	DEFW	L_353B
-	DEFW	L_3014
-	DEFW	L_352D
-	DEFW	L_353B
-	DEFW	L_353B
-	DEFW	L_353B
-	DEFW	L_353B
-	DEFW	L_353B
-	DEFW	L_353B
-	DEFW	L_359C
-	DEFW	L_35DE
-	DEFW	L_34BC
-	DEFW	L_3645
-	DEFW	L_346E
-	DEFW	L_3669
-	DEFW	L_35DE
-	DEFW	L_3674
-	DEFW	L_37B5
-	DEFW	L_37AA
-	DEFW	L_37DA
-	DEFW	L_3833
-	DEFW	L_3843
-	DEFW	L_37E2
-	DEFW	L_3713
-	DEFW	L_36C4
-	DEFW	L_36AF
-	DEFW	L_384A
-	DEFW	L_3492
-	DEFW	L_346A
-	DEFW	L_34AC
-	DEFW	L_34A5
-	DEFW	L_34B3
-	DEFW	L_361F
-	DEFW	L_35C9
-	DEFW	L_3501
-	DEFW	L_33C0
-	DEFW	L_36A0
-	DEFW	L_3686
-	DEFW	L_33C6
-	DEFW	L_367A
-	DEFW	L_3506
-	DEFW	L_34F9
-	DEFW	L_369B
-	DEFW	L_3783
-	DEFW	L_3214
-	DEFW	L_33A2
-	DEFW	L_2D4F
-	DEFW	L_3297
-	DEFW	L_3449
-	DEFW	L_341B
-	DEFW	L_342D
-	DEFW	L_340F
-;
-L_335B	CALL	L_35BF
+L_32D7	DW	L_368F
+	DW	L_343C
+	DW	L_33A1
+	DW	L_300F
+	DW	L_30CA
+	DW	L_31AF
+	DW	L_3851
+	DW	L_351B
+	DW	L_3524
+	DW	L_353B
+	DW	L_353B
+	DW	L_353B
+	DW	L_353B
+	DW	L_353B
+	DW	L_353B
+	DW	L_3014
+	DW	L_352D
+	DW	L_353B
+	DW	L_353B
+	DW	L_353B
+	DW	L_353B
+	DW	L_353B
+	DW	L_353B
+	DW	L_359C
+	DW	L_35DE
+	DW	L_34BC
+	DW	L_3645
+	DW	L_346E
+	DW	L_3669
+	DW	L_35DE
+	DW	L_3674
+	DW	L_37B5
+	DW	L_37AA
+	DW	L_37DA
+	DW	L_3833
+	DW	L_3843
+	DW	L_37E2
+	DW	L_3713
+	DW	L_36C4
+	DW	L_36AF
+	DW	L_384A
+	DW	L_3492
+	DW	L_346A
+	DW	L_34AC
+	DW	L_34A5
+	DW	L_34B3
+	DW	L_361F
+	DW	L_35C9
+	DW	L_3501
+	DW	L_33C0
+	DW	L_36A0
+	DW	L_3686
+	DW	L_33C6
+	DW	L_367A
+	DW	L_3506
+	DW	L_34F9
+	DW	L_369B
+	DW	L_3783
+	DW	L_3214
+	DW	L_33A2
+	DW	L_2D4F
+	DW	L_3297
+	DW	L_3449
+	DW	L_341B
+	DW	L_342D
+	DW	L_340F
+
+;The Calculator
+CALCULATE:	CALL	L_35BF
 L_335E	LD	A,B
 	LD	(#5C67),A
 L_3362	EXX
@@ -8676,7 +8556,7 @@ L_33A2	POP	AF
 ;
 L_33A9	PUSH	DE
 	PUSH	HL
-	LD	BC,L_0005
+	LD	BC,#0005
 	CALL	L_1F05
 	POP	HL
 	POP	DE
@@ -8797,34 +8677,34 @@ L_3449	LD	B,A
 	CALL	L_335E
 ;
 ;#344D
-	DEFB	#31
-	DEFB	#0F
-	DEFB	#C0
-	DEFB	#02
-	DEFB	#A0
-	DEFB	#C2
-	DEFB	#31
-	DEFB	#E0
-	DEFB	#04
-	DEFB	#E2
-	DEFB	#C1
-	DEFB	#03
-	DEFB	#38
+	DB	#31
+	DB	#0F
+	DB	#C0
+	DB	#02
+	DB	#A0
+	DB	#C2
+	DB	#31
+	DB	#E0
+	DB	#04
+	DB	#E2
+	DB	#C1
+	DB	#03
+	DB	#38
 ;
 ;#345A
 	CALL	L_33C6
 	CALL	L_3362
 ;
 ;#3460
-	DEFB	#0F
-	DEFB	#01
-	DEFB	#C2
-	DEFB	#02
-	DEFB	#35
-	DEFB	#EE
-	DEFB	#E1
-	DEFB	#03
-	DEFB	#38
+	DB	#0F
+	DB	#01
+	DB	#C2
+	DB	#02
+	DB	#35
+	DB	#EE
+	DB	#E1
+	DB	#03
+	DB	#38
 ;
 ;#3469
 	RET
@@ -8864,7 +8744,7 @@ L_3483	PUSH	DE
 L_3492	CALL	L_34E9
 	RET	C
 	PUSH	DE
-	LD	DE,L_0001
+	LD	DE,#0001
 	INC	HL
 	RL	(HL)
 	DEC	HL
@@ -8917,7 +8797,7 @@ L_34E4	JP	L_2D2B
 L_34E7	RST	#08
 ;
 ;#34E8
-	DEFB	#09
+	DB	#09
 ;
 L_34E9	PUSH	HL
 	PUSH	BC
@@ -9054,8 +8934,8 @@ L_3588	PUSH	AF
 	RST	#28	;*calc
 ;
 ;#358A
-	DEFB	#A0
-	DEFB	#38
+	DB	#A0
+	DB	#38
 ;
 L_358C	POP	AF
 	PUSH	AF
@@ -9104,7 +8984,7 @@ L_35C9	CALL	L_322E
 	JR	C,L_35DC
 	JR	NZ,L_35DC
 	PUSH	AF
-	LD	BC,L_0001
+	LD	BC,#0001
 	RST	#30
 	POP	AF
 	LD	(DE),A
@@ -9115,7 +8995,7 @@ L_35D7	CALL	L_2AB2
 L_35DC	RST	#08
 ;
 ;#35DD
-	DEFB	#0A
+	DB	#0A
 ;
 L_35DE	CALL	L_38B4
 	PUSH	HL
@@ -9151,7 +9031,7 @@ L_360C	JP	NZ,L_1C8A
 	LD	(#5C5D),HL
 	JR	L_35BF
 ;
-L_361F	LD	BC,L_0001
+L_361F	LD	BC,#0001
 	RST	#30
 	LD	(#5C5B),HL
 	PUSH	HL
@@ -9179,7 +9059,7 @@ L_3645	CALL	L_1E94
 	PUSH	HL
 	CALL	L_1601
 	CALL	L_15E6
-	LD	BC,L_0000
+	LD	BC,#0000
 	JR	NC,L_365F
 	INC	C
 	RST	#30
@@ -9240,19 +9120,19 @@ L_369B	POP	AF
 L_36A0	RST	#28	;*calc
 ;
 ;#36A1
-	DEFB	#C0
-	DEFB	#02
-	DEFB	#31
-	DEFB	#E0
-	DEFB	#05
-	DEFB	#27
-	DEFB	#E0
-	DEFB	#01
-	DEFB	#C0
-	DEFB	#04
-	DEFB	#03
-	DEFB	#E0
-	DEFB	#38
+	DB	#C0
+	DB	#02
+	DB	#31
+	DB	#E0
+	DB	#05
+	DB	#27
+	DB	#E0
+	DB	#01
+	DB	#C0
+	DB	#04
+	DB	#03
+	DB	#E0
+	DB	#38
 ;
 ;#36AE
 	RET
@@ -9260,29 +9140,29 @@ L_36A0	RST	#28	;*calc
 L_36AF	RST	#28	;*calc
 ;
 ;#36B0
-	DEFB	#31
-	DEFB	#36
-	DEFB	#00
-	DEFB	#04
-	DEFB	#3A
-	DEFB	#38
+	DB	#31
+	DB	#36
+	DB	#00
+	DB	#04
+	DB	#3A
+	DB	#38
 ;
 ;#36B6
 	RET
 ;
 ;#36B7
-	DEFB	#31
-	DEFB	#3A
-	DEFB	#C0
-	DEFB	#03
-	DEFB	#E0
-	DEFB	#01
-	DEFB	#30
-	DEFB	#00
-	DEFB	#03
-	DEFB	#A1
-	DEFB	#03
-	DEFB	#38
+	DB	#31
+	DB	#3A
+	DB	#C0
+	DB	#03
+	DB	#E0
+	DB	#01
+	DB	#30
+	DB	#00
+	DB	#03
+	DB	#A1
+	DB	#03
+	DB	#38
 ;
 ;#36C3
 	RET
@@ -9290,58 +9170,58 @@ L_36AF	RST	#28	;*calc
 L_36C4	RST	#28	;*calc
 ;
 ;#36C5
-	DEFB	#3D
-	DEFB	#34
-	DEFB	#F1
-	DEFB	#38
-	DEFB	#AA
-	DEFB	#3B
-	DEFB	#29
-	DEFB	#04
-	DEFB	#31
-	DEFB	#27
-	DEFB	#C3
-	DEFB	#03
-	DEFB	#31
-	DEFB	#0F
-	DEFB	#A1
-	DEFB	#03
-	DEFB	#88
-	DEFB	#13
-	DEFB	#36
-	DEFB	#58
-	DEFB	#65
-	DEFB	#66
-	DEFB	#9D
-	DEFB	#78
-	DEFB	#65
-	DEFB	#40
-	DEFB	#A2
-	DEFB	#60
-	DEFB	#32
-	DEFB	#C9
-	DEFB	#E7
-	DEFB	#21
-	DEFB	#F7
-	DEFB	#AF
-	DEFB	#24
-	DEFB	#EB
-	DEFB	#2F
-	DEFB	#B0
-	DEFB	#B0
-	DEFB	#14
-	DEFB	#EE
-	DEFB	#7E
-	DEFB	#BB
-	DEFB	#94
-	DEFB	#58
-	DEFB	#F1
-	DEFB	#3A
-	DEFB	#7E
-	DEFB	#F8
-	DEFB	#CF
-	DEFB	#E3
-	DEFB	#38
+	DB	#3D
+	DB	#34
+	DB	#F1
+	DB	#38
+	DB	#AA
+	DB	#3B
+	DB	#29
+	DB	#04
+	DB	#31
+	DB	#27
+	DB	#C3
+	DB	#03
+	DB	#31
+	DB	#0F
+	DB	#A1
+	DB	#03
+	DB	#88
+	DB	#13
+	DB	#36
+	DB	#58
+	DB	#65
+	DB	#66
+	DB	#9D
+	DB	#78
+	DB	#65
+	DB	#40
+	DB	#A2
+	DB	#60
+	DB	#32
+	DB	#C9
+	DB	#E7
+	DB	#21
+	DB	#F7
+	DB	#AF
+	DB	#24
+	DB	#EB
+	DB	#2F
+	DB	#B0
+	DB	#B0
+	DB	#14
+	DB	#EE
+	DB	#7E
+	DB	#BB
+	DB	#94
+	DB	#58
+	DB	#F1
+	DB	#3A
+	DB	#7E
+	DB	#F8
+	DB	#CF
+	DB	#E3
+	DB	#38
 ;
 ;#36F9
 	CALL	L_2DD5
@@ -9352,7 +9232,7 @@ L_36C4	RST	#28	;*calc
 L_3703	RST	#08
 ;
 ;#3704
-	DEFB	#05
+	DB	#05
 ;
 L_3705	JR	C,L_370E
 	SUB	(HL)
@@ -9364,9 +9244,9 @@ L_370C	LD	(HL),A
 L_370E	RST	#28	;*calc
 ;
 ;#370F
-	DEFB	#02
-	DEFB	#A0
-	DEFB	#38
+	DB	#02
+	DB	#A0
+	DB	#38
 ;
 ;#3712
 	RET
@@ -9374,21 +9254,21 @@ L_370E	RST	#28	;*calc
 L_3713	RST	#28	;*calc
 ;
 ;#3714
-	DEFB	#3D
-	DEFB	#31
-	DEFB	#37
-	DEFB	#00
-	DEFB	#04
-	DEFB	#38
+	DB	#3D
+	DB	#31
+	DB	#37
+	DB	#00
+	DB	#04
+	DB	#38
 ;
 ;#371A
 	RST	#08
 ;
 ;#371B
-	DEFB	#09
-	DEFB	#A0
-	DEFB	#02
-	DEFB	#38
+	DB	#09
+	DB	#A0
+	DB	#02
+	DB	#38
 ;
 ;#371F
 	LD	A,(HL)
@@ -9397,102 +9277,102 @@ L_3713	RST	#28	;*calc
 	RST	#28	;*calc
 ;
 ;#3726
-	DEFB	#34
-	DEFB	#38
-	DEFB	#00
-	DEFB	#03
-	DEFB	#01
-	DEFB	#31
-	DEFB	#34
-	DEFB	#F0
-	DEFB	#4C
-	DEFB	#CC
-	DEFB	#CC
-	DEFB	#CD
-	DEFB	#03
-	DEFB	#37
-	DEFB	#00
-	DEFB	#08
-	DEFB	#01
-	DEFB	#A1
-	DEFB	#03
-	DEFB	#01
-	DEFB	#38
+	DB	#34
+	DB	#38
+	DB	#00
+	DB	#03
+	DB	#01
+	DB	#31
+	DB	#34
+	DB	#F0
+	DB	#4C
+	DB	#CC
+	DB	#CC
+	DB	#CD
+	DB	#03
+	DB	#37
+	DB	#00
+	DB	#08
+	DB	#01
+	DB	#A1
+	DB	#03
+	DB	#01
+	DB	#38
 ;
 ;#373B
 	INC	(HL)
 	RST	#28	;*calc
 ;
 ;#373D
-	DEFB	#01
-	DEFB	#34
-	DEFB	#F0
-	DEFB	#31
-	DEFB	#72
-	DEFB	#17
-	DEFB	#F8
-	DEFB	#04
-	DEFB	#01
-	DEFB	#A2
-	DEFB	#03
-	DEFB	#A2
-	DEFB	#03
-	DEFB	#31
-	DEFB	#34
-	DEFB	#32
-	DEFB	#20
-	DEFB	#04
-	DEFB	#A2
-	DEFB	#03
-	DEFB	#8C
-	DEFB	#11
-	DEFB	#AC
-	DEFB	#14
-	DEFB	#09
-	DEFB	#56
-	DEFB	#DA
-	DEFB	#A5
-	DEFB	#59
-	DEFB	#30
-	DEFB	#C5
-	DEFB	#5C
-	DEFB	#90
-	DEFB	#AA
-	DEFB	#9E
-	DEFB	#70
-	DEFB	#6F
-	DEFB	#61
-	DEFB	#A1
-	DEFB	#CB
-	DEFB	#DA
-	DEFB	#96
-	DEFB	#A4
-	DEFB	#31
-	DEFB	#9F
-	DEFB	#B4
-	DEFB	#E7
-	DEFB	#A0
-	DEFB	#FE
-	DEFB	#5C
-	DEFB	#FC
-	DEFB	#EA
-	DEFB	#1B
-	DEFB	#43
-	DEFB	#CA
-	DEFB	#36
-	DEFB	#ED
-	DEFB	#A7
-	DEFB	#9C
-	DEFB	#7E
-	DEFB	#5E
-	DEFB	#F0
-	DEFB	#6E
-	DEFB	#23
-	DEFB	#80
-	DEFB	#93
-	DEFB	#04
-	DEFB	#0F
-	DEFB	#38
+	DB	#01
+	DB	#34
+	DB	#F0
+	DB	#31
+	DB	#72
+	DB	#17
+	DB	#F8
+	DB	#04
+	DB	#01
+	DB	#A2
+	DB	#03
+	DB	#A2
+	DB	#03
+	DB	#31
+	DB	#34
+	DB	#32
+	DB	#20
+	DB	#04
+	DB	#A2
+	DB	#03
+	DB	#8C
+	DB	#11
+	DB	#AC
+	DB	#14
+	DB	#09
+	DB	#56
+	DB	#DA
+	DB	#A5
+	DB	#59
+	DB	#30
+	DB	#C5
+	DB	#5C
+	DB	#90
+	DB	#AA
+	DB	#9E
+	DB	#70
+	DB	#6F
+	DB	#61
+	DB	#A1
+	DB	#CB
+	DB	#DA
+	DB	#96
+	DB	#A4
+	DB	#31
+	DB	#9F
+	DB	#B4
+	DB	#E7
+	DB	#A0
+	DB	#FE
+	DB	#5C
+	DB	#FC
+	DB	#EA
+	DB	#1B
+	DB	#43
+	DB	#CA
+	DB	#36
+	DB	#ED
+	DB	#A7
+	DB	#9C
+	DB	#7E
+	DB	#5E
+	DB	#F0
+	DB	#6E
+	DB	#23
+	DB	#80
+	DB	#93
+	DB	#04
+	DB	#0F
+	DB	#38
 ;
 ;#3782
 	RET
@@ -9500,47 +9380,47 @@ L_3713	RST	#28	;*calc
 L_3783	RST	#28	;*calc
 ;
 ;#3784
-	DEFB	#3D
-	DEFB	#34
-	DEFB	#EE
-	DEFB	#22
-	DEFB	#F9
-	DEFB	#83
-	DEFB	#6E
-	DEFB	#04
-	DEFB	#31
-	DEFB	#A2
-	DEFB	#0F
-	DEFB	#27
-	DEFB	#03
-	DEFB	#31
-	DEFB	#0F
-	DEFB	#31
-	DEFB	#0F
-	DEFB	#31
-	DEFB	#2A
-	DEFB	#A1
-	DEFB	#03
-	DEFB	#31
-	DEFB	#37
-	DEFB	#C0
-	DEFB	#00
-	DEFB	#04
-	DEFB	#02
-	DEFB	#38
+	DB	#3D
+	DB	#34
+	DB	#EE
+	DB	#22
+	DB	#F9
+	DB	#83
+	DB	#6E
+	DB	#04
+	DB	#31
+	DB	#A2
+	DB	#0F
+	DB	#27
+	DB	#03
+	DB	#31
+	DB	#0F
+	DB	#31
+	DB	#0F
+	DB	#31
+	DB	#2A
+	DB	#A1
+	DB	#03
+	DB	#31
+	DB	#37
+	DB	#C0
+	DB	#00
+	DB	#04
+	DB	#02
+	DB	#38
 ;
 ;#37A0
 	RET
 ;
 ;#37A1
-	DEFB	#A1
-	DEFB	#03
-	DEFB	#01
-	DEFB	#36
-	DEFB	#00
-	DEFB	#02
-	DEFB	#1B
-	DEFB	#38
+	DB	#A1
+	DB	#03
+	DB	#01
+	DB	#36
+	DB	#00
+	DB	#02
+	DB	#1B
+	DB	#38
 ;
 ;#37A9
 	RET
@@ -9548,55 +9428,55 @@ L_3783	RST	#28	;*calc
 L_37AA	RST	#28	;*calc
 ;
 ;#37AB
-	DEFB	#39
-	DEFB	#2A
-	DEFB	#A1
-	DEFB	#03
-	DEFB	#E0
-	DEFB	#00
-	DEFB	#06
-	DEFB	#1B
-	DEFB	#33
-	DEFB	#03
+	DB	#39
+	DB	#2A
+	DB	#A1
+	DB	#03
+	DB	#E0
+	DB	#00
+	DB	#06
+	DB	#1B
+	DB	#33
+	DB	#03
 ;
 L_37B5	RST	#28	;*calc
 ;
 ;#37B6
-	DEFB	#39
-	DEFB	#31
-	DEFB	#31
-	DEFB	#04
-	DEFB	#31
-	DEFB	#0F
-	DEFB	#A1
-	DEFB	#03
-	DEFB	#86
-	DEFB	#14
-	DEFB	#E6
-	DEFB	#5C
-	DEFB	#1F
-	DEFB	#0B
-	DEFB	#A3
-	DEFB	#8F
-	DEFB	#38
-	DEFB	#EE
-	DEFB	#E9
-	DEFB	#15
-	DEFB	#63
-	DEFB	#BB
-	DEFB	#23
-	DEFB	#EE
-	DEFB	#92
-	DEFB	#0D
-	DEFB	#CD
-	DEFB	#ED
-	DEFB	#F1
-	DEFB	#23
-	DEFB	#5D
-	DEFB	#1B
-	DEFB	#EA
-	DEFB	#04
-	DEFB	#38
+	DB	#39
+	DB	#31
+	DB	#31
+	DB	#04
+	DB	#31
+	DB	#0F
+	DB	#A1
+	DB	#03
+	DB	#86
+	DB	#14
+	DB	#E6
+	DB	#5C
+	DB	#1F
+	DB	#0B
+	DB	#A3
+	DB	#8F
+	DB	#38
+	DB	#EE
+	DB	#E9
+	DB	#15
+	DB	#63
+	DB	#BB
+	DB	#23
+	DB	#EE
+	DB	#92
+	DB	#0D
+	DB	#CD
+	DB	#ED
+	DB	#F1
+	DB	#23
+	DB	#5D
+	DB	#1B
+	DB	#EA
+	DB	#04
+	DB	#38
 ;
 ;#37D9
 	RET
@@ -9604,12 +9484,12 @@ L_37B5	RST	#28	;*calc
 L_37DA	RST	#28	;*calc
 ;
 ;#37DB
-	DEFB	#31
-	DEFB	#1F
-	DEFB	#01
-	DEFB	#20
-	DEFB	#05
-	DEFB	#38
+	DB	#31
+	DB	#1F
+	DB	#01
+	DB	#20
+	DB	#05
+	DB	#38
 ;
 ;#37E1
 	RET
@@ -9621,80 +9501,80 @@ L_37E2	CALL	L_3297
 	RST	#28	;*calc
 ;
 ;#37EB
-	DEFB	#A1
-	DEFB	#1B
-	DEFB	#01
-	DEFB	#05
-	DEFB	#31
-	DEFB	#36
-	DEFB	#A3
-	DEFB	#01
-	DEFB	#00
-	DEFB	#06
-	DEFB	#1B
-	DEFB	#33
-	DEFB	#03
+	DB	#A1
+	DB	#1B
+	DB	#01
+	DB	#05
+	DB	#31
+	DB	#36
+	DB	#A3
+	DB	#01
+	DB	#00
+	DB	#06
+	DB	#1B
+	DB	#33
+	DB	#03
 ;
 L_37F8	RST	#28	;*calc
 ;
 ;#37F9
-	DEFB	#A0
-	DEFB	#01
-	DEFB	#31
-	DEFB	#31
-	DEFB	#04
-	DEFB	#31
-	DEFB	#0F
-	DEFB	#A1
-	DEFB	#03
-	DEFB	#8C
-	DEFB	#10
-	DEFB	#B2
-	DEFB	#13
-	DEFB	#0E
-	DEFB	#55
-	DEFB	#E4
-	DEFB	#8D
-	DEFB	#58
-	DEFB	#39
-	DEFB	#BC
-	DEFB	#5B
-	DEFB	#98
-	DEFB	#FD
-	DEFB	#9E
-	DEFB	#00
-	DEFB	#36
-	DEFB	#75
-	DEFB	#A0
-	DEFB	#DB
-	DEFB	#E8
-	DEFB	#B4
-	DEFB	#63
-	DEFB	#42
-	DEFB	#C4
-	DEFB	#E6
-	DEFB	#B5
-	DEFB	#09
-	DEFB	#36
-	DEFB	#BE
-	DEFB	#E9
-	DEFB	#36
-	DEFB	#73
-	DEFB	#1B
-	DEFB	#5D
-	DEFB	#EC
-	DEFB	#D8
-	DEFB	#DE
-	DEFB	#63
-	DEFB	#BE
-	DEFB	#F0
-	DEFB	#61
-	DEFB	#A1
-	DEFB	#B3
-	DEFB	#0C
-	DEFB	#04
-	DEFB	#0F
-	DEFB	#38
+	DB	#A0
+	DB	#01
+	DB	#31
+	DB	#31
+	DB	#04
+	DB	#31
+	DB	#0F
+	DB	#A1
+	DB	#03
+	DB	#8C
+	DB	#10
+	DB	#B2
+	DB	#13
+	DB	#0E
+	DB	#55
+	DB	#E4
+	DB	#8D
+	DB	#58
+	DB	#39
+	DB	#BC
+	DB	#5B
+	DB	#98
+	DB	#FD
+	DB	#9E
+	DB	#00
+	DB	#36
+	DB	#75
+	DB	#A0
+	DB	#DB
+	DB	#E8
+	DB	#B4
+	DB	#63
+	DB	#42
+	DB	#C4
+	DB	#E6
+	DB	#B5
+	DB	#09
+	DB	#36
+	DB	#BE
+	DB	#E9
+	DB	#36
+	DB	#73
+	DB	#1B
+	DB	#5D
+	DB	#EC
+	DB	#D8
+	DB	#DE
+	DB	#63
+	DB	#BE
+	DB	#F0
+	DB	#61
+	DB	#A1
+	DB	#B3
+	DB	#0C
+	DB	#04
+	DB	#0F
+	DB	#38
 ;
 ;#3832
 	RET
@@ -9702,20 +9582,20 @@ L_37F8	RST	#28	;*calc
 L_3833	RST	#28	;*calc
 ;
 ;#3834
-	DEFB	#31
-	DEFB	#31
-	DEFB	#04
-	DEFB	#A1
-	DEFB	#03
-	DEFB	#1B
-	DEFB	#28
-	DEFB	#A1
-	DEFB	#0F
-	DEFB	#05
-	DEFB	#24
-	DEFB	#31
-	DEFB	#0F
-	DEFB	#38
+	DB	#31
+	DB	#31
+	DB	#04
+	DB	#A1
+	DB	#03
+	DB	#1B
+	DB	#28
+	DB	#A1
+	DB	#0F
+	DB	#05
+	DB	#24
+	DB	#31
+	DB	#0F
+	DB	#38
 ;
 ;#3842
 	RET
@@ -9723,11 +9603,11 @@ L_3833	RST	#28	;*calc
 L_3843	RST	#28	;*calc
 ;
 ;#3844
-	DEFB	#22
-	DEFB	#A3
-	DEFB	#03
-	DEFB	#1B
-	DEFB	#38
+	DB	#22
+	DB	#A3
+	DB	#03
+	DB	#1B
+	DB	#38
 ;
 ;#3849
 	RET
@@ -9735,45 +9615,45 @@ L_3843	RST	#28	;*calc
 L_384A	RST	#28	;*calc
 ;
 ;#384B
-	DEFB	#31
-	DEFB	#30
-	DEFB	#00
-	DEFB	#1E
-	DEFB	#A2
-	DEFB	#38
+	DB	#31
+	DB	#30
+	DB	#00
+	DB	#1E
+	DB	#A2
+	DB	#38
 ;
 L_3851	RST	#28	;*calc
 ;
 ;#3852
-	DEFB	#01
-	DEFB	#31
-	DEFB	#30
-	DEFB	#00
-	DEFB	#07
-	DEFB	#25
-	DEFB	#04
-	DEFB	#38
+	DB	#01
+	DB	#31
+	DB	#30
+	DB	#00
+	DB	#07
+	DB	#25
+	DB	#04
+	DB	#38
 ;
 ;#385A
 	JP	L_36C4
 ;
 ;#385D
-	DEFB	#02
-	DEFB	#31
-	DEFB	#30
-	DEFB	#00
-	DEFB	#09
-	DEFB	#A0
-	DEFB	#01
-	DEFB	#37
-	DEFB	#00
-	DEFB	#06
-	DEFB	#A1
-	DEFB	#01
-	DEFB	#05
-	DEFB	#02
-	DEFB	#A1
-	DEFB	#38
+	DB	#02
+	DB	#31
+	DB	#30
+	DB	#00
+	DB	#09
+	DB	#A0
+	DB	#01
+	DB	#37
+	DB	#00
+	DB	#06
+	DB	#A1
+	DB	#01
+	DB	#05
+	DB	#02
+	DB	#A1
+	DB	#38
 ;
 ;#386D
 	RET
@@ -9784,7 +9664,7 @@ L_386E	LD	HL,L_2596
 	POP	AF
 	CALL	L_2530
 	JP	NZ,L_26B5
-	LD	DE,L_0000
+	LD	DE,#0000
 L_387E	RST	#20
 	CALL	L_2C88
 	JR	NC,L_38A4
@@ -9837,7 +9717,7 @@ L_38B4	LD	HL,(#5C5D)
 	JP	L_2D2B
 ;
 L_38CD	PUSH	BC
-	LD	BC,L_0004
+	LD	BC,#0004
 	RST	#30
 	POP	HL
 	PUSH	DE
@@ -9869,13 +9749,13 @@ L_38F6	LD	DE,L_153E
 	JP	L_39F5
 ;
 ;#38FF
-	DEFB	#FF
-	DEFB	#FF
-L_3901	DEFB	#C3
-	DEFB	#52
-	DEFB	#00
-L_3904	DEFB	#52
-	DEFB	#00
+	DB	#FF
+	DB	#FF
+L_3901	DB	#C3
+	DB	#52
+	DB	#00
+L_3904	DB	#52
+	DB	#00
 ;
 L_3906	DI
 	XOR	A
@@ -9884,7 +9764,7 @@ L_3906	DI
 	LD	E,#17
 L_390E	LD	BC,#7FFD
 	OUT	(C),E
-	LD	BC,L_0008
+	LD	BC,#0008
 	LD	H,A
 	LD	L,A
 	LD	SP,HL
@@ -9904,14 +9784,15 @@ L_3929	LD	(BC),A
 	JR	NZ,L_3929
 	DEC	HL
 	JP	L_1200
-;
-L_3931	PUSH	AF
+
+;NMI Menu
+NMI_MENU:	PUSH	AF
 	PUSH	HL
 	LD	HL,#BFE0
 	ADD	HL,SP
 	JR	C,L_3942
 	LD	SP,#5800
-	LD	HL,L_3931
+	LD	HL,NMI_MENU
 	PUSH	HL
 	PUSH	HL
 	PUSH	HL
@@ -9924,16 +9805,16 @@ L_3949	DI
 	LD	C,#FE
 	LD	A,R
 	OUT	(C),A
-	DEFB	#ED,#71	;*OUT (C),0
-	CALL	L_028E
+	DB	#ED,#71	;*OUT (C),0
+	CALL	KEY_SCAN
 	INC	E
 	JR	Z,L_3949
 	DEC	E
-	CALL	L_031E
+	CALL	K_TEST
 	LD	XH,A
 	LD	A,#22
 	OUT	(#FE),A
-L_3962	CALL	L_028E
+L_3962	CALL	KEY_SCAN
 	INC	E
 	JR	NZ,L_3962
 	LD	A,#08
@@ -10018,10 +9899,10 @@ L_39F5	LD	B,H
 	JP	L_2DE3
 ;
 ;#39FD
-	DEFB	#00
-	DEFB	#00
-	DEFB	#FF
-	DEFB	#FF
+	DB	#00
+	DB	#00
+	DB	#FF
+	DB	#FF
 ;
 L_3A01	LD	C,A
 	LD	A,(IY+#02)
@@ -10091,7 +9972,7 @@ L_3A69	PUSH	HL
 	JR	Z,L_3A7E
 	BIT	0,(IY+#76)
 	JP	Z,L_1A28
-	LD	BC,L_0016
+	LD	BC,#0016
 L_3A7E	EQU	$-2
 	PUSH	DE
 	LD	D,(HL)
@@ -10233,12 +10114,12 @@ L_3B58	EQU	$-1
 ;
 L_3B77	LD	HL,L_15AF
 	LD	DE,#5CB6
-	LD	BC,L_0015
+	LD	BC,#0015
 	LD	(#5C4F),DE
 	LDIR
 	LD	HL,L_3C00
 	LD	(#5C36),HL
-	LD	HL,L_0040
+	LD	HL,#0040
 	LD	(#5C38),HL
 	LD	IY,#5C3A
 	LD	HL,(#5CB2)
@@ -10310,9 +10191,9 @@ L_3BFA	LD	(DE),A
 	JR	L_3BB3
 ;
 ;#3BFE
-	DEFB	#FF
-	DEFB	#FF
-L_3C00	DEFB	#FF
+	DB	#FF
+	DB	#FF
+L_3C00	DB	#FF
 ;
 L_3C01	CALL	L_1980
 	RET	NC
@@ -10338,7 +10219,7 @@ L_3C0B	CALL	L_0D6B
 	LD	A,#01
 	CALL	L_38F6
 	LD	BC,(#5C65)
-	LD	HL,L_0000
+	LD	HL,#0000
 	ADD	HL,SP
 	SBC	HL,BC
 	LD	A,#02
@@ -10349,7 +10230,7 @@ L_3C3F	LD	A,#FE
 	CALL	L_1601
 L_3C44	DI
 	LD	IX,#5C9E
-	LD	DE,L_0010
+	LD	DE,#0010
 	XOR	A
 	INC	E
 	SCF
@@ -10395,210 +10276,210 @@ L_3C7C	RST	#10
 	JR	L_3C44
 ;
 ;#3C97
-	DEFB	#FF
-	DEFB	#FF
-	DEFB	#FF
-	DEFB	#FF
-	DEFB	#FF
-	DEFB	#FF
-	DEFB	#FF
-	DEFB	#FF
-	DEFB	#FF
-	DEFB	#FF
-	DEFB	#FF
-L_3CA2	DEFB	#C9
-	DEFB	#FF
-L_3CA4	DEFB	#C9
-	DEFB	#FF
-	DEFB	#20
-	DEFB	#42
-	DEFB	#75
-	DEFB	#73
-	DEFB	#79
-	DEFB	#20
-	DEFB	#73
-	DEFB	#6F
-	DEFB	#66
-	DEFB	#74
-	DEFB	#20
-	DEFB	#72
-	DEFB	#6F
-	DEFB	#6D
-	DEFB	#20
-	DEFB	#31
-	DEFB	#34
-	DEFB	#30
-	DEFB	#20
-	DEFB	#FF
-	DEFB	#FF
-	DEFB	#FF
-	DEFB	#FF
-	DEFB	#FF
-	DEFB	#FF
-	DEFB	#FF
-	DEFB	#FF
-	DEFB	#FF
-	DEFB	#FF
-	DEFB	#FF
-	DEFB	#FF
-	DEFB	#FF
-	DEFB	#FF
-	DEFB	#FF
-	DEFB	#FF
-	DEFB	#FF
-	DEFB	#FF
-	DEFB	#FF
-	DEFB	#FF
-	DEFB	#FF
-	DEFB	#FF
-	DEFB	#FF
-	DEFB	#FF
-	DEFB	#FF
-	DEFB	#FF
-	DEFB	#FF
-	DEFB	#FF
-	DEFB	#FF
-	DEFB	#FF
-	DEFB	#FF
-	DEFB	#FF
-	DEFB	#FF
-	DEFB	#FF
-	DEFB	#FF
-	DEFB	#FF
-	DEFB	#FF
-	DEFB	#FF
-	DEFB	#FF
-	DEFB	#FF
-	DEFB	#FF
-	DEFB	#FF
-	DEFB	#FF
-	DEFB	#FF
-	DEFB	#FF
-	DEFB	#FF
-	DEFB	#FF
-	DEFB	#FF
-	DEFB	#FF
-	DEFB	#FF
-	DEFB	#FF
-	DEFB	#FF
-	DEFB	#FF
-	DEFB	#FF
-	DEFB	#FF
-	DEFB	#00
-	DEFB	#00
-	DEFB	#00
-	DEFB	#00
-	DEFB	#00
-	DEFB	#00
-	DEFB	#7E
-	DEFB	#00
-	DEFB	#00
-	DEFB	#7E
-	DEFB	#7E
-	DEFB	#7E
-	DEFB	#7E
-	DEFB	#7E
-	DEFB	#7E
-	DEFB	#00
+	DB	#FF
+	DB	#FF
+	DB	#FF
+	DB	#FF
+	DB	#FF
+	DB	#FF
+	DB	#FF
+	DB	#FF
+	DB	#FF
+	DB	#FF
+	DB	#FF
+L_3CA2	DB	#C9
+	DB	#FF
+L_3CA4	DB	#C9
+	DB	#FF
+	DB	#20
+	DB	#42
+	DB	#75
+	DB	#73
+	DB	#79
+	DB	#20
+	DB	#73
+	DB	#6F
+	DB	#66
+	DB	#74
+	DB	#20
+	DB	#72
+	DB	#6F
+	DB	#6D
+	DB	#20
+	DB	#31
+	DB	#34
+	DB	#30
+	DB	#20
+	DB	#FF
+	DB	#FF
+	DB	#FF
+	DB	#FF
+	DB	#FF
+	DB	#FF
+	DB	#FF
+	DB	#FF
+	DB	#FF
+	DB	#FF
+	DB	#FF
+	DB	#FF
+	DB	#FF
+	DB	#FF
+	DB	#FF
+	DB	#FF
+	DB	#FF
+	DB	#FF
+	DB	#FF
+	DB	#FF
+	DB	#FF
+	DB	#FF
+	DB	#FF
+	DB	#FF
+	DB	#FF
+	DB	#FF
+	DB	#FF
+	DB	#FF
+	DB	#FF
+	DB	#FF
+	DB	#FF
+	DB	#FF
+	DB	#FF
+	DB	#FF
+	DB	#FF
+	DB	#FF
+	DB	#FF
+	DB	#FF
+	DB	#FF
+	DB	#FF
+	DB	#FF
+	DB	#FF
+	DB	#FF
+	DB	#FF
+	DB	#FF
+	DB	#FF
+	DB	#FF
+	DB	#FF
+	DB	#FF
+	DB	#FF
+	DB	#FF
+	DB	#FF
+	DB	#FF
+	DB	#FF
+	DB	#FF
+	DB	#00
+	DB	#00
+	DB	#00
+	DB	#00
+	DB	#00
+	DB	#00
+	DB	#7E
+	DB	#00
+	DB	#00
+	DB	#7E
+	DB	#7E
+	DB	#7E
+	DB	#7E
+	DB	#7E
+	DB	#7E
+	DB	#00
 ;
 ;#3D00
-	DEFB	#00,#00,#00,#00,#00,#00,#00,#00
-	DEFB	#00,#10,#10,#10,#10,#00,#10,#00
-	DEFB	#00,#24,#24,#00,#00,#00,#00,#00
-	DEFB	#00,#24,#7E,#24,#24,#7E,#24,#00
-	DEFB	#00,#08,#3E,#28,#3E,#0A,#3E,#08
-	DEFB	#00,#62,#64,#08,#10,#26,#46,#00
-	DEFB	#00,#10,#28,#10,#2A,#44,#3A,#00
-	DEFB	#00,#08,#10,#00,#00,#00,#00,#00
-	DEFB	#00,#04,#08,#08,#08,#08,#04,#00
-	DEFB	#00,#20,#10,#10,#10,#10,#20,#00
-	DEFB	#00,#00,#14,#08,#3E,#08,#14,#00
-	DEFB	#00,#00,#08,#08,#3E,#08,#08,#00
-	DEFB	#00,#00,#00,#00,#00,#08,#08,#10
-	DEFB	#00,#00,#00,#00,#3E,#00,#00,#00
-	DEFB	#00,#00,#00,#00,#00,#18,#18,#00
-	DEFB	#00,#00,#02,#04,#08,#10,#20,#00
-	DEFB	#00,#3C,#46,#4A,#52,#62,#3C,#00
-	DEFB	#00,#18,#28,#08,#08,#08,#3E,#00
-	DEFB	#00,#3C,#42,#02,#3C,#40,#7E,#00
-	DEFB	#00,#3C,#42,#0C,#02,#42,#3C,#00
-	DEFB	#00,#08,#18,#28,#48,#7E,#08,#00
-	DEFB	#00,#7E,#40,#7C,#02,#42,#3C,#00
-	DEFB	#00,#3C,#40,#7C,#42,#42,#3C,#00
-	DEFB	#00,#7E,#02,#04,#08,#10,#10,#00
-	DEFB	#00,#3C,#42,#3C,#42,#42,#3C,#00
-	DEFB	#00,#3C,#42,#42,#3E,#02,#3C,#00
-	DEFB	#00,#00,#00,#10,#00,#00,#10,#00
-	DEFB	#00,#00,#10,#00,#00,#10,#10,#20
-	DEFB	#00,#00,#04,#08,#10,#08,#04,#00
-	DEFB	#00,#00,#00,#3E,#00,#3E,#00,#00
-	DEFB	#00,#00,#10,#08,#04,#08,#10,#00
-	DEFB	#00,#3C,#42,#04,#08,#00,#08,#00
-	DEFB	#00,#3C,#02,#3A,#4A,#4A,#3C,#00
-	DEFB	#00,#3C,#42,#42,#7E,#42,#42,#00
-	DEFB	#00,#7C,#42,#7C,#42,#42,#7C,#00
-	DEFB	#00,#3C,#42,#40,#40,#42,#3C,#00
-	DEFB	#00,#78,#44,#42,#42,#44,#78,#00
-	DEFB	#00,#7E,#40,#7C,#40,#40,#7E,#00
-	DEFB	#00,#7E,#40,#7C,#40,#40,#40,#00
-	DEFB	#00,#3C,#42,#40,#4E,#42,#3C,#00
-	DEFB	#00,#42,#42,#7E,#42,#42,#42,#00
-	DEFB	#00,#3E,#08,#08,#08,#08,#3E,#00
-	DEFB	#00,#02,#02,#02,#42,#42,#3C,#00
-	DEFB	#00,#44,#48,#70,#48,#44,#42,#00
-	DEFB	#00,#40,#40,#40,#40,#40,#7E,#00
-	DEFB	#00,#42,#66,#5A,#42,#42,#42,#00
-	DEFB	#00,#42,#62,#52,#4A,#46,#42,#00
-	DEFB	#00,#3C,#42,#42,#42,#42,#3C,#00
-	DEFB	#00,#7C,#42,#42,#7C,#40,#40,#00
-	DEFB	#00,#3C,#42,#42,#52,#4A,#3C,#00
-	DEFB	#00,#7C,#42,#42,#7C,#44,#42,#00
-	DEFB	#00,#3C,#40,#3C,#02,#42,#3C,#00
-	DEFB	#00,#FE,#10,#10,#10,#10,#10,#00
-	DEFB	#00,#42,#42,#42,#42,#42,#3C,#00
+	DB	#00,#00,#00,#00,#00,#00,#00,#00
+	DB	#00,#10,#10,#10,#10,#00,#10,#00
+	DB	#00,#24,#24,#00,#00,#00,#00,#00
+	DB	#00,#24,#7E,#24,#24,#7E,#24,#00
+	DB	#00,#08,#3E,#28,#3E,#0A,#3E,#08
+	DB	#00,#62,#64,#08,#10,#26,#46,#00
+	DB	#00,#10,#28,#10,#2A,#44,#3A,#00
+	DB	#00,#08,#10,#00,#00,#00,#00,#00
+	DB	#00,#04,#08,#08,#08,#08,#04,#00
+	DB	#00,#20,#10,#10,#10,#10,#20,#00
+	DB	#00,#00,#14,#08,#3E,#08,#14,#00
+	DB	#00,#00,#08,#08,#3E,#08,#08,#00
+	DB	#00,#00,#00,#00,#00,#08,#08,#10
+	DB	#00,#00,#00,#00,#3E,#00,#00,#00
+	DB	#00,#00,#00,#00,#00,#18,#18,#00
+	DB	#00,#00,#02,#04,#08,#10,#20,#00
+	DB	#00,#3C,#46,#4A,#52,#62,#3C,#00
+	DB	#00,#18,#28,#08,#08,#08,#3E,#00
+	DB	#00,#3C,#42,#02,#3C,#40,#7E,#00
+	DB	#00,#3C,#42,#0C,#02,#42,#3C,#00
+	DB	#00,#08,#18,#28,#48,#7E,#08,#00
+	DB	#00,#7E,#40,#7C,#02,#42,#3C,#00
+	DB	#00,#3C,#40,#7C,#42,#42,#3C,#00
+	DB	#00,#7E,#02,#04,#08,#10,#10,#00
+	DB	#00,#3C,#42,#3C,#42,#42,#3C,#00
+	DB	#00,#3C,#42,#42,#3E,#02,#3C,#00
+	DB	#00,#00,#00,#10,#00,#00,#10,#00
+	DB	#00,#00,#10,#00,#00,#10,#10,#20
+	DB	#00,#00,#04,#08,#10,#08,#04,#00
+	DB	#00,#00,#00,#3E,#00,#3E,#00,#00
+	DB	#00,#00,#10,#08,#04,#08,#10,#00
+	DB	#00,#3C,#42,#04,#08,#00,#08,#00
+	DB	#00,#3C,#02,#3A,#4A,#4A,#3C,#00
+	DB	#00,#3C,#42,#42,#7E,#42,#42,#00
+	DB	#00,#7C,#42,#7C,#42,#42,#7C,#00
+	DB	#00,#3C,#42,#40,#40,#42,#3C,#00
+	DB	#00,#78,#44,#42,#42,#44,#78,#00
+	DB	#00,#7E,#40,#7C,#40,#40,#7E,#00
+	DB	#00,#7E,#40,#7C,#40,#40,#40,#00
+	DB	#00,#3C,#42,#40,#4E,#42,#3C,#00
+	DB	#00,#42,#42,#7E,#42,#42,#42,#00
+	DB	#00,#3E,#08,#08,#08,#08,#3E,#00
+	DB	#00,#02,#02,#02,#42,#42,#3C,#00
+	DB	#00,#44,#48,#70,#48,#44,#42,#00
+	DB	#00,#40,#40,#40,#40,#40,#7E,#00
+	DB	#00,#42,#66,#5A,#42,#42,#42,#00
+	DB	#00,#42,#62,#52,#4A,#46,#42,#00
+	DB	#00,#3C,#42,#42,#42,#42,#3C,#00
+	DB	#00,#7C,#42,#42,#7C,#40,#40,#00
+	DB	#00,#3C,#42,#42,#52,#4A,#3C,#00
+	DB	#00,#7C,#42,#42,#7C,#44,#42,#00
+	DB	#00,#3C,#40,#3C,#02,#42,#3C,#00
+	DB	#00,#FE,#10,#10,#10,#10,#10,#00
+	DB	#00,#42,#42,#42,#42,#42,#3C,#00
 L_3EAF	EQU	$-1
-	DEFB	#00,#42,#42,#42,#42,#24,#18,#00
-	DEFB	#00,#42,#42,#42,#42,#5A,#24,#00
-	DEFB	#00,#42,#24,#18,#18,#24,#42,#00
-	DEFB	#00,#82,#44,#28,#10,#10,#10,#00
-	DEFB	#00,#7E,#04,#08,#10,#20,#7E,#00
-	DEFB	#00,#0E,#08,#08,#08,#08,#0E,#00
-	DEFB	#00,#00,#40,#20,#10,#08,#04,#00
-	DEFB	#00,#70,#10,#10,#10,#10,#70,#00
-	DEFB	#00,#10,#38,#54,#10,#10,#10,#00
-	DEFB	#00,#00,#00,#00,#00,#00,#00,#FF
-	DEFB	#00,#1C,#22,#78,#20,#20,#7E,#00
-	DEFB	#00,#00,#38,#04,#3C,#44,#3C,#00
-	DEFB	#00,#20,#20,#3C,#22,#22,#3C,#00
-	DEFB	#00,#00,#1C,#20,#20,#20,#1C,#00
-	DEFB	#00,#04,#04,#3C,#44,#44,#3C,#00
-	DEFB	#00,#00,#38,#44,#78,#40,#3C,#00
-	DEFB	#00,#0C,#10,#18,#10,#10,#10,#00
-	DEFB	#00,#00,#3C,#44,#44,#3C,#04,#38
-	DEFB	#00,#40,#40,#78,#44,#44,#44,#00
-	DEFB	#00,#10,#00,#30,#10,#10,#38,#00
-	DEFB	#00,#04,#00,#04,#04,#04,#24,#18
-	DEFB	#00,#20,#28,#30,#30,#28,#24,#00
-	DEFB	#00,#10,#10,#10,#10,#10,#0C,#00
-	DEFB	#00,#00,#68,#54,#54,#54,#54,#00
-	DEFB	#00,#00,#78,#44,#44,#44,#44,#00
-	DEFB	#00,#00,#38,#44,#44,#44,#38,#00
-	DEFB	#00,#00,#78,#44,#44,#78,#40,#40
-	DEFB	#00,#00,#3C,#44,#44,#3C,#04,#06
-	DEFB	#00,#00,#1C,#20,#20,#20,#20,#00
-	DEFB	#00,#00,#38,#40,#38,#04,#78,#00
-	DEFB	#00,#10,#38,#10,#10,#10,#0C,#00
-	DEFB	#00,#00,#44,#44,#44,#44,#38,#00
-	DEFB	#00,#00,#44,#44,#28,#28,#10,#00
-	DEFB	#00,#00,#44,#54,#54,#54,#28,#00
-	DEFB	#00,#00,#44,#28,#10,#28,#44,#00
-	DEFB	#00,#00,#44,#44,#44,#3C,#04,#38
-	DEFB	#00,#00,#7C,#08,#10,#20,#7C,#00
-	DEFB	#00,#0E,#08,#30,#08,#08,#0E,#00
-	DEFB	#00,#08,#08,#08,#08,#08,#08,#00
-	DEFB	#00,#70,#10,#0C,#10,#10,#70,#00
-	DEFB	#00,#14,#28,#00,#00,#00,#00,#00
-	DEFB	#3C,#42,#99,#A1,#A1,#99,#42,#3C
+	DB	#00,#42,#42,#42,#42,#24,#18,#00
+	DB	#00,#42,#42,#42,#42,#5A,#24,#00
+	DB	#00,#42,#24,#18,#18,#24,#42,#00
+	DB	#00,#82,#44,#28,#10,#10,#10,#00
+	DB	#00,#7E,#04,#08,#10,#20,#7E,#00
+	DB	#00,#0E,#08,#08,#08,#08,#0E,#00
+	DB	#00,#00,#40,#20,#10,#08,#04,#00
+	DB	#00,#70,#10,#10,#10,#10,#70,#00
+	DB	#00,#10,#38,#54,#10,#10,#10,#00
+	DB	#00,#00,#00,#00,#00,#00,#00,#FF
+	DB	#00,#1C,#22,#78,#20,#20,#7E,#00
+	DB	#00,#00,#38,#04,#3C,#44,#3C,#00
+	DB	#00,#20,#20,#3C,#22,#22,#3C,#00
+	DB	#00,#00,#1C,#20,#20,#20,#1C,#00
+	DB	#00,#04,#04,#3C,#44,#44,#3C,#00
+	DB	#00,#00,#38,#44,#78,#40,#3C,#00
+	DB	#00,#0C,#10,#18,#10,#10,#10,#00
+	DB	#00,#00,#3C,#44,#44,#3C,#04,#38
+	DB	#00,#40,#40,#78,#44,#44,#44,#00
+	DB	#00,#10,#00,#30,#10,#10,#38,#00
+	DB	#00,#04,#00,#04,#04,#04,#24,#18
+	DB	#00,#20,#28,#30,#30,#28,#24,#00
+	DB	#00,#10,#10,#10,#10,#10,#0C,#00
+	DB	#00,#00,#68,#54,#54,#54,#54,#00
+	DB	#00,#00,#78,#44,#44,#44,#44,#00
+	DB	#00,#00,#38,#44,#44,#44,#38,#00
+	DB	#00,#00,#78,#44,#44,#78,#40,#40
+	DB	#00,#00,#3C,#44,#44,#3C,#04,#06
+	DB	#00,#00,#1C,#20,#20,#20,#20,#00
+	DB	#00,#00,#38,#40,#38,#04,#78,#00
+	DB	#00,#10,#38,#10,#10,#10,#0C,#00
+	DB	#00,#00,#44,#44,#44,#44,#38,#00
+	DB	#00,#00,#44,#44,#28,#28,#10,#00
+	DB	#00,#00,#44,#54,#54,#54,#28,#00
+	DB	#00,#00,#44,#28,#10,#28,#44,#00
+	DB	#00,#00,#44,#44,#44,#3C,#04,#38
+	DB	#00,#00,#7C,#08,#10,#20,#7C,#00
+	DB	#00,#0E,#08,#30,#08,#08,#0E,#00
+	DB	#00,#08,#08,#08,#08,#08,#08,#00
+	DB	#00,#70,#10,#0C,#10,#10,#70,#00
+	DB	#00,#14,#28,#00,#00,#00,#00,#00
+	DB	#3C,#42,#99,#A1,#A1,#99,#42,#3C
 ;#4000
 ;
 ROM_LEN	EQU	$-START
