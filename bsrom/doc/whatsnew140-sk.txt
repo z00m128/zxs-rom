@@ -1,0 +1,18 @@
+Zmeny 118 -> 140
+~~~~~~~~~~~~~~~~
+ + Opravena chyba INT x, kde x=-65536.9 az -65535.1
+ + Opravena chyba scitania (-65535-1 uz je -65536)
+ + Opravena chyba nasobenia (chybny skok v rutinke)
+ + Opravena chyba dvojiteho ukladania retazca v SCREEN$
+
+ + Prikaz "*" - header: namiesto "?" vypisuje novy znak ciarku
+ + Autolist - namiesto kodov vypisuje tiez ciarku (pri POKE 23728,6)
+ + Nove startovacie farby po resetoch a NEWe: BORDER 1:PAPER 0:INK 7
+ + Lepsie osetreny "Scroll ?" pri vypise magnetofonovej hlavicky
+ - Hexadecimalne cisla sa uz pisu len po znaku '%' (& je zruseny)
+ + V prikazoch kde sa pise jednobajtove cislo, mozno napisat aj zaporne.
+ + Skorigovane niektore adresy a OUTy v NMI menu
+
+ + Magnetofonove prikazy s nepovinnym menom suboru
+ + Nova funkcia CHR$ (pri zapornom parametri vrati celu pamet)
+ + Prikaz POKE s celkom novou rozsirenou syntaxou (viac parametrov naraz)

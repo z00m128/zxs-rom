@@ -1,0 +1,18 @@
+Changes 118 -> 140
+~~~~~~~~~~~~~~~~~~
+ + Fixed bug of INT x, where x=-65536.9 to -65535.1
+ + Fixed bug of addition (-65535-1 is now -65536)
+ + Fixed bug of multiplication (bad jump in routine)
+ + Fixed bug of double store of string in SCREEN$
+
+ + Command '*' - header: '?' replaced by '_' (code 30)
+ + Autolisting - control codes:  '?' replaced by '_' too
+ + New start-up colors after resets and NEW: BORDER 1:PAPER 0:INK 7
+ + Better handler for 'Scroll ?' in displaying mg. headers
+ - Hexadecimal numbers only after character '%' (& is removed)
+ + You can write negative number in commands what need 8-bit value
+ + Some OUTs in NMI menu is corrected
+
+ + MG. commands with optional string parameter (name of program)
+ + New feature in function CHR$ (it can return whole memory as string)
+ + Command POKE with enhacement syntax (you can write more parameters)

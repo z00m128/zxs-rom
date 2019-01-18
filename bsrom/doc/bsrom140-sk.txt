@@ -1,0 +1,218 @@
+##############################################################################
+# BSrom140 - Modifikovana ZX Spectrum ROM - (c) Busy soft - Release 22.04.97 #
+##############################################################################
+                   Originalna romka: (c) Amstrad
+                (Ak nemate diakritiku Kamenickych,
+                skuste spustit program setkam.com)
+
+                           Vseobecne
+                           ---------
+Jedna sa o klasicku romku zo ZX Spectra na ktorej boli spachane tieto upravy:
+
+ - pribudlo zopar novych prikazov a funkcii - prehlad dalej
+ - rozsirena syntax niektorych prikazov a funkcii - prehlad dalej
+ - asi stvornasobne rychle chytanie uvodneho tonu z magnetofonu
+ - programovy kurzor zmeneny zo znaku ">" na znak "*"
+ - zvysena frekvencia chyboveho beepu
+ - spracovanie hexadecimalnych cisel v rozsahu 0-65535
+ - moznost pisania basicovych riadkov v rozsahu 0-16383
+   (mozete normalne editovat a odosielat aj nulty riadok!)
+ - v prikazoch ocakavajucich 8-bitovu hodnotu mozete pisat
+   aj zaporne cisla, realna hodnota bude potom o 256 vecsia.
+ - rychlejsi autorepeat na zaciatku po inicializacii
+ - pri pokuse o odoslanie chybneho prikazu alebo riadku skoci
+   kurzor na miesto chyby (lepsie ako v IZO-ROM)
+ - moznost vypisovat listing programu bez riadiacich kodov
+   (nereaguje na farby, TAB a AT - vhodne na zasite programy)
+ - osetrenie NMI pomocou rozsiritelneho menu - prehlad dalej
+ - opravene niektore chyby - prehlad dalej
+ - dva nove znaky v znakovom subore - maly podciarnik a stvorcek
+ - programovy kurzor "*" sa vypisuje iba pri autoliste
+ - po editacnej zone sa da chodit hore a dolu
+ - resety a NEW mazu pamet pomocou PUSH - je to super rychle
+ - nove farby po resetoch a NEWe: ink 7, paper 0
+ - autolist mozno v kazdom okamihu zastavit klavesou "Q"
+ - niekolko vymozenosti pre uzivatelov ZX Spektra 128k
+
+
+               Prehlad chyb, ktore boli opravene
+               ---------------------------------
+ - Chybne osetenie NMI rutiny - vyriesilo to NMI menu. Ale
+   prislusny bajt zostal nezmeneny - to keby ho nahodou
+   nejaky program moc usilovne zacal skumat a testovat.
+ - PRINT AT 0,0;CHR$ 8; - posunulo kurzor na poziciu AT -1,31 -
+   v tejto romke sa poloha kurzora nemeni.
+ - Ak sa malo vypisat chybove hlasenie a je zakazane prerusenie,
+   tak to zmrzlo. V tejto romke sa to nemoze stat.
+ - Normalna romka sama seba na adresach 0..4 prepisuje. Tato
+   romka nie, preto moze bezat aj bez zakazaneho zapisu v ramke.
+ - Ak vysledok scitania alebo odcitania dvoch cisel v rozsahu
+   -65535 az 65535 mal vyjst -65536, dopadlo to zle.
+   V tejto romke je tato chyba scitania uz osetrena.
+ - S chybou -65536 suvisi aj chybny vypocet INT x,
+   kde x=-65536.9 az -65535.1 Tento vypocet je tiez osetreny.
+ - Ak je posledny riadok  v  programe  N,  vy  odoslete  prazdny
+   riadok N+1 (akoze ho zmazete) a potom stlacite  EDIT,  editne
+   sa vam N-ty riadok aj s programovym kurzorom. V  tejto  romke
+   sa programovy kurzor objavuje iba pri autolistingu a preto sa
+   nikdy nemoze objavit v editnutom riadku.
+
+Na demonstraciu chyby -65536 a chyby INT je vhodny nasledujuci program:
+    FOR a=-65538 TO -65533.9 STEP 0.25: PRINT a,INT a : NEXT a
+Schvalne si ho skuste spustit na povodnej ZX romke, a na tejto opravenej.
+
+Po starte alebo NEWe sa romka prihlasi vypisanim informacie,
+kolko je volneho miesta (basic a premenne  basicu maju vtedy
+samozrejme nulovu dlzku) a vypise sa normalne hlasenie OK.
+48k a 128k reset a ani NEW netestuju pamet - predpoklada sa, ze
+cela 48kB alebo 128k pamet je funkcna.
+
+Po resete alebo NMI (skoku na adresy #00 alebo #66) zacne srsat
+border, co je znakom ze ste v NMI menu. Ak by bol zasobnik SP
+na adresach  #00-#4000, zmeni sa na #5800. Ovladacie klavesy:
+
+ B - teply start basicu. Inicializuju sa vseky systemove
+     premenne okrem PROG, VARS a ELINE - teda basicovy
+     program a basicoe premenne zostanu zachovane.
+ N - podobne ako CLEAR #5fff: NEW - teda pamet nad #6000 ostane
+     neporusena.
+ R - zmaze celu pamet 48kB - je to klasicky 48k reset.
+ E - zmaze celu pamet 128k - (extend reset 128k)
+ I - resetuje tieto periferie: AY, FDC, DMA a mechaniku disku.
+ S - save "" screen$ na aktualne zariadenie (MG alebo disk)
+ T - ako USR 15522 cize aktualne zariadenie bude paska.
+ D - ako USR 15524 cize aktualne zariadenie bude disk.
+ Q - navrat spat do preruseneho programu. Pozor: navrat bude
+     korektny iba vtedy, ak SP nebol zmeneny na #5800.
+     Pri navrate su vsetky registre (okrem dolnych 7 bitov
+     registra R) obnovene na povodne hodnoty.
+ M - skok do debuggera v MRS (musi byt v pameti!).
+     Vsetky registre sa nastavia ako boli v okamihu prerusenia
+     programu pomocou MNI - cize mozno preruseny program dalej
+     krokovat (PC a SP sa korektne nastavia iba ak sa SP
+     nezmenilo na #5800!).
+ 0..9 - prepnutie ram-banky na 128k. Ak by sa SP nachadzal v
+        oblasti hornych 16 kB, bude zmeneny na #5800.
+        Je to vlastne OUT (#7ffd),cislo - cize pomocou 8 a 9 si
+        mozno pozriet obsah druhej videostranky.
+ U - uzivatelska funkcia - na adrese #3901 je JP XXX, kde si moze
+     uzivatel napokovat adresu svojej aplikacie a po stlaceni klavesy "U"
+     sa tato aplikacia spusti. Navrat je normalne pomocou RET.
+ Z - uzivatelska funkcia - na adrese #3904 je DW xxx, a dalej presne
+     tak isto ako "U". Tieto dve funkcie v samotnej romke nerobia nic,
+     ale su vyhradene pre dalsie rozsirenia (napr. rezidentny monitor).
+
+
+            Rozsirenie syntaxe existujucich prikazov
+            ----------------------------------------
+            (Polozky v zatvorkach < > su nepovinne.)
+
+ CONTINUE <vyraz> .. ak je vyraz nenulovy tak sa spusti strojak
+   od tejto adresy. Pozor ! Pri navrate musi byt na rozdiel od
+   USR register IY nastaveny na #5c3a, ale zato HL' nemusi mat
+   hodnotu #2758.
+ CLS <vyraz> .. ak vyraz je nenulovy tak sa nim nastavia vsetky
+   farby (pr. CLS 7 = BORDER 0: PAPER 0:INK 7:BRIGHT 0:FLASH 0).
+ GOTO, GOSUB, PAUSE, BORDER .. ciselny parameter pri tychto
+   prikazoch je nepovinny, nezadany sa chape ako nula.
+ LOAD, SAVE, VERIFY, MERGE .. retazcovy parameter pri tychto
+   prikazoch je nepovinny, nezadany sa chape ako prazdny retazec.
+ <PRINT> zoznam poloziek .. Za predpokladu, ze zoznam poloziek
+   nezacina cislicou, ciarkou, a apostrofom mozete pokojne vynechat
+   prikaz PRINT. Totiz ak sa pri behu programu najde nieco, co nie
+   je ziadny prikaz, skoci sa do rutinky na prikaz PRINT.
+ POKE adresa <polozka1> <polozka2>... ukladanie poloziek do pameti.
+   Poloziek moze byt lubovolny pocet. Moznosti poloziek:
+    , 8-bit-hodnota ... ulozenie jedneho bajtu do pameti
+    ; 16-bit-hodnota ... ulozenie dvojbajtovej hodnoty
+    , retazec ... ulozenie retazca postupne po znakoch
+    ; retazec ... posledny znak retazca bude mat nastaveny siedmy bit
+   Priklad: POKE 16384,20;1025,"ahoj";"cau"
+   ulozi do pameti tieto bajty: 20, 1,4, 97,104,111,106, 99,97,245
+   Samozrejme ze vsade, kde sa ocakava nejaka hodnota (ciselna
+   alebo retazcova) mozno napisat lubovolny vyraz prislusneho typu.
+
+                  Rozsirenie niektorych funkcii
+                  -----------------------------
+ CHR$ vyraz .. ak je vyraz v rozsahu 0..255, pracuje ako predtym,
+   t.j. vrati prislusny znak ktoreho kod je hodnota vyrazu.
+   Ale ak vyraz nadobudne hodnotu -1, potom tato funkcia vrati
+   skoro celu pamet - t.j. retazec dlhy 65535 znakov.
+   (Vratit vsetkych 65536 bajtov by bolo technicky problematicke).
+ VAL$ vyraz .. ak je vyraz ciselneho typu, tak vysledkom tejto
+   funkcie je stvorznakovy retazec hexadecimalnych cislic - inac
+   povedane prevod DEC -> HEX (pr. VAL$ 33023 = "80ff").
+ VAL vyraz .. ak je vyraz ciselneho typu, tak vysledkom tejto
+   funkcie je dvojbajtove cislo ulozene na tejto adrese - inac
+   povedane dvojbajtovy PEEK.
+ % .. prevod HEX -> DEC podobne ako je BIN prevod BIN -> DEC.
+   Inac povedane ak chcete ako cislo zapisat hexadecimalnu
+   konstantu, musi zacinat znakom "%". Znak "#" nebol pouzity
+   preto, lebo ten sa pouziva na nastavenie kanala v prikazoch
+   PRINT A INPUT (priklad: zapis %80ff je totozny s 33023).
+
+Funkciu CHR$ s parametrom -1 je velmi vyhodne pouzivat spolu s prikazom
+POKE na pracu s blokmi pameti, alebo aj samostatne na citanie pameti.
+Napriklad prikaz LET a$=(CHR$ -1)(16384 TO 23295) odlozi do premennej a$
+obrazovku. Potom zase prikaz POKE 16384,a$ vrati odlozenu obrazovku spet.
+Pretoze zapisy "PEEK adresa" a "CODE (CHR$ -1)(adresa)" su totozne.
+
+                    Nove prikazy a ich syntax
+                    -------------------------
+ , <vyraz> .. (ciarka) editne prislusny basicovy riadok. Ak
+      vyraz nie je uvedeny alebo nadobuda nulovu hodnotu,
+      edituje sa riadok s najnizsim poradovym cislom.
+ ' <vyraz> .. (apostrof) prepina ram-banky na 128k ako OUT
+      (#7ffd),vyraz (podobne ako 0-9 v NMI menu). Vyraz musi
+      byt v intervale 0 az 15. Pozor! Pri prepinani musi byt
+      RAMTOP mensi ako #c000.
+  .. obnovi vsetky systemove premenne okrem PROG, VARS a ELINE.
+      (Ako "B" v NMI menu.) [C v kruzku]
+ ^ .. velky 128k reset - maze celu pamet 128k.
+      (Ako "E" v NMI menu.) [sipka hore]
+ ? .. vypise informaciu o dlzke programu, dlzke premennych a
+      velkost volnej pamete pre basic.
+ * .. header - z pasky cita hlavicky a vypisuje o nich toto:
+            typ suboru : meno suboru : adresa : dlzka
+ _ .. to iste ako USR 00102 - skok do NMI menu.
+ # .. to iste ako USR 54885 - skok do MRS (musi byt v pameti!).
+
+
+                  Jedna nova systemova premenna
+                  -----------------------------
+ Kedze NMI rutinka vzdy zavola NMI menu, nepotrebuje  uz  vektor
+na adrese 23728. Preto tri bity na 23728 su takto vyuzite:
+
+ bit 0=0:cisla basicovych riadkov sa vypisuju ako stvormiestne
+ bit 0=1:cisla basicovych riadkov sa vypisuju ako petmiestne
+ bit 1=0:pri autoliste sa vypisuju riadiace kody normalne
+ bit 1=1:pri autoliste sa vypisuju riadiace kody podla bitu 2
+ bit 2=0:pri autoliste sa vobec nevypisuju riadiace kody
+ bit 2=1:pri autoliste sa vypisuju riadiace kody ako "_"
+
+Po resete alebo newe sa tu zapise nula. Petmiestne cisla riadkov
+maju vyznam vtedy, ak pouzivate riadky v rozsahu 10000 az 16383.
+Tento bit nijako neovplyvnuje beh programu s takymito  riadkami,
+len meni format listingu. Pri editovani  riadku  sa  jeho  cislo
+vypise vzdy ako petmiestne.
+
+                ----------------------------
+
+Na adresach #3C98-#3CEF sa nachadza kusok volneho miesta.
+Toto miesto je rezervovane pre pouzitie v MB-02. Ale ak nemate
+MB-02 tak si mozete toto miesto vyuzit pre svoje vlastne ucely.
+
+Na zaver by som chcel podakovat tymto ludom
+ - Milan Pikula - WWW (www@crazy.elf.stuba.sk)
+ - Ian Collier (jeho e-mail adresu neviem)
+za ich modifikovane romky, ktorymi som sa nechal inspirovat
+a z ktorych som si dovolil "pozicat" si niektore napady.
+(Ale len napady a nic viac, vsetky rutinky mam vlastne).
+
+==================================================================
+    Adresa autora:         E-mail: busy@elf.stuba.sk
+    Slavko Labsky          http://www.elf.stuba.sk/~busy
+    Gallayova 13
+    841 02 Bratislava      Telefon:
+    Slovenska republika    (07) 764 705 (len slovensky a cesky!)
+==================================================================
