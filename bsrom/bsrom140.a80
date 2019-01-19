@@ -2,6 +2,7 @@
 
 		ORG	#0000
 
+; RST #00
 START:		DI
 		XOR	A
 		LD	DE,#FFFF
@@ -25,6 +26,7 @@ PRINT_A:	JP	PRINT_A_2
 		DB	#FF
 
 ; Collect a character
+; RST #18
 GET_CHAR:	LD	HL,(#5C5D)
 		LD	A,(HL)
 TEST_CHAR:	CALL	SKIP_OVER
@@ -535,6 +537,7 @@ K_KLC_LET:	LD	HL,#0229		;SYM_CODES-#41
 ; Add offset to main code to get tokens
 K_TOKENS:	ADD	A,#A5
 		RET
+
 ; Digits, space, enter and symbol shift decoding
 K_DIGIT:	CP	#30
 		RET	C
@@ -589,222 +592,159 @@ K_KLC_DGT:	INC	B
 ; Substitute ascii '@'
 K_AT_CHAR	LD	A,#40
 		RET
-		
-;
-L_03B5	DI
-	LD	A,L
-	SRL	L
-	SRL	L
-	CPL
-	AND	#03
-	LD	C,A
-	LD	B,#00
-	LD	IX,L_03D1
-	ADD	IX,BC
-	LD	A,(#5C48)
-	AND	#38
-	RRCA
-	RRCA
-	RRCA
-	OR	#08
-L_03D1	NOP
-	NOP
-	NOP
-	INC	B
-	INC	C
-L_03D6	DEC	C
-	JR	NZ,L_03D6
-	LD	C,#3F
-	DEC	B
-	JP	NZ,L_03D6
-	XOR	#10
-	OUT	(#FE),A
-	LD	B,H
-	LD	C,A
-	BIT	4,A
-	JR	NZ,L_03F2
-	LD	A,D
-	OR	E
-	JR	Z,L_03F6
-	LD	A,C
-	LD	C,L
-	DEC	DE
-L_03F0	JP	(IX)
-;
-L_03F2	LD	C,L
-	INC	C
-	JP	(IX)
-;
-L_03F6	EI
-	RET
-;
-L_03F8	RST	#28	;*calc
-;
-;#03F9
-	DB	#31
-	DB	#27
-	DB	#C0
-	DB	#03
-	DB	#34
-	DB	#EC
-	DB	#6C
-	DB	#98
-	DB	#1F
-	DB	#F5
-	DB	#04
-	DB	#A1
-	DB	#0F
-	DB	#38
-;
-;#0407
-	LD	HL,#5C92
-	LD	A,(HL)
-	AND	A
-	JR	NZ,L_046C
-	INC	HL
-	LD	C,(HL)
-	INC	HL
-	LD	B,(HL)
-	LD	A,B
-	RLA
-	SBC	A,A
-	CP	C
-	JR	NZ,L_046C
-	INC	HL
-	CP	(HL)
-	JR	NZ,L_046C
-	LD	A,B
-	ADD	A,#3C
-	JP	P,L_0425
-	JP	PO,L_046C
-L_0425	LD	B,#FA
-L_0427	INC	B
-	SUB	#0C
-	JR	NC,L_0427
-	ADD	A,#0C
-	PUSH	BC
-	LD	HL,L_046E
-	CALL	L_3406
-	CALL	L_33B4
-	RST	#28	;*calc
-;
-;#0439
-	DB	#04
-	DB	#38
-;
-;#043B
-	POP	AF
-	ADD	A,(HL)
-	LD	(HL),A
-	RST	#28	;*calc
-;
-;#043F
-	DB	#C0
-	DB	#02
-	DB	#31
-	DB	#38
-;
-;#0443
-	CALL	L_1E94
-	CP	#0B
-	JR	NC,L_046C
-	RST	#28	;*calc
-;
-;#044B
-	DB	#E0
-	DB	#04
-	DB	#E0
-	DB	#34
-	DB	#80
-	DB	#43
-	DB	#55
-	DB	#9F
-	DB	#80
-	DB	#01
-	DB	#05
-	DB	#34
-	DB	#35
-	DB	#71
-	DB	#03
-	DB	#38
-;
-;#045B
-	CALL	L_1E99
-	PUSH	BC
-	CALL	L_1E99
-	POP	HL
-	LD	D,B
-	LD	E,C
-	LD	A,D
-	OR	E
-	RET	Z
-	DEC	DE
-	JP	L_03B5
-;
-L_046C	RST	#08
-;
-;#046D
-	DB	#0A
-L_046E	DB	#89
-	DB	#02
-	DB	#D0
-	DB	#12
-	DB	#86
-	DB	#89
-	DB	#0A
-	DB	#97
-	DB	#60
-	DB	#75
-	DB	#89
-	DB	#12
-	DB	#D5
-	DB	#17
-	DB	#1F
-	DB	#89
-	DB	#1B
-	DB	#90
-	DB	#41
-	DB	#02
-	DB	#89
-	DB	#24
-	DB	#D0
-	DB	#53
-	DB	#CA
-	DB	#89
-	DB	#2E
-	DB	#9D
-	DB	#36
-	DB	#B1
-	DB	#89
-	DB	#38
-	DB	#FF
-	DB	#49
-	DB	#3E
-	DB	#89
-	DB	#43
-	DB	#FF
-	DB	#6A
-	DB	#73
-	DB	#89
-	DB	#4F
-	DB	#A7
-	DB	#00
-	DB	#54
-	DB	#89
-	DB	#5C
-	DB	#00
-	DB	#00
-	DB	#00
-	DB	#89
-	DB	#69
-	DB	#14
-	DB	#F6
-	DB	#24
-	DB	#89
-	DB	#76
-	DB	#F1
-	DB	#10
-	DB	#05
+
+; Routine to control loudspeaker
+BEEPER:		DI
+		LD	A,L
+		SRL	L
+		SRL	L
+		CPL
+		AND	#03
+		LD	C,A
+		LD	B,#00
+		LD	IX,BE_IX_3
+		ADD	IX,BC
+		LD	A,(#5C48)
+		AND	#38
+		RRCA
+		RRCA
+		RRCA
+		OR	#08
+BE_IX_3:	NOP
+		NOP
+		NOP
+		INC	B
+		INC	C
+BE_HL_LP:	DEC	C
+		JR	NZ,BE_HL_LP
+		LD	C,#3F
+		DEC	B
+		JP	NZ,BE_HL_LP
+		XOR	#10
+		OUT	(#FE),A
+		LD	B,H
+		LD	C,A
+		BIT	4,A
+		JR	NZ,BE_AGAIN
+		LD	A,D
+		OR	E
+		JR	Z,BE_END
+		LD	A,C
+		LD	C,L
+		DEC	DE
+L_03F0:		JP	(IX)
+BE_AGAIN:	LD	C,L
+		INC	C
+		JP	(IX)
+BE_END:		EI
+		RET
+
+; Handle BEEP command
+BEEP:		RST	#28			;*calc
+		DB	$31			;DUPLICATE - duplicate pitch
+		DB	$27			;INT - convert to integer
+		DB	$C0			;st-mem-0 - store integer pitch to memory 0
+		DB	$03			;SUBTRACT - calculate fractional part of pitch = fp_pitch - int_pitch
+		DB	$34			;STK_DATA - push constant
+		DB	$EC			;Exponent: $7C, Bytes: 4 - constant = 0.05762265
+		DB	$6C,$98,$1F,$F5 	;($6C,$98,$1F,$F5)
+		DB	$04			;MULTIPLY - compute:
+		DB	$A1			;STK_ONE - 1 + 0.05762265 * fraction_part(pitch)
+		DB	$0F			;ADDITION
+		DB	$38			;END_CALC - leave on calc stack
+
+		LD	HL,#5C92
+		LD	A,(HL)
+		AND	A
+		JR	NZ,REPORT_B
+		INC	HL
+		LD	C,(HL)
+		INC	HL
+		LD	B,(HL)
+		LD	A,B
+		RLA
+		SBC	A,A
+		CP	C
+		JR	NZ,REPORT_B
+		INC	HL
+		CP	(HL)
+		JR	NZ,REPORT_B
+		LD	A,B
+		ADD	A,#3C
+		JP	P,BE_I_OK
+		JP	PO,REPORT_B
+BE_I_OK:	LD	B,#FA
+BE_OCTAVE:	INC	B
+		SUB	#0C
+		JR	NC,BE_OCTAVE
+		ADD	A,#0C
+		PUSH	BC
+		LD	HL,SEMI_TONE
+		CALL	LOC_MEM
+		CALL	STACK_NUM
+
+		RST	#28			;*calc
+		DB	#04			;MULTIPLY
+		DB	#38			;END_CALC
+
+		POP	AF
+		ADD	A,(HL)
+		LD	(HL),A
+
+		RST	#28			;*calc
+		DB	#C0			;st-mem-0
+		DB	#02			;DELETE
+		DB	#31			;DUPLICATE
+		DB	#38			;END_CALC
+
+		CALL	FIND_INT1
+		CP	#0B
+		JR	NC,REPORT_B
+
+		RST	#28			;*calc
+		DB	#E0			;get-mem-0
+		DB	#04			;MULTIPLY
+		DB	#E0			;get-mem-0
+		DB	#34			;STK_DATA
+		DB	#80			;Exponent $93, Bytes: 3
+		DB	#43, #55, #9F, #80
+		DB	#01			;EXCHANGE
+		DB	#05			;DIVISION
+		DB	#34			;STK_DATA
+		DB	#35			;Exponent: $85, Bytes: 1
+		DB	#71
+		DB	#03			;SUBTRACT
+		DB	#38			;END_CALC
+
+		CALL	FIND_INT2
+		PUSH	BC
+		CALL	FIND_INT2
+		POP	HL
+		LD	D,B
+		LD	E,C
+		LD	A,D
+		OR	E
+		RET	Z
+		DEC	DE
+		JP	BEEPER
+
+REPORT_B:	RST	#08			; ERROR_1
+		DB	#0A			; Integer out of range
+
+; Semi-tone table.
+; Holds frequencies corresponding to semitones in middle octave.
+SEMI_TONE:	DB	#89, #02, #D0, #12, #86
+		DB	#89, #0A, #97, #60, #75
+		DB	#89, #12, #D5, #17, #1F
+		DB	#89, #1B, #90, #41, #02
+		DB	#89, #24, #D0, #53, #CA
+		DB	#89, #2E, #9D, #36, #B1
+		DB	#89, #38, #FF, #49, #3E
+		DB	#89, #43, #FF, #6A, #73
+		DB	#89, #4F, #A7, #00, #54
+		DB	#89, #5C, #00, #00, #00
+		DB	#89, #69, #14, #F6, #24
+		DB	#89, #76, #F1, #10, #05
 ;
 L_04AA	RST	#18
 	LD	HL,L_04BB
@@ -1155,11 +1095,11 @@ L_06F0	CALL	L_1CE6
 L_06F5	RST	#20
 	CALL	L_1C82
 L_06F9	CALL	L_1BEE
-	CALL	L_1E99
+	CALL	FIND_INT2
 	LD	(IX+#0B),C
 L_0701	EQU	$-1
 	LD	(IX+#0C),B
-	CALL	L_1E99
+	CALL	FIND_INT2
 	LD	(IX+#0D),C
 	LD	(IX+#0E),B
 	LD	H,B
@@ -1179,7 +1119,7 @@ L_0723	LD	A,(#5C74)
 	RST	#20
 	CALL	L_1C82
 	CALL	L_1BEE
-	CALL	L_1E99
+	CALL	FIND_INT2
 	LD	(IX+#0D),C
 	LD	(IX+#0E),B
 L_073A	LD	(IX+#00),#00
@@ -2345,7 +2285,7 @@ L_0F38	CALL	L_15D4
 	LD	D,#00
 	LD	E,(IY-#01)
 	LD	HL,#00C8
-	CALL	L_03B5
+	CALL	BEEPER
 	POP	AF
 	LD	HL,L_0F38
 	PUSH	HL
@@ -2530,7 +2470,7 @@ L_107F	BIT	4,(IY+#30)
 	LD	D,#00
 	LD	E,(IY-#02)
 	LD	HL,#0190
-	CALL	L_03B5
+	CALL	BEEPER
 	JP	L_0F30
 ;
 L_1097	PUSH	HL
@@ -2646,7 +2586,7 @@ L_115E	LD	A,#20
 L_1167	LD	D,#00
 	LD	E,(IY-#02)
 	LD	HL,#0190
-	CALL	L_03B5
+	CALL	BEEPER
 	LD	(IY+#00),#FF
 	LD	DE,(#5C8A)
 	JR	L_117E
@@ -2715,7 +2655,7 @@ L_11D5	PUSH	BC
 	EX	DE,HL
 	JR	L_11F0
 ;
-L_11E6	CALL	L_1E99
+L_11E6	CALL	FIND_INT2
 	LD	A,B
 	OR	C
 	JP	Z,L_1E5F
@@ -2730,7 +2670,7 @@ L_11F0	EXX
 	INC	A
 	JR	Z,L_1219
 L_1200	LD	(#5CB4),HL
-	LD	DE,L_3EAF
+	LD	DE,#3EAF
 	LD	BC,#00A8
 	EX	DE,HL
 	LDDR
@@ -2789,10 +2729,10 @@ L_1256	LD	(HL),#0D
 	LDIR
 	LD	(IY+#31),#02
 	LD	(IY+#0E),#0F
-	CALL	L_3B58
+	CALL	DEVRESET
 	CALL	L_16B0
 	LD	(IY+#00),#FF
-	CALL	L_3C0B
+	CALL	INFO
 	CALL	L_053F
 	JP	L_1303
 ;
@@ -3303,7 +3243,7 @@ L_1716	DB	"K"
 	POP	HL
 	RET
 ;
-L_171E	CALL	L_1E94
+L_171E	CALL	FIND_INT1
 L_1721	CP	#10
 	JR	C,L_1727
 L_1725	RST	#08
@@ -3477,7 +3417,7 @@ L_181A	CALL	L_1CE6
 L_181F	CALL	L_1CDE
 L_1821	EQU	$-1
 L_1822	CALL	L_1BEE
-	CALL	L_1E99
+	CALL	FIND_INT2
 	LD	A,B
 	AND	#3F
 	LD	H,A
@@ -3639,7 +3579,7 @@ L_192B	ADD	HL,BC
 	JR	Z,L_1925
 	JP	L_15EF
 ;
-L_1937	CALL	L_2D1B
+L_1937	CALL	NUMERIC
 	JR	NC,L_196C
 	CP	#21
 	JR	C,L_196C
@@ -4063,7 +4003,7 @@ L_1A48	DB	#B1
 	DB	#00
 ;
 ;#1AE5
-	DW	L_03F8
+	DW	BEEP
 ;
 ;#1AE7
 	DB	#09
@@ -4108,7 +4048,7 @@ L_1A48	DB	#B1
 	DB	#0A
 	DB	#00
 ;
-L_1B00	DW	L_1736
+	DW	L_1736
 ;
 ;#1B02
 	DB	#06
@@ -4681,7 +4621,7 @@ L_1E39	LD	B,A
 	LD	DE,#0200
 	JP	L_198B
 ;
-L_1E42	CALL	L_1E99
+L_1E42	CALL	FIND_INT2
 L_1E45	LD	H,B
 	LD	L,C
 	CALL	L_196E
@@ -4689,7 +4629,7 @@ L_1E45	LD	H,B
 	LD	(#5C57),HL
 	RET
 ;
-L_1E4F	CALL	L_1E99
+L_1E4F	CALL	FIND_INT2
 	LD	A,B
 	OR	C
 	JR	NZ,L_1E5A
@@ -4701,7 +4641,7 @@ L_1E5F	LD	HL,(#5C6E)
 	LD	D,(IY+#36)
 	JR	L_1E73
 ;
-L_1E67	CALL	L_1E99
+L_1E67	CALL	FIND_INT2
 	LD	H,B
 	LD	L,C
 	LD	D,#00
@@ -4721,19 +4661,21 @@ L_1E80	LD	DE,(#5C65)
 ;
 L_1E85	CALL	L_2DD5
 	PUSH	AF
-	CALL	L_1E99
+	CALL	FIND_INT2
 	POP	AF
 L_1E8D	JR	C,L_1E9F
 	JR	Z,L_1E93
 	NEG
 L_1E93	RET
+
 ;
-L_1E94	CALL	L_2DD5
-	JR	L_1E8D
+FIND_INT1:	CALL	L_2DD5
+		JR	L_1E8D
 ;
-L_1E99	CALL	L_2DA2
-	JR	C,L_1E9F
-	RET	Z
+FIND_INT2:	CALL	L_2DA2
+		JR	C,L_1E9F
+		RET	Z
+
 L_1E9F	RST	#08
 ;
 ;#1EA0
@@ -4744,7 +4686,7 @@ L_1EA1	CALL	L_1E67
 	CALL	L_1E45
 	JR	L_1EAF
 ;
-L_1EAC	CALL	L_1E99
+L_1EAC	CALL	FIND_INT2
 L_1EAF	LD	A,B
 	OR	C
 	JR	NZ,L_1EB7
@@ -4832,7 +4774,7 @@ L_1F36	PUSH	DE
 ;#1F39
 	DB	#06
 ;
-L_1F3A	CALL	L_1E99
+L_1F3A	CALL	FIND_INT2
 L_1F3D	HALT
 	DEC	BC
 	LD	A,B
@@ -4955,7 +4897,7 @@ L_200E	CP	#AD
 	RST	#20
 	CALL	L_1C82
 	CALL	L_1FC3
-	CALL	L_1E99
+	CALL	FIND_INT2
 	LD	A,#17
 L_201E	RST	#10
 	LD	A,C
@@ -5017,7 +4959,7 @@ L_2070	CP	#23
 	CALL	L_1C82
 	AND	A
 	CALL	L_1FC3
-	CALL	L_1E94
+	CALL	FIND_INT1
 	CP	#10
 	JP	NC,L_160E
 	CALL	L_1601
@@ -5211,7 +5153,7 @@ L_21FC	SUB	#C9
 	AND	A
 	CALL	L_1FC3
 	PUSH	AF
-	CALL	L_1E94
+	CALL	FIND_INT1
 	LD	D,A
 	POP	AF
 	RST	#10
@@ -5310,7 +5252,7 @@ L_2287	LD	A,C
 	RRCA
 	JR	L_226C
 ;
-L_2294	CALL	L_1E94
+L_2294	CALL	FIND_INT1
 	CP	#08
 	JR	NC,L_2244
 	OUT	(#FE),A
@@ -5494,10 +5436,10 @@ L_235A	RST	#28	;*calc
 ;
 ;#236E
 	INC	(IY+#62)
-	CALL	L_1E94
+	CALL	FIND_INT1
 	LD	L,A
 	PUSH	HL
-	CALL	L_1E94
+	CALL	FIND_INT1
 	POP	HL
 	LD	H,A
 	LD	(#5C7D),HL
@@ -6171,7 +6113,7 @@ L_26B6	INC	HL
 	CP	#0E
 	JR	NZ,L_26B6
 	INC	HL
-	CALL	L_33B4
+	CALL	STACK_NUM
 	LD	(#5C5D),HL
 L_26C3	SET	6,(IY+#01)
 	JR	L_26DD
@@ -6183,7 +6125,7 @@ L_26C9	CALL	L_28B2
 	CP	#C0
 	JR	C,L_26DD
 	INC	HL
-	CALL	L_33B4
+	CALL	STACK_NUM
 L_26DD	JR	L_2712
 ;
 L_26DF	LD	BC,#09DB
@@ -6864,7 +6806,7 @@ L_2ACD	PUSH	DE
 	CALL	L_2530
 	JR	Z,L_2AEB
 	PUSH	AF
-	CALL	L_1E99
+	CALL	FIND_INT2
 	POP	DE
 	LD	A,B
 	OR	C
@@ -7156,7 +7098,7 @@ L_2C7F	POP	BC
 	JR	NZ,L_2C7F
 	RET
 ;
-L_2C88	CALL	L_2D1B
+L_2C88	CALL	NUMERIC
 	CCF
 	RET	C
 L_2C8D	CP	#41
@@ -7194,12 +7136,12 @@ L_2CB8	CP	#2E
 	CP	#2E
 	JR	NZ,L_2CEB
 	RST	#20
-	CALL	L_2D1B
+	CALL	NUMERIC
 	JR	C,L_2CEB
 	JR	L_2CD5
 ;
 L_2CCB	RST	#20
-	CALL	L_2D1B
+	CALL	NUMERIC
 L_2CCF	JP	C,L_1C8A
 	RST	#28	;*calc
 ;
@@ -7245,7 +7187,7 @@ L_2CF2	LD	B,#FF
 	JR	NZ,L_2CFF
 	INC	B
 L_2CFE	RST	#20
-L_2CFF	CALL	L_2D1B
+L_2CFF	CALL	NUMERIC
 	JR	C,L_2CCF
 	PUSH	BC
 	CALL	L_2D3B
@@ -7258,14 +7200,16 @@ L_2CFF	CALL	L_2D1B
 	JR	Z,L_2D18
 	NEG
 L_2D18	JP	L_2D4F
+
+; Check for valid digit
+NUMERIC:	CP	#30
+		RET	C
+		CP	#3A
+		CCF
+		RET
+
 ;
-L_2D1B	CP	#30
-	RET	C
-	CP	#3A
-	CCF
-	RET
-;
-L_2D22	CALL	L_2D1B
+L_2D22	CALL	NUMERIC
 	RET	C
 	SUB	#30
 L_2D28	LD	C,A
@@ -8562,10 +8506,10 @@ L_33A9	PUSH	DE
 	POP	DE
 	RET
 ;
-L_33B4	LD	DE,(#5C65)
-	CALL	L_33C0
-	LD	(#5C65),DE
-	RET
+STACK_NUM:	LD	DE,(#5C65)
+		CALL	L_33C0
+		LD	(#5C65),DE
+		RET
 ;
 L_33C0	CALL	L_33A9
 	LDIR
@@ -8622,7 +8566,7 @@ L_33F8	RET	Z
 	DEC	A
 	JR	L_33F8
 ;
-L_3406	LD	C,A
+LOC_MEM:	LD	C,A
 	RLCA
 	RLCA
 	ADD	A,C
@@ -8633,7 +8577,7 @@ L_3406	LD	C,A
 ;
 L_340F	PUSH	DE
 	LD	HL,(#5C68)
-	CALL	L_3406
+	CALL	LOC_MEM
 	CALL	L_33C0
 	POP	HL
 	RET
@@ -8654,7 +8598,7 @@ L_341B	LD	H,D
 L_342D	PUSH	HL
 	EX	DE,HL
 	LD	HL,(#5C68)
-	CALL	L_3406
+	CALL	LOC_MEM
 	EX	DE,HL
 	CALL	L_33C0
 	EX	DE,HL
@@ -8754,15 +8698,15 @@ L_3492	CALL	L_34E9
 	POP	DE
 	RET
 ;
-L_34A5	CALL	L_1E99
+L_34A5	CALL	FIND_INT2
 	IN	A,(C)
 	JR	L_34B0
 ;
-L_34AC	CALL	L_1E99
+L_34AC	CALL	FIND_INT2
 	LD	A,(BC)
 L_34B0	JP	L_2D28
 ;
-L_34B3	CALL	L_1E99
+L_34B3	CALL	FIND_INT2
 	LD	HL,L_2D2B
 	PUSH	HL
 	PUSH	BC
@@ -9052,7 +8996,7 @@ L_361F	LD	BC,#0001
 	EX	DE,HL
 	RET
 ;
-L_3645	CALL	L_1E94
+L_3645	CALL	FIND_INT1
 	CP	#10
 	JP	NC,L_1E9F
 	LD	HL,(#5C51)
@@ -9705,7 +9649,7 @@ L_38B4	LD	HL,(#5C5D)
 	RET	Z
 	POP	AF
 	PUSH	BC
-	CALL	L_1E99
+	CALL	FIND_INT2
 	POP	AF
 	RRCA
 	JR	NC,L_38CD
@@ -9747,150 +9691,147 @@ L_38F3	LD	(DE),A
 L_38F6	LD	DE,L_153E
 	CALL	L_0C13
 	JP	L_39F5
-;
-;#38FF
-	DB	#FF
-	DB	#FF
-L_3901	DB	#C3
-	DB	#52
-	DB	#00
-L_3904	DB	#52
-	DB	#00
-;
-L_3906	DI
-	XOR	A
-	LD	I,A
-	OUT	(#FE),A
-	LD	E,#17
-L_390E	LD	BC,#7FFD
-	OUT	(C),E
-	LD	BC,#0008
-	LD	H,A
-	LD	L,A
-	LD	SP,HL
-L_3919	PUSH	HL
-	PUSH	HL
-	PUSH	HL
-	PUSH	HL
-	DJNZ	L_3919
-	DEC	C
-	JR	NZ,L_3919
-	DEC	E
-	BIT	4,E
-	JR	NZ,L_390E
-	LD	B,#5C
-L_3929	LD	(BC),A
-	INC	C
-	JR	NZ,L_3929
-	DEC	HL
-	JP	L_1200
+
+MM:		DW	#FFFF
+
+USERJP:		JP	#0052
+
+DISKTOOLS:	DW	#0052
+
+RESET128K:	DI
+		XOR	A
+		LD	I,A
+		OUT	(#FE),A
+		LD	E,#17
+CC0:		LD	BC,#7FFD
+		OUT	(C),E
+		LD	BC,#0008
+		LD	H,A
+		LD	L,A
+		LD	SP,HL
+CC1:		PUSH	HL
+		PUSH	HL
+		PUSH	HL
+		PUSH	HL
+		DJNZ	CC1
+		DEC	C
+		JR	NZ,CC1
+		DEC	E
+		BIT	4,E
+		JR	NZ,CC0
+		LD	B,#5C
+CC2:		LD	(BC),A
+		INC	C
+		JR	NZ,CC2
+		DEC	HL
+		JP	L_1200
 
 ;NMI Menu
 NMI_MENU:	PUSH	AF
-	PUSH	HL
-	LD	HL,#BFE0
-	ADD	HL,SP
-	JR	C,L_3942
-	LD	SP,#5800
-	LD	HL,NMI_MENU
-	PUSH	HL
-	PUSH	HL
-	PUSH	HL
-L_3942	PUSH	BC
-	PUSH	DE
-	PUSH	IX
-	LD	A,I
-	PUSH	AF
-L_3949	DI
-	LD	C,#FE
-	LD	A,R
-	OUT	(C),A
-	DB	#ED,#71	;*OUT (C),0
-	CALL	KEY_SCAN
-	INC	E
-	JR	Z,L_3949
-	DEC	E
-	CALL	K_TEST
-	LD	XH,A
-	LD	A,#22
-	OUT	(#FE),A
-L_3962	CALL	KEY_SCAN
-	INC	E
-	JR	NZ,L_3962
-	LD	A,#08
-	OUT	(#FE),A
-	LD	A,XH
-	LD	HL,L_3949
-	PUSH	HL
-	CP	#55
-	JR	Z,L_3901
-	CP	#45
-	JR	Z,L_3906
-	CP	#49
-	JP	Z,L_3B58
-	CP	#54
-	JP	Z,L_3CA2
-	CP	#44
-	JP	Z,L_3CA4
-	CP	#42
-	JP	Z,L_3B77
-	CP	#5A
-	LD	HL,(L_3904)
-	JR	NZ,L_3996
-	JP	(HL)
-;
-L_3996	CP	#4E
-	LD	DE,#5FFF
-	JR	Z,L_39A0
-	CP	#52
-	LD	D,E
-L_39A0	JP	Z,L_11BE
-	CP	#53
-	JR	NZ,L_39B3
-	LD	IX,#4000
-	LD	DE,L_1B00
-	LD	A,#FF
-	JP	L_04C6
-;
-L_39B3	CP	#51
-	JR	Z,L_39CF
-	CP	#4D
-	JR	Z,L_39DE
-	CALL	L_2D1B
-	RET	C
-	LD	HL,#4000
-	ADD	HL,SP
-	JR	NC,L_39C8
-	LD	SP,#57F0
-L_39C8	POP	BC
-	CALL	L_3ADD
-	JP	L_3949
-;
-L_39CF	POP	AF
-	POP	AF
-	LD	I,A
-	JP	PO,L_39D7
-	EI
-L_39D7	POP	IX
-	POP	DE
-	POP	BC
-	POP	HL
-	POP	AF
-	RET
-;
-L_39DE	POP	AF
-	POP	AF
-	LD	I,A
-	POP	IX
-	POP	DE
-	POP	BC
-	POP	HL
-	POP	AF
-	LD	(#F4FF),HL
-	POP	HL
-	LD	(#F544),HL
-	JP	#F514
-;
+		PUSH	HL
+		LD	HL,#BFE0
+		ADD	HL,SP
+		JR	C,MM1
+		LD	SP,#5800
+		LD	HL,NMI_MENU
+		PUSH	HL
+		PUSH	HL
+		PUSH	HL
+MM1:		PUSH	BC
+		PUSH	DE
+		PUSH	IX
+		LD	A,I
+		PUSH	AF
+MMRET:		DI
+		LD	C,#FE
+		LD	A,R
+		OUT	(C),A
+		OUT 	(C),0
+		CALL	KEY_SCAN
+		INC	E
+		JR	Z,MMRET
+		DEC	E
+		CALL	K_TEST
+		LD	XH,A
+		LD	A,#22
+		OUT	(#FE),A
+PUST:		CALL	KEY_SCAN
+		INC	E
+		JR	NZ,PUST
+		LD	A,#08
+		OUT	(#FE),A
+		LD	A,XH
+		LD	HL,MMRET
+		PUSH	HL
+		CP	'U'				; U - user function.
+		JR	Z,USERJP
+		CP	'E'				; E - extended 128k reset.
+		JR	Z,RESET128K
+		CP	'I'				; I - quiet AY. Reset FDC, DMA and stop disk drive if MB-02 is present.
+		JP	Z,DEVRESET
+		CP	'T'				; T - set tape as actual device (only on MB-02).
+		JP	Z,JP15522
+		CP	'D'				; D - set disk as actual device (only on MB-02)
+		JP	Z,JP15524
+		CP	'B'				; B - warm start. BASIC program with variables is not deleted.
+		JP	Z,INIT
+		CP	'Z'				; Z - user function like 'U' but this key is reserved for MB-02 applications.
+		LD	HL,(DISKTOOLS)
+		JR	NZ,DSKIP
+		JP	(HL)
+DSKIP:		CP	'N'				; N - CLEAR #5FFF: NEW - memory above #6000 is not changed.
+		LD	DE,#5FFF
+		JR	Z,RESNEW
+		CP	'R'				; R - CLEAR #FFFF: NEW - classic 48k reset.
+		LD	D,E
+RESNEW:		JP	Z,L_11BE
+		CP	'S'				; S - save SCREEN$ on tape, or disk if MB-02 is present.
+		JR	NZ,NESAV
+		LD	IX,#4000
+		LD	DE,#1B00
+		LD	A,#FF
+		JP	L_04C6
+NESAV:		CP	'Q'				; Q - quit / return from NMI menu.
+		JR	Z,QUIT
+		CP	'M'				; M - jump to MRS debugger (MRS must be loaded in memory).
+		JR	Z,MRS
+		CALL	NUMERIC
+		RET	C
+		LD	HL,#4000
+		ADD	HL,SP
+		JR	NC,DD0
+		LD	SP,#57F0
+DD0:		POP	BC
+		CALL	OUT128
+		JP	MMRET
+
+; Quit from NMI Menu		
+QUIT		POP	AF
+		POP	AF
+		LD	I,A
+		JP	PO,RET_I
+		EI
+RET_I		POP	IX
+		POP	DE
+		POP	BC
+		POP	HL
+		POP	AF
+		RET
+
+; Jump to MRS debugger
+MRS:		POP	AF
+		POP	AF
+		LD	I,A
+		POP	IX
+		POP	DE
+		POP	BC
+		POP	HL
+		POP	AF
+		LD	(#F4FF),HL
+		POP	HL
+		LD	(#F544),HL
+		JP	#F514
+
 L_39F2	LD	A,#3A
 	RST	#10
 L_39F5	LD	B,H
@@ -9953,7 +9894,7 @@ L_3A4C	CALL	L_1695
 	RET
 ;
 L_3A56	RST	#18
-	CALL	L_2D1B
+	CALL	NUMERIC
 	PUSH	AF
 	CALL	L_19FB
 	POP	AF
@@ -10027,17 +9968,17 @@ L_3ACD	RST	#08
 L_3AD3	RST	#20
 	CALL	L_1CDE
 	CALL	L_1BEE
-	CALL	L_1E94
-L_3ADD	AND	#0F
-	OR	#10
-	LD	BC,#7FFD
-	OUT	(C),A
-	RET
+	CALL	FIND_INT1
+OUT128:		AND	#0F
+		OR	#10
+		LD	BC,#7FFD
+		OUT	(C),A
+		RET
 ;
 L_3AE7	RST	#20
 	CALL	L_1CDE
 	CALL	L_1BEE
-	CALL	L_1E99
+	CALL	FIND_INT2
 	LD	(#5C49),BC
 	CALL	L_16B0
 	CALL	L_0D6E
@@ -10051,7 +9992,7 @@ L_3AE7	RST	#20
 	JP	L_12AC
 L_3B0E	EQU	$-2
 ;
-L_3B10	CALL	L_1E94
+L_3B10	CALL	FIND_INT1
 	OR	A
 	JR	Z,L_3B1F
 	LD	(#5C48),A
@@ -10063,7 +10004,7 @@ L_3B22	CP	#27
 	JR	Z,L_3AD3
 	CP	#2C
 	JR	Z,L_3AE7
-	LD	HL,L_3B40
+	LD	HL,NEWTAB
 L_3B2D	BIT	7,(HL)
 	JP	NZ,L_1FCD
 	CP	(HL)
@@ -10077,65 +10018,67 @@ L_3B2D	BIT	7,(HL)
 	CALL	L_1BEE
 	EX	DE,HL
 	JP	(HL)
-;
-L_3B40	INC	HL
-	LD	H,L
-	SUB	#5F
-	LD	H,(HL)
-	NOP
-	LD	HL,(L_3C3F)
-	CCF
-	DEC	BC
-	INC	A
-	LD	A,A
-	LD	(HL),A
-	DEC	SP
-	LD	E,(HL)
-	LD	B,#39
-	LD	HL,L_3B58
-	DEC	A
-	LD	BC,#AF39
-L_3B58	EQU	$-1
-	LD	BC,#FFFD
-	OUT	(#13),A
-	LD	A,#D0
-	OUT	(#0F),A
-	LD	A,#C3
-	OUT	(#0B),A
-	LD	A,#07
-	OUT	(C),A
-	LD	A,#BF
-	OUT	(#FD),A
-	LD	A,#0D
-	OUT	(C),A
-	LD	A,#80
-	OUT	(#FD),A
-	RET
-;
-L_3B77	LD	HL,L_15AF
-	LD	DE,#5CB6
-	LD	BC,#0015
-	LD	(#5C4F),DE
-	LDIR
-	LD	HL,L_3C00
-	LD	(#5C36),HL
-	LD	HL,#0040
-	LD	(#5C38),HL
-	LD	IY,#5C3A
-	LD	HL,(#5CB2)
-	LD	(HL),#3E
-	DEC	HL
-	LD	SP,HL
-	DEC	HL
-	DEC	HL
-	LD	(#5C3D),HL
-	IM	1
-	EI
-	LD	HL,(#5C59)
-	JP	L_1256
+
+NEWTAB:		DB	'#'
+		DW	54885	
+		DB	'_'
+		DW	#66
+		DB	'*'
+		DW	HEA
+		DB	'?'
+		DW	INFO
+		DB	#7F			;(c)
+		DW	INIT
+		DB	'^'
+		DW	RESET128K
+		DB	'!'
+		DW	DEVRESET
+		DB	'='
+		DW	USERJP
+
+; Quiet AY. Reset FDC, DMA, stop drives if MB-02 is present
+DEVRESET:	XOR	A
+		LD	BC,#FFFD
+		OUT	(#13),A			; FDD motor
+		LD	A,#D0
+		OUT	(#0F),A			; FDC
+		LD	A,#C3
+		OUT	(#0B),A			; DMA
+		LD	A,#07	
+		OUT	(C),A			; AY
+		LD	A,#BF
+		OUT	(#FD),A
+		LD	A,#0D
+		OUT	(C),A
+		LD	A,#80
+		OUT	(#FD),A
+		RET
+
+; Warm start
+INIT:		LD	HL,L_15AF
+		LD	DE,#5CB6
+		LD	BC,#0015
+		LD	(#5C4F),DE
+		LDIR
+		LD	HL,L_3C00
+		LD	(#5C36),HL
+		LD	HL,#0040
+		LD	(#5C38),HL
+		LD	IY,#5C3A
+		LD	HL,(#5CB2)
+		LD	(HL),#3E
+		DEC	HL
+		LD	SP,HL
+		DEC	HL
+		DEC	HL
+		LD	(#5C3D),HL
+		IM	1
+		EI
+		LD	HL,(#5C59)
+		JP	L_1256
 ;
 L_3BAB	CALL	L_2530
-	CALL	NZ,L_1E99
+	CALL	NZ,FIND_INT2
 	LD	D,B
 	LD	E,C
 L_3BB3	RST	#18
@@ -10176,11 +10119,11 @@ L_3BE5	POP	AF
 L_3BE8	PUSH	DE
 	RRCA
 	JR	C,L_3BF2
-	CALL	L_1E94
+	CALL	FIND_INT1
 	POP	DE
 	JR	L_3BFA
 ;
-L_3BF2	CALL	L_1E99
+L_3BF2	CALL	FIND_INT2
 	POP	DE
 	LD	A,C
 	LD	(DE),A
@@ -10203,7 +10146,7 @@ L_3C01	CALL	L_1980
 	SCF
 	RET
 ;
-L_3C0B	CALL	L_0D6B
+INFO:	CALL	L_0D6B
 	LD	A,#FE
 	CALL	L_1601
 	LD	HL,(#5C4B)
@@ -10225,8 +10168,8 @@ L_3C0B	CALL	L_0D6B
 	LD	A,#02
 	CALL	L_38F6
 	JP	L_1FF8
-;
-L_3C3F	LD	A,#FE
+
+HEA:	LD	A,#FE
 	CALL	L_1601
 L_3C44	DI
 	LD	IX,#5C9E
@@ -10274,23 +10217,27 @@ L_3C7C	RST	#10
 	LD	A,#0D
 	RST	#10
 	JR	L_3C44
-;
-;#3C97
-	DB	#FF
-	DB	#FF
-	DB	#FF
-	DB	#FF
-	DB	#FF
-	DB	#FF
-	DB	#FF
-	DB	#FF
-	DB	#FF
-	DB	#FF
-	DB	#FF
-L_3CA2	DB	#C9
-	DB	#FF
-L_3CA4	DB	#C9
-	DB	#FF
+
+		DB	#FF
+		DB	#FF
+		DB	#FF
+		DB	#FF
+		DB	#FF
+		DB	#FF
+		DB	#FF
+		DB	#FF
+		DB	#FF
+		DB	#FF
+		DB	#FF
+
+JP15522:	RET
+
+		DB	#FF
+
+JP15524:	RET
+
+		DB	#FF
+
 	DB	#20
 	DB	#42
 	DB	#75
@@ -10381,107 +10328,105 @@ L_3CA4	DB	#C9
 	DB	#7E
 	DB	#7E
 	DB	#00
-;
-;#3D00
-	DB	#00,#00,#00,#00,#00,#00,#00,#00
-	DB	#00,#10,#10,#10,#10,#00,#10,#00
-	DB	#00,#24,#24,#00,#00,#00,#00,#00
-	DB	#00,#24,#7E,#24,#24,#7E,#24,#00
-	DB	#00,#08,#3E,#28,#3E,#0A,#3E,#08
-	DB	#00,#62,#64,#08,#10,#26,#46,#00
-	DB	#00,#10,#28,#10,#2A,#44,#3A,#00
-	DB	#00,#08,#10,#00,#00,#00,#00,#00
-	DB	#00,#04,#08,#08,#08,#08,#04,#00
-	DB	#00,#20,#10,#10,#10,#10,#20,#00
-	DB	#00,#00,#14,#08,#3E,#08,#14,#00
-	DB	#00,#00,#08,#08,#3E,#08,#08,#00
-	DB	#00,#00,#00,#00,#00,#08,#08,#10
-	DB	#00,#00,#00,#00,#3E,#00,#00,#00
-	DB	#00,#00,#00,#00,#00,#18,#18,#00
-	DB	#00,#00,#02,#04,#08,#10,#20,#00
-	DB	#00,#3C,#46,#4A,#52,#62,#3C,#00
-	DB	#00,#18,#28,#08,#08,#08,#3E,#00
-	DB	#00,#3C,#42,#02,#3C,#40,#7E,#00
-	DB	#00,#3C,#42,#0C,#02,#42,#3C,#00
-	DB	#00,#08,#18,#28,#48,#7E,#08,#00
-	DB	#00,#7E,#40,#7C,#02,#42,#3C,#00
-	DB	#00,#3C,#40,#7C,#42,#42,#3C,#00
-	DB	#00,#7E,#02,#04,#08,#10,#10,#00
-	DB	#00,#3C,#42,#3C,#42,#42,#3C,#00
-	DB	#00,#3C,#42,#42,#3E,#02,#3C,#00
-	DB	#00,#00,#00,#10,#00,#00,#10,#00
-	DB	#00,#00,#10,#00,#00,#10,#10,#20
-	DB	#00,#00,#04,#08,#10,#08,#04,#00
-	DB	#00,#00,#00,#3E,#00,#3E,#00,#00
-	DB	#00,#00,#10,#08,#04,#08,#10,#00
-	DB	#00,#3C,#42,#04,#08,#00,#08,#00
-	DB	#00,#3C,#02,#3A,#4A,#4A,#3C,#00
-	DB	#00,#3C,#42,#42,#7E,#42,#42,#00
-	DB	#00,#7C,#42,#7C,#42,#42,#7C,#00
-	DB	#00,#3C,#42,#40,#40,#42,#3C,#00
-	DB	#00,#78,#44,#42,#42,#44,#78,#00
-	DB	#00,#7E,#40,#7C,#40,#40,#7E,#00
-	DB	#00,#7E,#40,#7C,#40,#40,#40,#00
-	DB	#00,#3C,#42,#40,#4E,#42,#3C,#00
-	DB	#00,#42,#42,#7E,#42,#42,#42,#00
-	DB	#00,#3E,#08,#08,#08,#08,#3E,#00
-	DB	#00,#02,#02,#02,#42,#42,#3C,#00
-	DB	#00,#44,#48,#70,#48,#44,#42,#00
-	DB	#00,#40,#40,#40,#40,#40,#7E,#00
-	DB	#00,#42,#66,#5A,#42,#42,#42,#00
-	DB	#00,#42,#62,#52,#4A,#46,#42,#00
-	DB	#00,#3C,#42,#42,#42,#42,#3C,#00
-	DB	#00,#7C,#42,#42,#7C,#40,#40,#00
-	DB	#00,#3C,#42,#42,#52,#4A,#3C,#00
-	DB	#00,#7C,#42,#42,#7C,#44,#42,#00
-	DB	#00,#3C,#40,#3C,#02,#42,#3C,#00
-	DB	#00,#FE,#10,#10,#10,#10,#10,#00
-	DB	#00,#42,#42,#42,#42,#42,#3C,#00
-L_3EAF	EQU	$-1
-	DB	#00,#42,#42,#42,#42,#24,#18,#00
-	DB	#00,#42,#42,#42,#42,#5A,#24,#00
-	DB	#00,#42,#24,#18,#18,#24,#42,#00
-	DB	#00,#82,#44,#28,#10,#10,#10,#00
-	DB	#00,#7E,#04,#08,#10,#20,#7E,#00
-	DB	#00,#0E,#08,#08,#08,#08,#0E,#00
-	DB	#00,#00,#40,#20,#10,#08,#04,#00
-	DB	#00,#70,#10,#10,#10,#10,#70,#00
-	DB	#00,#10,#38,#54,#10,#10,#10,#00
-	DB	#00,#00,#00,#00,#00,#00,#00,#FF
-	DB	#00,#1C,#22,#78,#20,#20,#7E,#00
-	DB	#00,#00,#38,#04,#3C,#44,#3C,#00
-	DB	#00,#20,#20,#3C,#22,#22,#3C,#00
-	DB	#00,#00,#1C,#20,#20,#20,#1C,#00
-	DB	#00,#04,#04,#3C,#44,#44,#3C,#00
-	DB	#00,#00,#38,#44,#78,#40,#3C,#00
-	DB	#00,#0C,#10,#18,#10,#10,#10,#00
-	DB	#00,#00,#3C,#44,#44,#3C,#04,#38
-	DB	#00,#40,#40,#78,#44,#44,#44,#00
-	DB	#00,#10,#00,#30,#10,#10,#38,#00
-	DB	#00,#04,#00,#04,#04,#04,#24,#18
-	DB	#00,#20,#28,#30,#30,#28,#24,#00
-	DB	#00,#10,#10,#10,#10,#10,#0C,#00
-	DB	#00,#00,#68,#54,#54,#54,#54,#00
-	DB	#00,#00,#78,#44,#44,#44,#44,#00
-	DB	#00,#00,#38,#44,#44,#44,#38,#00
-	DB	#00,#00,#78,#44,#44,#78,#40,#40
-	DB	#00,#00,#3C,#44,#44,#3C,#04,#06
-	DB	#00,#00,#1C,#20,#20,#20,#20,#00
-	DB	#00,#00,#38,#40,#38,#04,#78,#00
-	DB	#00,#10,#38,#10,#10,#10,#0C,#00
-	DB	#00,#00,#44,#44,#44,#44,#38,#00
-	DB	#00,#00,#44,#44,#28,#28,#10,#00
-	DB	#00,#00,#44,#54,#54,#54,#28,#00
-	DB	#00,#00,#44,#28,#10,#28,#44,#00
-	DB	#00,#00,#44,#44,#44,#3C,#04,#38
-	DB	#00,#00,#7C,#08,#10,#20,#7C,#00
-	DB	#00,#0E,#08,#30,#08,#08,#0E,#00
-	DB	#00,#08,#08,#08,#08,#08,#08,#00
-	DB	#00,#70,#10,#0C,#10,#10,#70,#00
-	DB	#00,#14,#28,#00,#00,#00,#00,#00
-	DB	#3C,#42,#99,#A1,#A1,#99,#42,#3C
-;#4000
-;
+
+; Character set
+CHAR_SET:	DB	#00,#00,#00,#00,#00,#00,#00,#00	;space
+		DB	#00,#10,#10,#10,#10,#00,#10,#00	;!
+		DB	#00,#24,#24,#00,#00,#00,#00,#00	;"
+		DB	#00,#24,#7E,#24,#24,#7E,#24,#00	;#
+		DB	#00,#08,#3E,#28,#3E,#0A,#3E,#08	;$
+		DB	#00,#62,#64,#08,#10,#26,#46,#00	;%
+		DB	#00,#10,#28,#10,#2A,#44,#3A,#00	;&
+		DB	#00,#08,#10,#00,#00,#00,#00,#00	;'
+		DB	#00,#04,#08,#08,#08,#08,#04,#00	;(
+		DB	#00,#20,#10,#10,#10,#10,#20,#00	;)
+		DB	#00,#00,#14,#08,#3E,#08,#14,#00	;*
+		DB	#00,#00,#08,#08,#3E,#08,#08,#00	;+
+		DB	#00,#00,#00,#00,#00,#08,#08,#10	;,
+		DB	#00,#00,#00,#00,#3E,#00,#00,#00	;-
+		DB	#00,#00,#00,#00,#00,#18,#18,#00	;.
+		DB	#00,#00,#02,#04,#08,#10,#20,#00	;/
+		DB	#00,#3C,#46,#4A,#52,#62,#3C,#00	;0
+		DB	#00,#18,#28,#08,#08,#08,#3E,#00	;1
+		DB	#00,#3C,#42,#02,#3C,#40,#7E,#00	;2
+		DB	#00,#3C,#42,#0C,#02,#42,#3C,#00	;3
+		DB	#00,#08,#18,#28,#48,#7E,#08,#00	;4
+		DB	#00,#7E,#40,#7C,#02,#42,#3C,#00	;5
+		DB	#00,#3C,#40,#7C,#42,#42,#3C,#00	;6
+		DB	#00,#7E,#02,#04,#08,#10,#10,#00	;7
+		DB	#00,#3C,#42,#3C,#42,#42,#3C,#00	;8
+		DB	#00,#3C,#42,#42,#3E,#02,#3C,#00	;9
+		DB	#00,#00,#00,#10,#00,#00,#10,#00	;:
+		DB	#00,#00,#10,#00,#00,#10,#10,#20	;;
+		DB	#00,#00,#04,#08,#10,#08,#04,#00	;<
+		DB	#00,#00,#00,#3E,#00,#3E,#00,#00	;=
+		DB	#00,#00,#10,#08,#04,#08,#10,#00	;>
+		DB	#00,#3C,#42,#04,#08,#00,#08,#00	;?
+		DB	#00,#3C,#02,#3A,#4A,#4A,#3C,#00	;@
+		DB	#00,#3C,#42,#42,#7E,#42,#42,#00	;A
+		DB	#00,#7C,#42,#7C,#42,#42,#7C,#00	;B
+		DB	#00,#3C,#42,#40,#40,#42,#3C,#00	;C
+		DB	#00,#78,#44,#42,#42,#44,#78,#00	;D
+		DB	#00,#7E,#40,#7C,#40,#40,#7E,#00	;E
+		DB	#00,#7E,#40,#7C,#40,#40,#40,#00	;F
+		DB	#00,#3C,#42,#40,#4E,#42,#3C,#00	;G
+		DB	#00,#42,#42,#7E,#42,#42,#42,#00	;H
+		DB	#00,#3E,#08,#08,#08,#08,#3E,#00	;I
+		DB	#00,#02,#02,#02,#42,#42,#3C,#00	;J
+		DB	#00,#44,#48,#70,#48,#44,#42,#00	;K
+		DB	#00,#40,#40,#40,#40,#40,#7E,#00	;L
+		DB	#00,#42,#66,#5A,#42,#42,#42,#00	;M
+		DB	#00,#42,#62,#52,#4A,#46,#42,#00	;N
+		DB	#00,#3C,#42,#42,#42,#42,#3C,#00	;O
+		DB	#00,#7C,#42,#42,#7C,#40,#40,#00	;P
+		DB	#00,#3C,#42,#42,#52,#4A,#3C,#00	;Q
+		DB	#00,#7C,#42,#42,#7C,#44,#42,#00	;R
+		DB	#00,#3C,#40,#3C,#02,#42,#3C,#00	;S
+		DB	#00,#FE,#10,#10,#10,#10,#10,#00	;T
+		DB	#00,#42,#42,#42,#42,#42,#3C,#00	;U
+		DB	#00,#42,#42,#42,#42,#24,#18,#00	;V
+		DB	#00,#42,#42,#42,#42,#5A,#24,#00	;W
+		DB	#00,#42,#24,#18,#18,#24,#42,#00	;X
+		DB	#00,#82,#44,#28,#10,#10,#10,#00	;Y
+		DB	#00,#7E,#04,#08,#10,#20,#7E,#00	;Z
+		DB	#00,#0E,#08,#08,#08,#08,#0E,#00	;[
+		DB	#00,#00,#40,#20,#10,#08,#04,#00	;\
+		DB	#00,#70,#10,#10,#10,#10,#70,#00	;]
+		DB	#00,#10,#38,#54,#10,#10,#10,#00	;^
+		DB	#00,#00,#00,#00,#00,#00,#00,#FF	;_
+		DB	#00,#1C,#22,#78,#20,#20,#7E,#00	;£
+		DB	#00,#00,#38,#04,#3C,#44,#3C,#00	;a
+		DB	#00,#20,#20,#3C,#22,#22,#3C,#00	;b
+		DB	#00,#00,#1C,#20,#20,#20,#1C,#00	;c
+		DB	#00,#04,#04,#3C,#44,#44,#3C,#00	;d
+		DB	#00,#00,#38,#44,#78,#40,#3C,#00	;e
+		DB	#00,#0C,#10,#18,#10,#10,#10,#00	;f
+		DB	#00,#00,#3C,#44,#44,#3C,#04,#38	;g
+		DB	#00,#40,#40,#78,#44,#44,#44,#00	;h
+		DB	#00,#10,#00,#30,#10,#10,#38,#00	;i
+		DB	#00,#04,#00,#04,#04,#04,#24,#18	;j
+		DB	#00,#20,#28,#30,#30,#28,#24,#00	;k
+		DB	#00,#10,#10,#10,#10,#10,#0C,#00	;l
+		DB	#00,#00,#68,#54,#54,#54,#54,#00	;m
+		DB	#00,#00,#78,#44,#44,#44,#44,#00	;n
+		DB	#00,#00,#38,#44,#44,#44,#38,#00	;o
+		DB	#00,#00,#78,#44,#44,#78,#40,#40	;p
+		DB	#00,#00,#3C,#44,#44,#3C,#04,#06	;q
+		DB	#00,#00,#1C,#20,#20,#20,#20,#00	;r
+		DB	#00,#00,#38,#40,#38,#04,#78,#00	;s
+		DB	#00,#10,#38,#10,#10,#10,#0C,#00	;t
+		DB	#00,#00,#44,#44,#44,#44,#38,#00	;u
+		DB	#00,#00,#44,#44,#28,#28,#10,#00	;v
+		DB	#00,#00,#44,#54,#54,#54,#28,#00	;w
+		DB	#00,#00,#44,#28,#10,#28,#44,#00	;x
+		DB	#00,#00,#44,#44,#44,#3C,#04,#38	;y
+		DB	#00,#00,#7C,#08,#10,#20,#7C,#00	;z
+		DB	#00,#0E,#08,#30,#08,#08,#0E,#00	;{
+		DB	#00,#08,#08,#08,#08,#08,#08,#00	;|
+		DB	#00,#70,#10,#0C,#10,#10,#70,#00	;}
+		DB	#00,#14,#28,#00,#00,#00,#00,#00	;~
+		DB	#3C,#42,#99,#A1,#A1,#99,#42,#3C	;(c)
+
 ROM_LEN	EQU	$-START
 
 	savebin "bsrom140_.rom",START,ROM_LEN
