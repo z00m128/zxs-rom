@@ -23,7 +23,7 @@
 ; obsolete labels
 ; L1C16 JUMP-C-R
 
-		device	zxspectrum48
+		OUTPUT	"48.ROM"
 
 ; System variables definitions
 
@@ -1791,8 +1791,8 @@ SAVE_ETC:	POP	AF		; discard address STMT_RET.
 
 					; Now reduce the low byte of the Syntax table entry to give command.
 
-		SUB	P_SAVE + 1 % 256; subtract the known offset.
-					; ( is SUB $E0 in standard ROM )
+		SUB	$E0		; subtract the known offset - giving 0 for SAVE,
+					; 1 for LOAD, 2 for VERIFY and 3 for MERGE
 		LD	(T_ADDR),A	; and put back in T_ADDR as 0,1,2, or 3
 					; for future reference.
 		CALL	EXPT_EXP	; routine EXPT_EXP checks that a string
@@ -7796,7 +7796,7 @@ CLASS_07:	BIT	7,(IY+$01)	; test FLAGS - checking syntax only ?
 
 					; Note if you move alter the syntax table next line may have to be altered.
 
-		SUB	P_INK-$D8 % 256 ; convert $EB to $D8 ('INK') etc.
+		SUB	$13		; convert $EB to $D8 ('INK') etc.
 					; ( is SUB $13 in standard ROM )
 		CALL	CO_TEMP_4	; routine CO_TEMP_4
 		CALL	CHECK_END	; routine CHECK_END check that nothing else in statement. 
@@ -17578,7 +17578,3 @@ CHAR_SET:	DEFB	%00000000
 		DEFB	%10011001
 		DEFB	%01000010
 		DEFB	%00111100
-
-ROM_LEN		equ	$-START
-		savebin	"48.rom",START,ROM_LEN
-

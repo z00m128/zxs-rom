@@ -1,4 +1,4 @@
-		OUTPUT	"BSROM140.BIN"
+		OUTPUT	"bsrom140.rom"
 
 VERZIA		EQU	140
 
@@ -19,7 +19,7 @@ VER3		EQU	'0'+VERF
 START:		DI
 		XOR	A
 		LD	DE,#FFFF
-		JP	NMI_MENU
+		JP	NMI_MENU		; Busy's modification - jumps to NMI menu instead of START_NEW
 
 ; Error restart
 ; RST #08
@@ -101,17 +101,17 @@ ERROR_3:	LD	(IY+#00),L
 
 ; Non-maskable interrupt routine
 ; RST #66
-RESET:		JP	NMI_MENU
+RESET:		JP	NMI_MENU		; Busy's modfication - jumps to NMI menu
 
-		OR	B			; Looks like this is unused torso 
-		LD	E,H			; of the original reset routine.
-		LD	A,H			; It was replaced with jump to NMI menu.
-		OR	L			;
-		JR	NZ,NO_RESET		;
-		JP	(HL)			;
-NO_RESET:	POP	HL			;
-		POP	AF			;
-		RETN				; End of unused bytes.
+		DB	#B0			; Looks like this is unused torso 
+		DB	#5C			; of the original RESET routine.
+		DB	#7C			;
+		DB	#B5			;
+		DB	#20, #01		;
+		DB	#E9			;
+		DB	#E1			;
+		DB	#F1			;
+		DB	#ED, #45		; End of unused bytes.
 
 ; Fetch the next immediate character following the current valid character address
 ; and update the associated system variable.
@@ -750,7 +750,9 @@ SEMI_TONE:	DB	#89, #02, #D0, #12, #86
 		DB	#89, #5C, #00, #00, #00
 		DB	#89, #69, #14, #F6, #24
 		DB	#89, #76, #F1, #10, #05
- 
+
+; Busy's modification - file name is optional now.
+; There was ZX81_NAME routine at this place, but it was not used anyway.
 NONAME:		RST	#18
 		LD	HL,NNTAB
 		LD	BC,#0005
@@ -792,7 +794,7 @@ SA_SYNC_1:	DJNZ	SA_SYNC_1
 		LD	B,#37
 SA_SYNC_2:	DJNZ	SA_SYNC_2
 		OUT	(#FE),A
-		LD	BC,#3B0E		; B=$3B time(*), C=$0E, YELLOW, MIC OFF.
+		LD	BC,#3B0E		; B=$3B time; C=$0E YELLOW, MIC OFF.
 		EX	AF,AF'
 		LD	L,A
 		JP	SA_START
@@ -875,7 +877,7 @@ LD_BYTES1:	AND	#20
 LD_BREAK:	RET	NZ
 LD_START:	CALL	LD_EDGE_1
 		JR	NC,LD_BREAK
-		LD	HL,#0115		; smaller delay (was #0415 in orig. ROM)
+		LD	HL,#0115		; Busy's modification - short delay (was #0415 in orig. ROM)
 LD_WAIT:	DJNZ	LD_WAIT
 		DEC	HL
 		LD	A,H
@@ -976,7 +978,7 @@ SAVE_ETC:	POP	AF
 		LD	A,(#5C74)
 		SUB	#E0
 		LD	(#5C74),A
-		CALL	NONAME			; File name is not mandatory now
+		CALL	NONAME			; Busy's modification - file name is optional now
 		CALL	L_2530
 		JR	Z,SA_DATA
 		LD	BC,#0011
@@ -1135,7 +1137,7 @@ SA_TYPE_0:	LD	(IX+#00),#00
 		EX	DE,HL
 SA_ALL:		LD	A,(#5C74)
 		AND	A
-		JP	Z,L_0970
+		JP	Z,SA_CONTRL
 		PUSH	HL
 		LD	BC,#0011
 		ADD	IX,BC
@@ -1189,287 +1191,287 @@ LD_CH_PR:	RST	#10
 		JR	Z,VR_CONTROL
 		LD	A,(#5C74)
 		DEC	A
-		JP	Z,L_0808
+		JP	Z,LD_CONTRL
 		CP	#02
-		JP	Z,L_08B6
-VR_CONTROL	PUSH	HL			; Handle VERIFY control
+		JP	Z,ME_CONTRL
+VR_CONTROL:	PUSH	HL			; Handle VERIFY control
 		LD	L,(IX-#06)
-L_07CD	EQU	$-2
-	LD	H,(IX-#05)
-	LD	E,(IX+#0B)
-	LD	D,(IX+#0C)
-	LD	A,H
-	OR	L
-	JR	Z,L_07E9
-	SBC	HL,DE
-	JR	C,L_0806
-	JR	Z,L_07E9
-	LD	A,(IX+#00)
-	CP	#03
-	JR	NZ,L_0806
-L_07E9	POP	HL
-	LD	A,H
-	OR	L
-	JR	NZ,L_07F4
-	LD	L,(IX+#0D)
-	LD	H,(IX+#0E)
-L_07F4	PUSH	HL
-	POP	IX
-	LD	A,(#5C74)
-	CP	#02
-	SCF
-	JR	NZ,L_0800
-	AND	A
-L_0800	LD	A,#FF
-L_0802	CALL	LD_BYTES
-	RET	C
-L_0806	RST	#08
-;
-;#0807
-	DB	#1A
-;
-L_0808	LD	E,(IX+#0B)
-	LD	D,(IX+#0C)
-	PUSH	HL
-	LD	A,H
-	OR	L
-	JR	NZ,L_0819
-	INC	DE
-	INC	DE
-	INC	DE
-	EX	DE,HL
-	JR	L_0825
-;
-L_0819	LD	L,(IX-#06)
-	LD	H,(IX-#05)
-	EX	DE,HL
-	SCF
-	SBC	HL,DE
-	JR	C,L_082E
-L_0825	LD	DE,#0005
-	ADD	HL,DE
-	LD	B,H
-	LD	C,L
-	CALL	L_1F05
-L_082E	POP	HL
-	LD	A,(IX+#00)
-	AND	A
-	JR	Z,L_0873
-	LD	A,H
-	OR	L
-	JR	Z,L_084C
-	DEC	HL
-	LD	B,(HL)
-	DEC	HL
-	LD	C,(HL)
-	DEC	HL
-	INC	BC
-	INC	BC
-	INC	BC
-	LD	(#5C5F),IX
-	CALL	L_19E8
-	LD	IX,(#5C5F)
-L_084C	LD	HL,(#5C59)
-	DEC	HL
-	LD	C,(IX+#0B)
-	LD	B,(IX+#0C)
-	PUSH	BC
-	INC	BC
-	INC	BC
-	INC	BC
-	LD	A,(IX-#03)
-	PUSH	AF
-	CALL	MAKE_ROOM
-	INC	HL
-	POP	AF
-	LD	(HL),A
-	POP	DE
-	INC	HL
-	LD	(HL),E
-	INC	HL
-	LD	(HL),D
-	INC	HL
-	PUSH	HL
-	POP	IX
-	SCF
-	LD	A,#FF
-	JP	L_0802
-;
-L_0873	EX	DE,HL
-	LD	HL,(#5C59)
-	DEC	HL
-	LD	(#5C5F),IX
-	LD	C,(IX+#0B)
-	LD	B,(IX+#0C)
-	PUSH	BC
-	CALL	L_19E5
-	POP	BC
-	PUSH	HL
-	PUSH	BC
-	CALL	MAKE_ROOM
-	LD	IX,(#5C5F)
-	INC	HL
-	LD	C,(IX+#0F)
-	LD	B,(IX+#10)
-	ADD	HL,BC
-	LD	(#5C4B),HL
-	LD	H,(IX+#0E)
-	LD	A,H
-	AND	#C0
-	JR	NZ,L_08AD
-	LD	L,(IX+#0D)
-	LD	(#5C42),HL
-	LD	(IY+#0A),#00
-L_08AD	POP	DE
-	POP	IX
-	SCF
-	LD	A,#FF
-	JP	L_0802
-;
-L_08B6	LD	C,(IX+#0B)
-	LD	B,(IX+#0C)
-	PUSH	BC
-	INC	BC
-	RST	#30
-	LD	(HL),#80
-	EX	DE,HL
-	POP	DE
-	PUSH	HL
-	PUSH	HL
-	POP	IX
-	SCF
-	LD	A,#FF
-	CALL	L_0802
-	POP	HL
-	LD	DE,(#5C53)
-L_08D2	LD	A,(HL)
-	AND	#C0
-	JR	NZ,L_08F0
-L_08D7	LD	A,(DE)
-	INC	DE
-	CP	(HL)
-	INC	HL
-	JR	NZ,L_08DF
-	LD	A,(DE)
-	CP	(HL)
-L_08DF	DEC	DE
-	DEC	HL
-	JR	NC,L_08EB
-	PUSH	HL
-	EX	DE,HL
-	CALL	L_19B8
-	POP	HL
-	JR	L_08D7
-;
-L_08EB	CALL	L_092C
-	JR	L_08D2
-;
-L_08F0	LD	A,(HL)
-	LD	C,A
-	CP	#80
-	RET	Z
-	PUSH	HL
-	LD	HL,(#5C4B)
-L_08F9	LD	A,(HL)
-	CP	#80
-	JR	Z,L_0923
-	CP	C
-	JR	Z,L_0909
-L_0901	PUSH	BC
-	CALL	L_19B8
-	POP	BC
-	EX	DE,HL
-	JR	L_08F9
-;
-L_0909	AND	#E0
-	CP	#A0
-	JR	NZ,L_0921
-	POP	DE
-	PUSH	DE
-	PUSH	HL
-L_0912	INC	HL
-	INC	DE
-	LD	A,(DE)
-	CP	(HL)
-	JR	NZ,L_091E
-	RLA
-	JR	NC,L_0912
-	POP	HL
-	JR	L_0921
-;
-L_091E	POP	HL
-	JR	L_0901
-;
-L_0921	LD	A,#FF
-L_0923	POP	DE
-	EX	DE,HL
-	INC	A
-	SCF
-	CALL	L_092C
-	JR	L_08F0
-;
-L_092C	JR	NZ,L_093E
-	EX	AF,AF'
-	LD	(#5C5F),HL
-	EX	DE,HL
-	CALL	L_19B8
-	CALL	L_19E8
-	EX	DE,HL
-	LD	HL,(#5C5F)
-	EX	AF,AF'
-L_093E	EX	AF,AF'
-	PUSH	DE
-	CALL	L_19B8
-	LD	(#5C5F),HL
-	LD	HL,(#5C53)
-	EX	(SP),HL
-	PUSH	BC
-	EX	AF,AF'
-	JR	C,L_0955
-	DEC	HL
-	CALL	MAKE_ROOM
-	INC	HL
-	JR	L_0958
-;
-L_0955	CALL	MAKE_ROOM
-L_0958	INC	HL
-	POP	BC
-	POP	DE
-	LD	(#5C53),DE
-	LD	DE,(#5C5F)
-	PUSH	BC
-	PUSH	DE
-	EX	DE,HL
-	LDIR
-	POP	HL
-	POP	BC
-	PUSH	DE
-	CALL	L_19E8
-	POP	DE
-	RET
-;
-L_0970	PUSH	HL
-	LD	A,#FD
-	CALL	L_1601
-	XOR	A
-	LD	DE,TAPE_MSGS
-	CALL	L_0C0A
-	SET	5,(IY+#02)
-	CALL	L_15D4
-	PUSH	IX
-	LD	DE,#0011
-	XOR	A
-	CALL	SA_BYTES
-	POP	IX
-	LD	B,#32
-L_0991	HALT
-	DJNZ	L_0991
-	LD	E,(IX+#0B)
-	LD	D,(IX+#0C)
-	POP	IX
-	LD	A,#FF
-	JP	SA_BYTES
-;
+		LD	H,(IX-#05)
+		LD	E,(IX+#0B)
+		LD	D,(IX+#0C)
+		LD	A,H
+		OR	L
+		JR	Z,VR_CONT_1
+		SBC	HL,DE
+		JR	C,REPORT_R
+		JR	Z,VR_CONT_1
+		LD	A,(IX+#00)
+		CP	#03
+		JR	NZ,REPORT_R
+VR_CONT_1:	POP	HL
+		LD	A,H
+		OR	L
+		JR	NZ,VR_CONT_2
+		LD	L,(IX+#0D)
+		LD	H,(IX+#0E)
+VR_CONT_2:	PUSH	HL
+		POP	IX
+		LD	A,(#5C74)
+		CP	#02
+		SCF
+		JR	NZ,VR_CONT_3
+		AND	A
+VR_CONT_3:	LD	A,#FF
+LD_BLOCK:	CALL	LD_BYTES		; Load a block of data
+		RET	C
+REPORT_R:	RST	#08			; Error report
+		DB	#1A			; Tape loading error
+LD_CONTRL:	LD	E,(IX+#0B)		; Handle LOAD control
+		LD	D,(IX+#0C)
+		PUSH	HL
+		LD	A,H
+		OR	L
+		JR	NZ,LD_CONT_1
+		INC	DE
+		INC	DE
+		INC	DE
+		EX	DE,HL
+		JR	LD_CONT_2
+
+LD_CONT_1:	LD	L,(IX-#06)
+		LD	H,(IX-#05)
+		EX	DE,HL
+		SCF
+		SBC	HL,DE
+		JR	C,LD_DATA
+LD_CONT_2:	LD	DE,#0005
+		ADD	HL,DE
+		LD	B,H
+		LD	C,L
+		CALL	L_1F05
+LD_DATA:	POP	HL
+		LD	A,(IX+#00)
+		AND	A
+		JR	Z,LD_PROG
+		LD	A,H
+		OR	L
+		JR	Z,LD_DATA_1
+		DEC	HL
+		LD	B,(HL)
+		DEC	HL
+		LD	C,(HL)
+		DEC	HL
+		INC	BC
+		INC	BC
+		INC	BC
+		LD	(#5C5F),IX
+		CALL	L_19E8
+		LD	IX,(#5C5F)
+LD_DATA_1:	LD	HL,(#5C59)
+		DEC	HL
+		LD	C,(IX+#0B)
+		LD	B,(IX+#0C)
+		PUSH	BC
+		INC	BC
+		INC	BC
+		INC	BC
+		LD	A,(IX-#03)
+		PUSH	AF
+		CALL	MAKE_ROOM
+		INC	HL
+		POP	AF
+		LD	(HL),A
+		POP	DE
+		INC	HL
+		LD	(HL),E
+		INC	HL
+		LD	(HL),D
+		INC	HL
+		PUSH	HL
+		POP	IX
+		SCF
+		LD	A,#FF
+		JP	LD_BLOCK
+
+LD_PROG:	EX	DE,HL
+		LD	HL,(#5C59)
+		DEC	HL
+		LD	(#5C5F),IX
+		LD	C,(IX+#0B)
+		LD	B,(IX+#0C)
+		PUSH	BC
+		CALL	L_19E5
+		POP	BC
+		PUSH	HL
+		PUSH	BC
+		CALL	MAKE_ROOM
+		LD	IX,(#5C5F)
+		INC	HL
+		LD	C,(IX+#0F)
+		LD	B,(IX+#10)
+		ADD	HL,BC
+		LD	(#5C4B),HL
+		LD	H,(IX+#0E)
+		LD	A,H
+		AND	#C0
+		JR	NZ,LD_PROG_1
+		LD	L,(IX+#0D)
+		LD	(#5C42),HL
+		LD	(IY+#0A),#00
+LD_PROG_1:	POP	DE
+		POP	IX
+		SCF
+		LD	A,#FF
+		JP	LD_BLOCK
+
+; Handle MERGE control
+ME_CONTRL:	LD	C,(IX+#0B)
+		LD	B,(IX+#0C)
+		PUSH	BC
+		INC	BC
+		RST	#30
+		LD	(HL),#80
+		EX	DE,HL
+		POP	DE
+		PUSH	HL
+		PUSH	HL
+		POP	IX
+		SCF
+		LD	A,#FF
+		CALL	LD_BLOCK
+		POP	HL
+		LD	DE,(#5C53)
+ME_NEW_LP:	LD	A,(HL)
+		AND	#C0
+		JR	NZ,ME_VAR_LP
+ME_OLD_LP:	LD	A,(DE)
+		INC	DE
+		CP	(HL)
+		INC	HL
+		JR	NZ,ME_OLD_L1
+		LD	A,(DE)
+		CP	(HL)
+ME_OLD_L1:	DEC	DE
+		DEC	HL
+		JR	NC,ME_NEW_L2
+		PUSH	HL
+		EX	DE,HL
+		CALL	L_19B8
+		POP	HL
+		JR	ME_OLD_LP
+
+ME_NEW_L2:	CALL	ME_ENTER
+		JR	ME_NEW_LP
+
+ME_VAR_LP:	LD	A,(HL)
+		LD	C,A
+		CP	#80
+		RET	Z
+		PUSH	HL
+		LD	HL,(#5C4B)
+ME_OLD_VP:	LD	A,(HL)
+		CP	#80
+		JR	Z,ME_VAR_L2
+		CP	C
+		JR	Z,ME_OLD_V2
+ME_OLD_V1:	PUSH	BC
+		CALL	L_19B8
+		POP	BC
+		EX	DE,HL
+		JR	ME_OLD_VP
+
+ME_OLD_V2:	AND	#E0
+		CP	#A0
+		JR	NZ,ME_VAR_L1
+		POP	DE
+		PUSH	DE
+		PUSH	HL
+ME_OLD_V3:	INC	HL
+		INC	DE
+		LD	A,(DE)
+		CP	(HL)
+		JR	NZ,ME_OLD_V4
+		RLA
+		JR	NC,ME_OLD_V3
+		POP	HL
+		JR	ME_VAR_L1
+
+ME_OLD_V4:	POP	HL
+		JR	ME_OLD_V1
+
+ME_VAR_L1:	LD	A,#FF
+ME_VAR_L2:	POP	DE
+		EX	DE,HL
+		INC	A
+		SCF
+		CALL	ME_ENTER
+		JR	ME_VAR_LP
+
+; Merge a line or variable
+ME_ENTER:	JR	NZ,ME_ENT_1
+		EX	AF,AF'
+		LD	(#5C5F),HL
+		EX	DE,HL
+		CALL	L_19B8
+		CALL	L_19E8
+		EX	DE,HL
+		LD	HL,(#5C5F)
+		EX	AF,AF'
+ME_ENT_1:	EX	AF,AF'
+		PUSH	DE
+		CALL	L_19B8
+		LD	(#5C5F),HL
+		LD	HL,(#5C53)
+		EX	(SP),HL
+		PUSH	BC
+		EX	AF,AF'
+		JR	C,ME_ENT_2
+		DEC	HL
+		CALL	MAKE_ROOM
+		INC	HL
+		JR	ME_ENT_3
+
+ME_ENT_2:	CALL	MAKE_ROOM
+ME_ENT_3:	INC	HL
+		POP	BC
+		POP	DE
+		LD	(#5C53),DE
+		LD	DE,(#5C5F)
+		PUSH	BC
+		PUSH	DE
+		EX	DE,HL
+		LDIR
+		POP	HL
+		POP	BC
+		PUSH	DE
+		CALL	L_19E8
+		POP	DE
+		RET
+
+; Handle SAVE control
+SA_CONTRL:	PUSH	HL
+		LD	A,#FD
+		CALL	L_1601
+		XOR	A
+		LD	DE,TAPE_MSGS
+		CALL	L_0C0A
+		SET	5,(IY+#02)
+		CALL	L_15D4
+		PUSH	IX
+		LD	DE,#0011
+		XOR	A
+		CALL	SA_BYTES
+		POP	IX
+		LD	B,#32
+SA_1_SEC:	HALT
+		DJNZ	SA_1_SEC
+		LD	E,(IX+#0B)
+		LD	D,(IX+#0C)
+		POP	IX
+		LD	A,#FF
+		JP	SA_BYTES
+
+; Tape mesages
 TAPE_MSGS:	DB	#80
 		DC	"Press REC & PLAY, then any key."
 TAPE_MSGS2:	EQU	$-1
@@ -1481,8 +1483,9 @@ TAPE_MSGS2:	EQU	$-1
 		DC	"Character array: "
 		DB	#0D
 		DC	"Bytes: "
-;
-L_09F4	CALL	DISPL
+
+; Genereal PRINT routine
+L_09F4	CALL	DISPL				; Busy's modification - disabled autolist of control codes
 	CP	#1E
 	JP	NC,L_0AD9
 	CP	#06
