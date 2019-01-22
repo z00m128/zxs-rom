@@ -1,4 +1,17 @@
-		device	zxspectrum48
+		OUTPUT	"BSROM140.BIN"
+
+VERZIA		EQU	140
+
+VERA		EQU	VERZIA/100
+VERB		EQU	VERA*100
+VERC		EQU	VERZIA-VERB
+VERD		EQU	VERC/10
+VERE		EQU	VERD*10
+VERF		EQU	VERC-VERE
+
+VER1		EQU	'0'+VERA
+VER2		EQU	'0'+VERD
+VER3		EQU	'0'+VERF
 
 		ORG	#0000
 
@@ -19,10 +32,8 @@ ERROR_1:	LD	HL,(#5C5D)
 PRINT_A:	JP	PRINT_A_2
 
 ; Unused bytes
-		DB	#FF
-		DB	#FF
-		DB	#FF
-		DB	#FF
+		DW	#FFFF
+		DW	#FFFF
 		DB	#FF
 
 ; Collect a character
@@ -35,8 +46,7 @@ NEXT_CHAR:	CALL	CH_ADD_1
 		JR	TEST_CHAR
 
 ; Unused bytes
-		DB	#FF
-		DB	#FF
+		DW	#FFFF
 		DB	#FF
 
 ; Calculator restart
@@ -44,10 +54,8 @@ NEXT_CHAR:	CALL	CH_ADD_1
 		JP	CALCULATE
 
 ; Unused bytes
-		DB	#FF
-		DB	#FF
-		DB	#FF
-		DB	#FF
+		DW	#FFFF
+		DW	#FFFF
 		DB	#FF
 
 ; Create free locations in work space
@@ -86,12 +94,9 @@ ERROR_3:	LD	(IY+#00),L
 		JP	SET_STK
 
 ; Unused bytes
-		DB	#FF
-		DB	#FF
-		DB	#FF
-		DB	#FF
-		DB	#FF
-		DB	#FF
+		DW	#FFFF
+		DW	#FFFF
+		DW	#FFFF
 		DB	#FF
 
 ; Non-maskable interrupt routine
@@ -236,158 +241,158 @@ TKN_TABLE:	DC	"?"
 
 ; maps for the standard 40-key ZX Spectrum keyboard
 ; SHIFT (#27) is read directly.
-MAIN_KEYS:	DB	#42				;B
-		DB	#48				;H
-		DB	#59				;Y
-		DB	#36				;6
-		DB	#35				;5
-		DB	#54				;T
-		DB	#47				;G
-		DB	#56				;V
-		DB	#4E				;N
-		DB	#4A				;J
-		DB	#55				;U
-		DB	#37				;7
-		DB	#34				;4
-		DB	#52				;R
-		DB	#46				;F
-		DB	#43				;C
-		DB	#4D				;M
-		DB	#4B				;K
-		DB	#49				;I
-		DB	#38				;8
-		DB	#33				;3
-		DB	#45				;E
-		DB	#44				;D
-		DB	#58				;X
-		DB	#0E				;Symbol shift
-		DB	#4C				;L
-		DB	#4F				;O
-		DB	#39				;9
-		DB	#32				;2
-		DB	#57				;W
-		DB	#53				;S
-		DB	#5A				;Z
-		DB	#20				;Space
-		DB	#0D				;Enter
-		DB	#50				;P
-		DB	#30				;0
-		DB	#31				;1
-		DB	#51				;Q
-		DB	#41				;A
+MAIN_KEYS:	DB	#42			;B
+		DB	#48			;H
+		DB	#59			;Y
+		DB	#36			;6
+		DB	#35			;5
+		DB	#54			;T
+		DB	#47			;G
+		DB	#56			;V
+		DB	#4E			;N
+		DB	#4A			;J
+		DB	#55			;U
+		DB	#37			;7
+		DB	#34			;4
+		DB	#52			;R
+		DB	#46			;F
+		DB	#43			;C
+		DB	#4D			;M
+		DB	#4B			;K
+		DB	#49			;I
+		DB	#38			;8
+		DB	#33			;3
+		DB	#45			;E
+		DB	#44			;D
+		DB	#58			;X
+		DB	#0E			;Symbol shift
+		DB	#4C			;L
+		DB	#4F			;O
+		DB	#39			;9
+		DB	#32			;2
+		DB	#57			;W
+		DB	#53			;S
+		DB	#5A			;Z
+		DB	#20			;Space
+		DB	#0D			;Enter
+		DB	#50			;P
+		DB	#30			;0
+		DB	#31			;1
+		DB	#51			;Q
+		DB	#41			;A
 
 ; Unshifted extended mode keys.
 ; The green keywords on the original keyboard.
-E_UNSHIFT:	DB	#E3				;READ
-		DB	#C4				;BIN
-		DB	#E0				;LPRINT
-		DB	#E4				;DATA
-		DB	#B4				;TAN
-		DB	#BC				;SGN
-		DB	#BD				;ABS
-		DB	#BB				;SQR
-		DB	#AF				;CODE
-		DB	#B0				;VAL
-		DB	#B1				;LEN
-		DB	#C0				;USR
-		DB	#A7				;PI
-		DB	#A6				;INKEY$
-		DB	#BE				;PEEK
-		DB	#AD				;TAB
-		DB	#B2				;SIN
-		DB	#BA				;INT
-		DB	#E5				;RESTORE
-		DB	#A5				;RND
-		DB	#C2				;CHR$
-		DB	#E1				;LLIST
-		DB	#B3				;COS
-		DB	#B9				;EXP
-		DB	#C1				;STR$
-		DB	#B8				;LN
+E_UNSHIFT:	DB	#E3			;READ
+		DB	#C4			;BIN
+		DB	#E0			;LPRINT
+		DB	#E4			;DATA
+		DB	#B4			;TAN
+		DB	#BC			;SGN
+		DB	#BD			;ABS
+		DB	#BB			;SQR
+		DB	#AF			;CODE
+		DB	#B0			;VAL
+		DB	#B1			;LEN
+		DB	#C0			;USR
+		DB	#A7			;PI
+		DB	#A6			;INKEY$
+		DB	#BE			;PEEK
+		DB	#AD			;TAB
+		DB	#B2			;SIN
+		DB	#BA			;INT
+		DB	#E5			;RESTORE
+		DB	#A5			;RND
+		DB	#C2			;CHR$
+		DB	#E1			;LLIST
+		DB	#B3			;COS
+		DB	#B9			;EXP
+		DB	#C1			;STR$
+		DB	#B8			;LN
 
 ; Shifted extended mode keys.
 ; The red keywords below keys on the original keyboard.
-EXT_SHIFT:	DB	#7E				;~
-		DB	#DC				;BRIGHT
-		DB	#DA				;PAPER
-		DB	#5C				;\
-		DB	#B7				;ATN
-		DB	#7B				;{
-		DB	#7D				;}
-		DB	#D8				;CIRCLE
-		DB	#BF				;IN
-		DB	#AE				;VAL$
-		DB	#AA				;SCREEN$
-		DB	#AB				;ATTR
-		DB	#DD				;INVERSE
-		DB	#DE				;OVER
-		DB	#DF				;OUT
-		DB	#7F				;(c)
-		DB	#B5				;ASN
-		DB	#D6				;VERIFY
-		DB	#7C				;|
-		DB	#D5				;MERGE
-		DB	#5D				;]
-		DB	#DB				;FLASH
-		DB	#B6				;ACS
-		DB	#D9				;INK
-		DB	#5B				;[
-		DB	#D7				;BEEP
+EXT_SHIFT:	DB	#7E			;~
+		DB	#DC			;BRIGHT
+		DB	#DA			;PAPER
+		DB	#5C			;\
+		DB	#B7			;ATN
+		DB	#7B			;{
+		DB	#7D			;}
+		DB	#D8			;CIRCLE
+		DB	#BF			;IN
+		DB	#AE			;VAL$
+		DB	#AA			;SCREEN$
+		DB	#AB			;ATTR
+		DB	#DD			;INVERSE
+		DB	#DE			;OVER
+		DB	#DF			;OUT
+		DB	#7F			;(c)
+		DB	#B5			;ASN
+		DB	#D6			;VERIFY
+		DB	#7C			;|
+		DB	#D5			;MERGE
+		DB	#5D			;]
+		DB	#DB			;FLASH
+		DB	#B6			;ACS
+		DB	#D9			;INK
+		DB	#5B			;[
+		DB	#D7			;BEEP
 
 ; Shift key control codes assigned to the digits.
 ; White labels above the number characters on the digits keys on the orig. keyboard.
-CTL_CODES:	DB	#0C				;DELETE
-		DB	#07				;EDIT
-		DB	#06				;Caps lock
-		DB	#04				;True video
-		DB	#05				;Inverse video
-		DB	#08				;Cursor left
-		DB	#0A				;Cursor down
-		DB	#0B				;Cursor up
-		DB	#09				;Cursor right
-		DB	#0F				;GRAPH
+CTL_CODES:	DB	#0C			;DELETE
+		DB	#07			;EDIT
+		DB	#06			;Caps lock
+		DB	#04			;True video
+		DB	#05			;Inverse video
+		DB	#08			;Cursor left
+		DB	#0A			;Cursor down
+		DB	#0B			;Cursor up
+		DB	#09			;Cursor right
+		DB	#0F			;GRAPH
 
 ; Keys shifted with Symbol shift.
 ; Red symbols on the alphabetic characters on the original keyboard.
-SYM_CODES:	DB	#E2				;STOP
-		DB	#2A				;*
-		DB	#3F				;?
-		DB	#CD				;STEP
-		DB	#C8				;>=
-		DB	#CC				;TO
-		DB	#CB				;THEN
-		DB	#5E				;^
-		DB	#AC				;AT
-		DB	#2D				;-
-		DB	#2B				;+
-		DB	#3D				;=
-		DB	#2E				;.
-		DB	#2C				;,
-		DB	#3B				;;
-		DB	#22				;"
-		DB	#C7				;<=
-		DB	#3C				;<
-		DB	#C3				;NOT
-		DB	#3E				;>
-		DB	#C5				;OR
-		DB	#2F				;/
-		DB	#C9				;<>
-		DB	#60				;£
-		DB	#C6				;AND
-		DB	#3A				;:
+SYM_CODES:	DB	#E2			;STOP
+		DB	#2A			;*
+		DB	#3F			;?
+		DB	#CD			;STEP
+		DB	#C8			;>=
+		DB	#CC			;TO
+		DB	#CB			;THEN
+		DB	#5E			;^
+		DB	#AC			;AT
+		DB	#2D			;-
+		DB	#2B			;+
+		DB	#3D			;=
+		DB	#2E			;.
+		DB	#2C			;,
+		DB	#3B			;;
+		DB	#22			;"
+		DB	#C7			;<=
+		DB	#3C			;<
+		DB	#C3			;NOT
+		DB	#3E			;>
+		DB	#C5			;OR
+		DB	#2F			;/
+		DB	#C9			;<>
+		DB	#60			;£
+		DB	#C6			;AND
+		DB	#3A			;:
 
 ; Keywords assigned to the digits in extended mode.
 ; On the original keyboard those are remaining red keywords below the keys.
-E_DIGITS:	DB	#D0				;FORMAT
-		DB	#CE				;DEF FN
-		DB	#A8				;FN
-		DB	#CA				;LINE
-		DB	#D3				;OPEN #
-		DB	#D4				;CLOSE #
-		DB	#D1				;MOVE
-		DB	#D2				;ERASE
-		DB	#A9				;POINT
-		DB	#CF				;CAT
+E_DIGITS:	DB	#D0			;FORMAT
+		DB	#CE			;DEF FN
+		DB	#A8			;FN
+		DB	#CA			;LINE
+		DB	#D3			;OPEN #
+		DB	#D4			;CLOSE #
+		DB	#D1			;MOVE
+		DB	#D2			;ERASE
+		DB	#A9			;POINT
+		DB	#CF			;CAT
 
 ; Keyboard scanning
 ; returns 1 or 2 keys in DE
@@ -745,456 +750,450 @@ SEMI_TONE:	DB	#89, #02, #D0, #12, #86
 		DB	#89, #5C, #00, #00, #00
 		DB	#89, #69, #14, #F6, #24
 		DB	#89, #76, #F1, #10, #05
-;
-L_04AA	RST	#18
-	LD	HL,L_04BB
-	LD	BC,#0005
-	CPIR
-	JP	NZ,L_1C8C
-	LD	C,#00
-	JP	L_2AA9
-;
-L_04BB	LD	A,(#AA0D)
-	XOR	A
-	CALL	PO,#0000
-L_04C2	LD	HL,L_053F
-	PUSH	HL
-L_04C6	LD	HL,L_1F80
-	BIT	7,A
-	JR	Z,L_04D0
-	LD	HL,L_0C98
-L_04D0	EX	AF,AF'
-	INC	DE
-	DEC	IX
-	DI
-	LD	A,#02
+ 
+NONAME:		RST	#18
+		LD	HL,NNTAB
+		LD	BC,#0005
+		CPIR
+		JP	NZ,L_1C8C
+		LD	C,#00
+		JP	L_2AA9
+NNTAB:		DB	#3A
+		DW	#AA0D
+		DW	#E4AF
+		DW	#0000
 
-	LD	B,A
-L_04D8	DJNZ	L_04D8
-L_04D9	EQU	$-1
-	OUT	(#FE),A
-	XOR	#0F
-	LD	B,#A4
-	DEC	L
-	JR	NZ,L_04D8
-	DEC	B
-	DEC	H
-	JP	P,L_04D8
-	LD	B,#2F
-L_04EA	DJNZ	L_04EA
-	OUT	(#FE),A
-	LD	A,#0D
-L_04F0	LD	B,#37
-L_04F2	DJNZ	L_04F2
-	OUT	(#FE),A
-	LD	BC,L_3B0E
-	EX	AF,AF'
-	LD	L,A
-	JP	L_0507
-;
-L_04FE	LD	A,D
-	OR	E
-	JR	Z,L_050E
-	LD	L,(IX+#00)
-L_0505	LD	A,H
-	XOR	L
-L_0507	LD	H,A
-	LD	A,#01
-	SCF
-	JP	L_0525
-;
-L_050E	LD	L,H
-	JR	L_0505
-;
-L_0511	LD	A,C
-	BIT	7,B
-L_0514	DJNZ	L_0514
-	JR	NC,L_051C
-	LD	B,#42
-L_051A	DJNZ	L_051A
-L_051C	OUT	(#FE),A
-	LD	B,#3E
-	JR	NZ,L_0511
-	DEC	B
-	XOR	A
-	INC	A
-L_0525	RL	L
-	JP	NZ,L_0514
-	DEC	DE
-	INC	IX
-	LD	B,#31
-	LD	A,#7F
-	IN	A,(#FE)
-	RRA
-	RET	NC
-	LD	A,D
-	INC	A
-	JP	NZ,L_04FE
-	LD	B,#3B
-L_053C	DJNZ	L_053C
-	RET
-;
-L_053F	PUSH	AF
-	LD	A,(#5C48)
-	AND	#38
-	RRCA
-	RRCA
-	RRCA
-	OUT	(#FE),A
-	LD	A,#7F
-	IN	A,(#FE)
-	RRA
-	EI
-	JR	C,L_0554
-	RST	#08
-;
-;#0553
-	DB	#0C
-;
-L_0554	POP	AF
-	RET
-;
-L_0556	INC	D
-	EX	AF,AF'
-	DEC	D
-	DI
-	LD	A,#0F
-	OUT	(#FE),A
-	LD	HL,L_053F
-	PUSH	HL
-	IN	A,(#FE)
-	RRA
-L_0565	AND	#20
-	OR	#02
-	LD	C,A
-	CP	A
-L_056B	RET	NZ
-L_056C	CALL	L_05E7
-	JR	NC,L_056B
-	LD	HL,#0115
-L_0574	DJNZ	L_0574
-	DEC	HL
-	LD	A,H
-	OR	L
-	JR	NZ,L_0574
-	CALL	L_05E3
-	JR	NC,L_056B
-L_0580	LD	B,#9C
-	CALL	L_05E3
-	JR	NC,L_056B
-	LD	A,#C6
-	CP	B
-	JR	NC,L_056C
-	INC	H
-	JR	NZ,L_0580
-L_058F	LD	B,#C9
-	CALL	L_05E7
-	JR	NC,L_056B
-	LD	A,B
-	CP	#D4
-	JR	NC,L_058F
-	CALL	L_05E7
-	RET	NC
-	LD	A,C
-	XOR	#03
-	LD	C,A
-	LD	H,#00
-	LD	B,#B0
-	JR	L_05C8
-;
-L_05A9	EX	AF,AF'
-	JR	NZ,L_05B3
-	JR	NC,L_05BD
-	LD	(IX+#00),L
-	JR	L_05C2
-;
-L_05B3	RL	C
-	XOR	L
-	RET	NZ
-	LD	A,C
-	RRA
-	LD	C,A
-	INC	DE
-	JR	L_05C4
-;
-L_05BD	LD	A,(IX+#00)
-	XOR	L
-	RET	NZ
-L_05C2	INC	IX
-L_05C4	DEC	DE
-	EX	AF,AF'
-	LD	B,#B2
-L_05C8	LD	L,#01
-L_05CA	CALL	L_05E3
-	RET	NC
-	LD	A,#CB
-	CP	B
-	RL	L
-	LD	B,#B0
-	JP	NC,L_05CA
-	LD	A,H
-	XOR	L
-	LD	H,A
-	LD	A,D
-	OR	E
-	JR	NZ,L_05A9
-	LD	A,H
-	CP	#01
-	RET
-;
-L_05E3	CALL	L_05E7
-	RET	NC
-L_05E7	LD	A,#16
-L_05E9	DEC	A
-	JR	NZ,L_05E9
-	AND	A
-L_05ED	INC	B
-	RET	Z
-	LD	A,#7F
-	IN	A,(#FE)
-	RRA
-	RET	NC
-	XOR	C
-	AND	#20
-	JR	Z,L_05ED
-	LD	A,C
-	CPL
-	LD	C,A
-	AND	#07
-	OR	#08
-	OUT	(#FE),A
-	SCF
-	RET
-;
-L_0605	POP	AF
-	LD	A,(#5C74)
-	SUB	#E0
-	LD	(#5C74),A
-	CALL	L_04AA
-	CALL	L_2530
-	JR	Z,L_0652
-	LD	BC,#0011
-	LD	A,(#5C74)
-	AND	A
-	JR	Z,L_0621
-	LD	C,#22
-L_0621	RST	#30
-	PUSH	DE
-	POP	IX
-	LD	B,#0B
-	LD	A,#20
-L_0629	LD	(DE),A
-	INC	DE
-	DJNZ	L_0629
-	LD	(IX+#01),#FF
-	CALL	L_2BF1
-	LD	HL,#FFF6
-	DEC	BC
-	ADD	HL,BC
-	INC	BC
-	JR	NC,L_064B
-	LD	A,(#5C74)
-	AND	A
-	JR	NZ,L_0644
-	RST	#08
-;
-;#0643
-	DB	#0E
-;
-L_0644	LD	A,B
-	OR	C
-	JR	Z,L_0652
-	LD	BC,#000A
-L_064B	PUSH	IX
-	POP	HL
-	INC	HL
-	EX	DE,HL
-	LDIR
-L_0652	RST	#18
-	CP	#E4
-	JR	NZ,L_06A0
-	LD	A,(#5C74)
-	CP	#03
-	JP	Z,L_1C8A
-	RST	#20
-	CALL	L_28B2
-	SET	7,C
-	JR	NC,L_0672
-	LD	HL,#0000
-	LD	A,(#5C74)
-	DEC	A
-	JR	Z,L_0685
-	RST	#08
-;
-;#0671
-	DB	#01
-;
-L_0672	JP	NZ,L_1C8A
-	CALL	L_2530
-	JR	Z,L_0692
-	INC	HL
-	LD	A,(HL)
-	LD	(IX+#0B),A
-	INC	HL
-	LD	A,(HL)
-	LD	(IX+#0C),A
-	INC	HL
-L_0685	LD	(IX+#0E),C
-	LD	A,#01
-	BIT	6,C
-	JR	Z,L_068F
-	INC	A
-L_068F	LD	(IX+#00),A
-L_0692	EX	DE,HL
-	RST	#20
-	CP	#29
-	JR	NZ,L_0672
-	RST	#20
-	CALL	L_1BEE
-	EX	DE,HL
-	JP	L_075A
-;
-L_06A0	CP	#AA
-	JR	NZ,L_06C3
-	LD	A,(#5C74)
-	CP	#03
-	JP	Z,L_1C8A
-	RST	#20
-	CALL	L_1BEE
-	LD	(IX+#0B),#00
-	LD	(IX+#0C),#1B
-	LD	HL,#4000
-	LD	(IX+#0D),L
-	LD	(IX+#0E),H
-	JR	L_0710
-;
-L_06C3	CP	#AF
-	JR	NZ,L_0716
-	LD	A,(#5C74)
-	CP	#03
-	JP	Z,L_1C8A
-	RST	#20
-	CALL	L_2048
-	JR	NZ,L_06E1
-	LD	A,(#5C74)
-	AND	A
-	JP	Z,L_1C8A
-	CALL	L_1CE6
-	JR	L_06F0
-;
-L_06E1	CALL	L_1C82
-	RST	#18
-	CP	#2C
-	JR	Z,L_06F5
-	LD	A,(#5C74)
-	AND	A
-	JP	Z,L_1C8A
-L_06F0	CALL	L_1CE6
-	JR	L_06F9
-;
-L_06F5	RST	#20
-	CALL	L_1C82
-L_06F9	CALL	L_1BEE
-	CALL	FIND_INT2
-	LD	(IX+#0B),C
-L_0701	EQU	$-1
-	LD	(IX+#0C),B
-	CALL	FIND_INT2
-	LD	(IX+#0D),C
-	LD	(IX+#0E),B
-	LD	H,B
-	LD	L,C
-L_0710	LD	(IX+#00),#03
-	JR	L_075A
-;
-L_0716	CP	#CA
-	JR	Z,L_0723
-	CALL	L_1BEE
-	LD	(IX+#0E),#80
-	JR	L_073A
-;
-L_0723	LD	A,(#5C74)
-	AND	A
-	JP	NZ,L_1C8A
-	RST	#20
-	CALL	L_1C82
-	CALL	L_1BEE
-	CALL	FIND_INT2
-	LD	(IX+#0D),C
-	LD	(IX+#0E),B
-L_073A	LD	(IX+#00),#00
-	LD	HL,(#5C59)
-	LD	DE,(#5C53)
-	SCF
-	SBC	HL,DE
-	LD	(IX+#0B),L
-	LD	(IX+#0C),H
-	LD	HL,(#5C4B)
-	SBC	HL,DE
-	LD	(IX+#0F),L
-	LD	(IX+#10),H
-	EX	DE,HL
-L_075A	LD	A,(#5C74)
-	AND	A
-	JP	Z,L_0970
-	PUSH	HL
-	LD	BC,#0011
-	ADD	IX,BC
-L_0767	PUSH	IX
-	LD	DE,#0011
-	XOR	A
-	SCF
-	CALL	L_0556
-	POP	IX
-	JR	NC,L_0767
-	LD	A,#FE
-	CALL	L_1601
-	LD	(IY+#52),#FF
-	LD	C,#80
-	LD	A,(IX+#00)
-	CP	(IX-#11)
-	JR	NZ,L_078A
-	LD	C,#F6
-L_078A	CP	#04
-	JR	NC,L_0767
-			LD	DE,TAPE_MSGS2	;#09C0
-	PUSH	BC
-	CALL	L_0C0A
-	POP	BC
-	PUSH	IX
-	POP	DE
-	LD	HL,#FFF0
-	ADD	HL,DE
-	LD	B,#0A
-	LD	A,(HL)
-	INC	A
-	JR	NZ,L_07A6
-	LD	A,C
-	ADD	A,B
-	LD	C,A
-L_07A6	INC	DE
-	LD	A,(DE)
-	CP	(HL)
-	INC	HL
-	JR	NZ,L_07AD
-	INC	C
-L_07AD	RST	#10
-	DJNZ	L_07A6
-	BIT	7,C
-	JR	NZ,L_0767
-	LD	A,#0D
-	RST	#10
-	POP	HL
-	LD	A,(IX+#00)
-	CP	#03
-	JR	Z,L_07CB
-	LD	A,(#5C74)
-	DEC	A
-	JP	Z,L_0808
-	CP	#02
-	JP	Z,L_08B6
-L_07CB	PUSH	HL
-	LD	L,(IX-#06)
+; Save header and program or data
+SA_BYTES:	LD	HL,SA_LD_RET
+		PUSH	HL
+SA_BYTES1:	LD	HL,L_1F80
+		BIT	7,A
+		JR	Z,SA_FLAG
+		LD	HL,L_0C98
+SA_FLAG:	EX	AF,AF'
+		INC	DE
+		DEC	IX
+		DI
+		LD	A,#02
+		LD	B,A
+SA_LEADER:	DJNZ	SA_LEADER
+		OUT	(#FE),A
+		XOR	#0F
+		LD	B,#A4
+		DEC	L
+		JR	NZ,SA_LEADER
+		DEC	B
+		DEC	H
+		JP	P,SA_LEADER
+		LD	B,#2F
+SA_SYNC_1:	DJNZ	SA_SYNC_1
+		OUT	(#FE),A
+		LD	A,#0D
+		LD	B,#37
+SA_SYNC_2:	DJNZ	SA_SYNC_2
+		OUT	(#FE),A
+		LD	BC,#3B0E		; B=$3B time(*), C=$0E, YELLOW, MIC OFF.
+		EX	AF,AF'
+		LD	L,A
+		JP	SA_START
+
+SA_LOOP:	LD	A,D
+		OR	E
+		JR	Z,SA_PARITY
+		LD	L,(IX+#00)
+SA_LOOP_P:	LD	A,H
+		XOR	L
+SA_START:	LD	H,A
+		LD	A,#01
+		SCF
+		JP	SA_8_BITS
+
+SA_PARITY:	LD	L,H
+		JR	SA_LOOP_P
+
+SA_BIT_2:	LD	A,C
+		BIT	7,B
+SA_BIT_1:	DJNZ	SA_BIT_1
+		JR	NC,SA_OUT
+		LD	B,#42
+SA_SET:		DJNZ	SA_SET
+SA_OUT		OUT	(#FE),A
+		LD	B,#3E
+		JR	NZ,SA_BIT_2
+		DEC	B
+		XOR	A
+		INC	A
+SA_8_BITS	RL	L
+		JP	NZ,SA_BIT_1
+		DEC	DE
+		INC	IX
+		LD	B,#31
+		LD	A,#7F
+		IN	A,(#FE)
+		RRA
+		RET	NC
+		LD	A,D
+		INC	A
+		JP	NZ,SA_LOOP
+		LD	B,#3B
+SA_DELAY	DJNZ	SA_DELAY
+		RET
+
+; Reset border nad check BREAK for LOAD and SAVE
+SA_LD_RET	PUSH	AF
+		LD	A,(#5C48)
+		AND	#38
+		RRCA
+		RRCA
+		RRCA
+		OUT	(#FE),A
+		LD	A,#7F
+		IN	A,(#FE)
+		RRA
+		EI
+		JR	C,SA_LD_END
+REPORT_DA:	RST	#08			; Error report
+		DB	#0C			; BREAK - CONT repeats
+SA_LD_END:	POP	AF
+		RET
+
+; Load header or data
+LD_BYTES:	INC	D
+		EX	AF,AF'
+		DEC	D
+		DI
+		LD	A,#0F
+		OUT	(#FE),A
+		LD	HL,SA_LD_RET
+		PUSH	HL
+		IN	A,(#FE)
+		RRA
+LD_BYTES1:	AND	#20
+		OR	#02
+		LD	C,A
+		CP	A
+LD_BREAK:	RET	NZ
+LD_START:	CALL	LD_EDGE_1
+		JR	NC,LD_BREAK
+		LD	HL,#0115		; smaller delay (was #0415 in orig. ROM)
+LD_WAIT:	DJNZ	LD_WAIT
+		DEC	HL
+		LD	A,H
+		OR	L
+		JR	NZ,LD_WAIT
+		CALL	LD_EDGE_2
+		JR	NC,LD_BREAK
+LD_LEADER:	LD	B,#9C
+		CALL	LD_EDGE_2
+		JR	NC,LD_BREAK
+		LD	A,#C6
+		CP	B
+		JR	NC,LD_START
+		INC	H
+		JR	NZ,LD_LEADER
+LD_SYNC:	LD	B,#C9
+		CALL	LD_EDGE_1
+		JR	NC,LD_BREAK
+		LD	A,B
+		CP	#D4
+		JR	NC,LD_SYNC
+		CALL	LD_EDGE_1
+		RET	NC
+		LD	A,C
+		XOR	#03
+		LD	C,A
+		LD	H,#00
+		LD	B,#B0
+		JR	LD_MARKER
+
+LD_LOOP:	EX	AF,AF'
+		JR	NZ,LD_FLAG
+		JR	NC,LD_VERIFY
+		LD	(IX+#00),L
+		JR	LD_NEXT
+
+LD_FLAG:	RL	C
+		XOR	L
+		RET	NZ
+		LD	A,C
+		RRA
+		LD	C,A
+		INC	DE
+		JR	LD_DEC
+
+LD_VERIFY:	LD	A,(IX+#00)
+		XOR	L
+		RET	NZ
+LD_NEXT:	INC	IX
+LD_DEC:		DEC	DE
+		EX	AF,AF'
+		LD	B,#B2
+LD_MARKER:	LD	L,#01
+LD_8_BITS:	CALL	LD_EDGE_2
+		RET	NC
+		LD	A,#CB
+		CP	B
+		RL	L
+		LD	B,#B0
+		JP	NC,LD_8_BITS
+		LD	A,H
+		XOR	L
+		LD	H,A
+		LD	A,D
+		OR	E
+		JR	NZ,LD_LOOP
+		LD	A,H
+		CP	#01
+		RET
+
+; Check signal being loaded
+LD_EDGE_2:	CALL	LD_EDGE_1
+		RET	NC
+LD_EDGE_1:	LD	A,#16
+LD_DELAY:	DEC	A
+		JR	NZ,LD_DELAY
+		AND	A
+LD_SAMPLE	INC	B
+		RET	Z
+		LD	A,#7F
+		IN	A,(#FE)
+		RRA
+		RET	NC
+		XOR	C
+		AND	#20
+		JR	Z,LD_SAMPLE
+		LD	A,C
+		CPL
+		LD	C,A
+		AND	#07
+		OR	#08
+		OUT	(#FE),A
+		SCF
+		RET
+
+; Entry point for tape commands
+SAVE_ETC:	POP	AF
+		LD	A,(#5C74)
+		SUB	#E0
+		LD	(#5C74),A
+		CALL	NONAME			; File name is not mandatory now
+		CALL	L_2530
+		JR	Z,SA_DATA
+		LD	BC,#0011
+		LD	A,(#5C74)
+		AND	A
+		JR	Z,SA_SPACE
+		LD	C,#22
+SA_SPACE:	RST	#30
+		PUSH	DE
+		POP	IX
+		LD	B,#0B
+		LD	A,#20
+SA_BLANK:	LD	(DE),A
+		INC	DE
+		DJNZ	SA_BLANK
+		LD	(IX+#01),#FF
+		CALL	L_2BF1
+		LD	HL,#FFF6
+		DEC	BC
+		ADD	HL,BC
+		INC	BC
+		JR	NC,SA_NAME
+		LD	A,(#5C74)
+		AND	A
+		JR	NZ,SA_NULL
+REPORT_FA:	RST	#08			; Error report
+		DB	#0E			; Invalid file name
+SA_NULL:	LD	A,B
+		OR	C
+		JR	Z,SA_DATA
+		LD	BC,#000A
+SA_NAME:	PUSH	IX
+		POP	HL
+		INC	HL
+		EX	DE,HL
+		LDIR
+SA_DATA:	RST	#18
+		CP	#E4
+		JR	NZ,SA_SCR
+		LD	A,(#5C74)
+		CP	#03
+		JP	Z,L_1C8A
+		RST	#20
+		CALL	L_28B2
+		SET	7,C
+		JR	NC,SA_V_OLD
+		LD	HL,#0000
+		LD	A,(#5C74)
+		DEC	A
+		JR	Z,SA_V_NEW
+REPORT_2A:	RST	#08			; Error report
+		DB	#01			; Variable not found
+SA_V_OLD:	JP	NZ,L_1C8A
+		CALL	L_2530
+		JR	Z,SA_DATA_1
+		INC	HL
+		LD	A,(HL)
+		LD	(IX+#0B),A
+		INC	HL
+		LD	A,(HL)
+		LD	(IX+#0C),A
+		INC	HL
+SA_V_NEW:	LD	(IX+#0E),C
+		LD	A,#01
+		BIT	6,C
+		JR	Z,SA_V_TYPE
+		INC	A
+SA_V_TYPE:	LD	(IX+#00),A
+SA_DATA_1:	EX	DE,HL
+		RST	#20
+		CP	#29
+		JR	NZ,SA_V_OLD
+		RST	#20
+		CALL	CHECK_END
+		EX	DE,HL
+		JP	SA_ALL
+
+SA_SCR:		CP	#AA
+		JR	NZ,SA_CODE
+		LD	A,(#5C74)
+		CP	#03
+		JP	Z,L_1C8A
+		RST	#20
+		CALL	CHECK_END
+		LD	(IX+#0B),#00
+		LD	(IX+#0C),#1B
+		LD	HL,#4000
+		LD	(IX+#0D),L
+		LD	(IX+#0E),H
+		JR	SA_TYPE_3
+
+SA_CODE:	CP	#AF
+		JR	NZ,SA_LINE
+		LD	A,(#5C74)
+		CP	#03
+		JP	Z,L_1C8A
+		RST	#20
+		CALL	L_2048
+		JR	NZ,SA_CODE_1
+		LD	A,(#5C74)
+		AND	A
+		JP	Z,L_1C8A
+		CALL	L_1CE6
+		JR	SA_CODE_2
+
+SA_CODE_1:	CALL	L_1C82
+		RST	#18
+		CP	#2C
+		JR	Z,SA_CODE_3
+		LD	A,(#5C74)
+		AND	A
+		JP	Z,L_1C8A
+SA_CODE_2:	CALL	L_1CE6
+		JR	SA_CODE_4
+
+SA_CODE_3:	RST	#20
+		CALL	L_1C82
+SA_CODE_4	CALL	CHECK_END
+		CALL	FIND_INT2
+		LD	(IX+#0B),C
+		LD	(IX+#0C),B
+		CALL	FIND_INT2
+		LD	(IX+#0D),C
+		LD	(IX+#0E),B
+		LD	H,B
+		LD	L,C
+SA_TYPE_3	LD	(IX+#00),#03
+		JR	SA_ALL
+
+SA_LINE:	CP	#CA
+		JR	Z,SA_LINE_1
+		CALL	CHECK_END
+		LD	(IX+#0E),#80
+		JR	SA_TYPE_0
+
+SA_LINE_1:	LD	A,(#5C74)
+		AND	A
+		JP	NZ,L_1C8A
+		RST	#20
+		CALL	L_1C82
+		CALL	CHECK_END
+		CALL	FIND_INT2
+		LD	(IX+#0D),C
+		LD	(IX+#0E),B
+SA_TYPE_0:	LD	(IX+#00),#00
+		LD	HL,(#5C59)
+		LD	DE,(#5C53)
+		SCF
+		SBC	HL,DE
+		LD	(IX+#0B),L
+		LD	(IX+#0C),H
+		LD	HL,(#5C4B)
+		SBC	HL,DE
+		LD	(IX+#0F),L
+		LD	(IX+#10),H
+		EX	DE,HL
+SA_ALL:		LD	A,(#5C74)
+		AND	A
+		JP	Z,L_0970
+		PUSH	HL
+		LD	BC,#0011
+		ADD	IX,BC
+LD_LOOK_H:	PUSH	IX
+		LD	DE,#0011
+		XOR	A
+		SCF
+		CALL	LD_BYTES
+		POP	IX
+		JR	NC,LD_LOOK_H
+		LD	A,#FE
+		CALL	L_1601
+		LD	(IY+#52),#FF
+		LD	C,#80
+		LD	A,(IX+#00)
+		CP	(IX-#11)
+		JR	NZ,LD_TYPE
+		LD	C,#F6
+LD_TYPE:	CP	#04
+		JR	NC,LD_LOOK_H
+		LD	DE,TAPE_MSGS2
+		PUSH	BC
+		CALL	L_0C0A
+		POP	BC
+		PUSH	IX
+		POP	DE
+		LD	HL,#FFF0
+		ADD	HL,DE
+		LD	B,#0A
+		LD	A,(HL)
+		INC	A
+		JR	NZ,LD_NAME
+		LD	A,C
+		ADD	A,B
+		LD	C,A
+LD_NAME:	INC	DE
+		LD	A,(DE)
+		CP	(HL)
+		INC	HL
+		JR	NZ,LD_CH_PR
+		INC	C
+LD_CH_PR:	RST	#10
+		DJNZ	LD_NAME
+		BIT	7,C
+		JR	NZ,LD_LOOK_H
+		LD	A,#0D
+		RST	#10
+		POP	HL
+		LD	A,(IX+#00)
+		CP	#03
+		JR	Z,VR_CONTROL
+		LD	A,(#5C74)
+		DEC	A
+		JP	Z,L_0808
+		CP	#02
+		JP	Z,L_08B6
+VR_CONTROL	PUSH	HL			; Handle VERIFY control
+		LD	L,(IX-#06)
 L_07CD	EQU	$-2
 	LD	H,(IX-#05)
 	LD	E,(IX+#0B)
@@ -1222,7 +1221,7 @@ L_07F4	PUSH	HL
 	JR	NZ,L_0800
 	AND	A
 L_0800	LD	A,#FF
-L_0802	CALL	L_0556
+L_0802	CALL	LD_BYTES
 	RET	C
 L_0806	RST	#08
 ;
@@ -1460,7 +1459,7 @@ L_0970	PUSH	HL
 	PUSH	IX
 	LD	DE,#0011
 	XOR	A
-	CALL	L_04C2
+	CALL	SA_BYTES
 	POP	IX
 	LD	B,#32
 L_0991	HALT
@@ -1469,7 +1468,7 @@ L_0991	HALT
 	LD	D,(IX+#0C)
 	POP	IX
 	LD	A,#FF
-	JP	L_04C2
+	JP	SA_BYTES
 ;
 TAPE_MSGS:	DB	#80
 		DC	"Press REC & PLAY, then any key."
@@ -1483,7 +1482,7 @@ TAPE_MSGS2:	EQU	$-1
 		DB	#0D
 		DC	"Bytes: "
 ;
-L_09F4	CALL	L_3A01
+L_09F4	CALL	DISPL
 	CP	#1E
 	JP	NC,L_0AD9
 	CP	#06
@@ -1497,7 +1496,7 @@ L_09F4	CALL	L_3A01
 L_0A0B	LD	E,(HL)
 	ADD	HL,DE
 	PUSH	HL
-	JP	L_0B03
+	JP	PO_FETCH
 ;
 ;#0A11
 	DB	#4E
@@ -1550,8 +1549,8 @@ L_0A3A	JP	L_0DD9
 	CALL	L_0C55
 	DEC	B
 	JP	L_0DD9
-;
-	CALL	L_0B03
+
+	CALL	PO_FETCH
 	LD	A,C
 	DEC	A
 	DEC	A
@@ -1606,7 +1605,7 @@ L_0AAC	JP	C,L_1E9F
 L_0ABF	JP	L_0DD9
 ;
 L_0AC2	LD	A,H
-L_0AC3	CALL	L_0B03
+L_0AC3	CALL	PO_FETCH
 	ADD	A,C
 	DEC	A
 	AND	#1F
@@ -1636,20 +1635,21 @@ L_0AF0	LD	(#5C8A),BC
 L_0AFC	LD	(IY+#45),C
 	LD	(#5C80),HL
 	RET
-;
-L_0B03	BIT	1,(IY+#01)
-	JR	NZ,L_0B1D
-	LD	BC,(#5C88)
-	LD	HL,(#5C84)
-	BIT	0,(IY+#02)
-	RET	Z
-	LD	BC,(#5C8A)
-	LD	HL,(#5C86)
-	RET
-;
-L_0B1D	LD	C,(IY+#45)
-	LD	HL,(#5C80)
-	RET
+
+;Fetch position parameters
+PO_FETCH:	BIT	1,(IY+#01)
+		JR	NZ,PO_F_FR
+		LD	BC,(#5C88)
+		LD	HL,(#5C84)
+		BIT	0,(IY+#02)
+		RET	Z
+		LD	BC,(#5C8A)
+		LD	HL,(#5C86)
+		RET
+
+PO_F_FR:	LD	C,(IY+#45)
+		LD	HL,(#5C80)
+		RET
 ;
 L_0B24	CP	#80
 	JR	C,L_0B65
@@ -1657,7 +1657,7 @@ L_0B24	CP	#80
 	JR	NC,L_0B52
 	LD	B,A
 	CALL	L_0B38
-	CALL	L_0B03
+	CALL	PO_FETCH
 	LD	DE,#5C92
 	JR	L_0B7F
 ;
@@ -1686,7 +1686,7 @@ L_0B52	SUB	#A5
 	JR	L_0B6A
 ;
 L_0B5F	CALL	L_0C10
-	JP	L_0B03
+	JP	PO_FETCH
 ;
 L_0B65	PUSH	BC
 	LD	BC,(#5C36)
@@ -2134,7 +2134,7 @@ L_0E4D	AND	#07
 	LD	(HL),#00
 	INC	DE
 	LDIR
-	LD	DE,L_0701
+	LD	DE,#0701			;was L_0701
 	ADD	HL,DE
 	DEC	A
 	AND	#F8
@@ -2349,7 +2349,7 @@ L_0FA9	LD	HL,(#5C49)
 	BIT	5,(IY+#37)
 	JP	NZ,L_1097
 	CALL	L_196E
-	CALL	L_3A4C
+	CALL	LIN2
 	AND	#C0
 	JP	NZ,L_1097
 	PUSH	HL
@@ -2382,7 +2382,7 @@ TOERR:		LD	(#5C5F),HL
 		LD	(#5C5B),HL
 		RET
 ;
-	CALL	L_3A8B
+	CALL	DOLE
 	BIT	5,(IY+#37)
 	RET	NZ
 	NOP
@@ -2447,13 +2447,13 @@ L_1051	AND	A
 	JR	C,L_103E
 	RET
 ;
-	CALL	L_3A98
+	CALL	HORE
 L_105A	EQU	$-2
 	BIT	5,(IY+#37)
 	RET	NZ
 	CALL	L_196E
 	EX	DE,HL
-	CALL	L_1695
+	CALL	LINE_NO
 	LD	HL,#5C4A
 	CALL	L_191C
 L_106E	CALL	L_1795
@@ -2681,7 +2681,7 @@ L_1200	LD	(#5CB4),HL
 	LD	BC,#0040
 	LD	(#5C38),BC
 L_1219	LD	(#5CB2),HL
-	LD	HL,L_3C00
+	LD	HL,#3C00
 	LD	(#5C36),HL
 	LD	HL,(#5CB2)
 	LD	(HL),#3E
@@ -2729,11 +2729,11 @@ L_1256	LD	(HL),#0D
 	LDIR
 	LD	(IY+#31),#02
 	LD	(IY+#0E),#0F
-	CALL	DEVRESET
+	CALL	HARD
 	CALL	L_16B0
 	LD	(IY+#00),#FF
 	CALL	INFO
-	CALL	L_053F
+	CALL	SA_LD_RET
 	JP	L_1303
 ;
 L_12A2	LD	(IY+#31),#02
@@ -2754,7 +2754,7 @@ L_12AC	LD	A,#00
 ;
 L_12CF	LD	HL,(#5C59)
 	LD	(#5C5D),HL
-	CALL	L_3A56
+	CALL	LIN3
 	NOP
 	NOP
 	JP	NC,L_155D
@@ -2804,12 +2804,12 @@ L_133C	CALL	L_15EF
 			LD	DE,COMMA_SP - 1
 	CALL	L_0C0A
 	LD	BC,(#5C45)
-	CALL	L_1A1B
+	CALL	OUT_NUM_1
 	LD	A,#3A
 	RST	#10
 	LD	C,(IY+#0D)
 	LD	B,#00
-	CALL	L_1A1B
+	CALL	OUT_NUM_1
 	CALL	L_1097
 	LD	A,(#5C3A)
 	INC	A
@@ -3133,19 +3133,20 @@ L_167F	INC	HL
 	ADD	HL,DE
 	EX	DE,HL
 	RET
-;
-L_168F	DB	#00
-	DB	#00
-;
-L_1691	EX	DE,HL
-	LD	DE,L_168F
-L_1695	LD	A,(HL)
-	AND	#C0
-	JR	NZ,L_1691
-	LD	D,(HL)
-	INC	HL
-	LD	E,(HL)
-	RET
+
+; Collect line number
+LINE_ZERO:	DB	#00
+		DB	#00
+
+LINE_NO_A:	EX	DE,HL
+		LD	DE,LINE_ZERO
+LINE_NO:	LD	A,(HL)
+		AND	#C0
+		JR	NZ,LINE_NO_A
+		LD	D,(HL)
+		INC	HL
+		LD	E,(HL)
+		RET
 ; Handle reserve room, continuation of the restart BC_SPACES
 RESERVE:	LD	HL,(#5C63)
 		DEC	HL
@@ -3414,9 +3415,9 @@ L_1814	RST	#20
 L_181A	CALL	L_1CE6
 	JR	L_1822
 ;
-L_181F	CALL	L_1CDE
+L_181F	CALL	FETCH_NUM
 L_1821	EQU	$-1
-L_1822	CALL	L_1BEE
+L_1822	CALL	CHECK_END
 	CALL	FIND_INT2
 	LD	A,B
 	AND	#3F
@@ -3454,7 +3455,7 @@ L_1865	LD	(IY+#2D),E
 	POP	BC
 	RET	NC
 	PUSH	BC
-	CALL	L_3A60
+	CALL	LIN4
 	INC	HL
 	INC	HL
 	INC	HL
@@ -3556,7 +3557,7 @@ L_190F	LD	E,(HL)
 	EX	DE,HL
 	INC	HL
 	CALL	L_196E
-	CALL	L_1695
+	CALL	LINE_NO
 	POP	HL
 L_191C	BIT	5,(IY+#37)
 	RET	NZ
@@ -3564,20 +3565,21 @@ L_191C	BIT	5,(IY+#37)
 	DEC	HL
 	LD	(HL),E
 	RET
-;
-L_1925	LD	A,E
-	AND	A
-	RET	M
-	JR	L_1937
-;
-L_192A	XOR	A
-L_192B	ADD	HL,BC
-	INC	A
-	JR	C,L_192B
-	SBC	HL,BC
-	DEC	A
-	JR	Z,L_1925
-	JP	L_15EF
+
+; Outputting numbers at start of BASIC line
+OUT_SP_2	LD	A,E
+		AND	A
+		RET	M
+		JR	L_1937
+
+OUT_SP_NO:	XOR	A
+OUT_SP_1:	ADD	HL,BC
+		INC	A
+		JR	C,OUT_SP_1
+		SBC	HL,BC
+		DEC	A
+		JR	Z,OUT_SP_2
+		JP	L_15EF
 ;
 L_1937	CALL	NUMERIC
 	JR	NC,L_196C
@@ -3610,7 +3612,7 @@ L_196E	PUSH	HL
 	LD	D,H
 	LD	E,L
 L_1974	POP	BC
-	CALL	L_3C01
+	CALL	LIN1
 	RET	NC
 	PUSH	BC
 	CALL	L_19B8
@@ -3709,48 +3711,49 @@ L_19E8	PUSH	BC
 	LDIR
 	POP	HL
 	RET
-;
-L_19FB	LD	HL,(#5C59)
-	DEC	HL
-	LD	(#5C5D),HL
-	RST	#20
-	LD	HL,#5C92
-	LD	(#5C65),HL
-	CALL	L_2D3B
-	CALL	L_2DA2
-	JR	C,L_1A15
-	LD	HL,#C000
-	ADD	HL,BC
-L_1A15	JP	C,L_1C8A
-	JP	SET_STK
-;
-L_1A1B	PUSH	DE
-	PUSH	HL
-	XOR	A
-	BIT	7,B
-	JR	NZ,L_1A42
-	LD	H,B
-	LD	E,#FF
-	JP	L_3A42
-;
-L_1A28	PUSH	DE
-	LD	D,(HL)
-	INC	HL
-	LD	E,(HL)
-	PUSH	HL
-	EX	DE,HL
-	LD	E,#20
-L_1A30	LD	BC,#FC18
-	CALL	L_192A
-	LD	BC,#FF9C
-	CALL	L_192A
-	LD	C,#F6
-	CALL	L_192A
-	LD	A,L
-L_1A42	CALL	L_15EF
-	POP	HL
-	POP	DE
-	RET
+; Read line number of line editing area
+E_LINE_NO:	LD	HL,(#5C59)
+		DEC	HL
+		LD	(#5C5D),HL
+		RST	#20
+		LD	HL,#5C92
+		LD	(#5C65),HL
+		CALL	L_2D3B
+		CALL	L_2DA2
+		JR	C,E_L_1
+		LD	HL,#C000
+		ADD	HL,BC
+E_L_1:		JP	C,L_1C8A
+		JP	SET_STK
+
+; Report and line number outputting
+OUT_NUM_1:	PUSH	DE
+		PUSH	HL
+		XOR	A
+		BIT	7,B
+		JR	NZ,OUT_NUM_4
+		LD	H,B
+		LD	E,#FF
+		JP	NUMCOM
+
+OUT_NUM_2:	PUSH	DE
+		LD	D,(HL)
+		INC	HL
+		LD	E,(HL)
+		PUSH	HL
+		EX	DE,HL
+		LD	E,#20
+OUT_NUM_3:	LD	BC,#FC18
+		CALL	OUT_SP_NO
+		LD	BC,#FF9C
+		CALL	OUT_SP_NO
+		LD	C,#F6
+		CALL	OUT_SP_NO
+		LD	A,L
+OUT_NUM_4:	CALL	L_15EF
+		POP	HL
+		POP	DE
+		RET
 ;
 L_1A48	DB	#B1
 	DB	#CB
@@ -3911,7 +3914,7 @@ L_1A48	DB	#B1
 	DB	#05
 ;
 ;#1AB3
-	DW	L_3BAB
+	DW	POKE
 ;
 ;#1AB5
 	DB	#03
@@ -3935,7 +3938,7 @@ L_1A48	DB	#B1
 	DB	#03
 ;
 ;#1ABF
-	DW	L_3B10
+	DW	CLS
 ;
 ;#1AC1
 	DB	#09
@@ -4091,7 +4094,7 @@ L_1A48	DB	#B1
 	DW	L_1793
 ;
 L_1B17	RES	7,(IY+#01)
-	CALL	L_19FB
+	CALL	E_LINE_NO
 	XOR	A
 	LD	(#5C47),A
 	DEC	A
@@ -4111,7 +4114,7 @@ L_1B29	CALL	L_16BF
 	LD	HL,L_1B76
 	PUSH	HL
 	CP	#CE
-	JP	C,L_3B22
+	JP	C,COMM
 	SUB	#CE
 	LD	C,A
 	RST	#20
@@ -4154,7 +4157,7 @@ L_1B76	CALL	L_1F54
 	DB	#14
 ;
 L_1B7D	BIT	7,(IY+#0A)
-	JR	NZ,L_1BF4
+	JR	NZ,STMT_NEXT
 	LD	HL,(#5C42)
 	BIT	7,H
 	JR	Z,L_1B9E
@@ -4214,22 +4217,23 @@ L_1BD1	LD	(#5C55),HL
 	JP	Z,L_1B28
 	INC	D
 	CALL	L_198B
-	JR	Z,L_1BF4
+	JR	Z,STMT_NEXT
 L_1BEC	RST	#08
 ;
 ;#1BED
 	DB	#16
-;
-L_1BEE	CALL	L_2530
-	RET	NZ
-	POP	BC
-	POP	BC
-L_1BF4	RST	#18
-	CP	#0D
-	JR	Z,L_1BB3
-	CP	#3A
-	JP	Z,L_1B28
-	JP	L_1C8A
+
+; End of statements
+CHECK_END:	CALL	L_2530
+		RET	NZ
+		POP	BC
+		POP	BC
+STMT_NEXT:	RST	#18			;Go to next statement
+		CP	#0D
+		JR	Z,L_1BB3
+		CP	#3A
+		JP	Z,L_1B28
+		JP	L_1C8A
 ;
 L_1C01	DB	#0F
 	DB	#1D
@@ -4245,10 +4249,10 @@ L_1C01	DB	#0F
 	DB	#CF
 ;
 ;#1C0D
-	CALL	L_1CDE
+	CALL	FETCH_NUM
 	CP	A
 	POP	BC
-	CALL	Z,L_1BEE
+	CALL	Z,CHECK_END
 	EX	DE,HL
 	LD	HL,(#5C74)
 	LD	C,(HL)
@@ -4284,7 +4288,7 @@ L_1C46	LD	(#5C72),BC
 ;
 	POP	BC
 	CALL	L_1C56
-	CALL	L_1BEE
+	CALL	CHECK_END
 	RET
 ;
 L_1C56	LD	A,(#5C3B)
@@ -4333,7 +4337,7 @@ L_1C8C	CALL	L_24FB
 	LD	A,(#5C74)
 	SUB	#13
 	CALL	L_21FC
-	CALL	L_1BEE
+	CALL	CHECK_END
 	LD	HL,(#5C8F)
 	LD	(#5C8D),HL
 	LD	HL,#5C91
@@ -4358,15 +4362,15 @@ L_1C8C	CALL	L_24FB
 L_1CD6	CALL	L_21E2
 	JR	L_1C7A
 ;
-	JP	L_0605
+	JP	SAVE_ETC
 ;
-L_1CDE	CP	#0D
-	JR	Z,L_1CE6
-	CP	#3A
-	JR	NZ,L_1C82
-L_1CE6	CALL	L_2530
-	RET	Z
-	RST	#28	;*calc
+FETCH_NUM:	CP	#0D
+		JR	Z,L_1CE6
+		CP	#3A
+		JR	NZ,L_1C82
+L_1CE6		CALL	L_2530
+		RET	Z
+		RST	#28	;*calc
 ;
 ;#1CEB
 	DB	#A0
@@ -4399,10 +4403,10 @@ L_1D03	CP	#CD
 	JR	NZ,L_1D10
 	RST	#20
 	CALL	L_1C82
-	CALL	L_1BEE
+	CALL	CHECK_END
 	JR	L_1D16
 ;
-L_1D10	CALL	L_1BEE
+L_1D10	CALL	CHECK_END
 	RST	#28	;*calc
 ;
 ;#1D14
@@ -4604,14 +4608,14 @@ L_1E0A	CALL	TEMP_PTR1
 L_1E1E	RST	#18
 	CP	#2C
 	JR	Z,L_1DEC
-	CALL	L_1BEE
+	CALL	CHECK_END
 	RET
 ;
 L_1E27	CALL	L_2530
 	JR	NZ,L_1E37
 L_1E2C	CALL	L_24FB
 	CP	#2C
-	CALL	NZ,L_1BEE
+	CALL	NZ,CHECK_END
 	RST	#20
 	JR	L_1E2C
 ;
@@ -4668,10 +4672,10 @@ L_1E8D	JR	C,L_1E9F
 	NEG
 L_1E93	RET
 
-;
+
 FIND_INT1:	CALL	L_2DD5
 		JR	L_1E8D
-;
+
 FIND_INT2:	CALL	L_2DA2
 		JR	C,L_1E9F
 		RET	Z
@@ -4850,7 +4854,7 @@ L_1FA6	CP	#29
 	XOR	(IY+#01)
 	AND	#40
 L_1FBD	JP	NZ,L_1C8A
-	CALL	L_1BEE
+	CALL	CHECK_END
 L_1FC3	CALL	L_2530
 	POP	HL
 	RET	Z
@@ -4864,7 +4868,7 @@ L_1FCF	CALL	L_2530
 	CALL	NZ,L_1601
 	CALL	L_0D4D
 	CALL	L_1FDF
-	CALL	L_1BEE
+	CALL	CHECK_END
 	RET
 ;
 L_1FDF	RST	#18
@@ -4914,7 +4918,7 @@ L_2024	CALL	L_21F2
 	CALL	L_1FC3
 	BIT	6,(IY+#01)
 	CALL	Z,L_2BF1
-	JP	NZ,L_2DE3
+	JP	NZ,PRINT_FP
 L_203C	LD	A,B
 	OR	C
 	DEC	BC
@@ -4973,7 +4977,7 @@ L_2089	CALL	L_2530
 	CALL	L_0D6E
 L_2096	LD	(IY+#02),#01
 	CALL	L_20C1
-	CALL	L_1BEE
+	CALL	CHECK_END
 	LD	BC,(#5C88)
 	LD	A,(#5C6B)
 	CP	B
@@ -5301,7 +5305,7 @@ L_22CB	CALL	L_2307
 L_22D4	RLCA
 	DJNZ	L_22D4
 	AND	#01
-	JP	L_2D28
+	JP	STACK_A
 ;
 L_22DC	CALL	L_2307
 	CALL	L_22E5
@@ -5349,7 +5353,7 @@ L_2320	RST	#18
 	JP	NZ,L_1C8A
 	RST	#20
 	CALL	L_1C82
-	CALL	L_1BEE
+	CALL	CHECK_END
 	RST	#28	;*calc
 ;
 ;#232E
@@ -5449,12 +5453,12 @@ L_235A	RST	#28	;*calc
 L_2382	RST	#18
 	CP	#2C
 	JR	Z,L_238D
-	CALL	L_1BEE
+	CALL	CHECK_END
 	JP	L_2477
 ;
 L_238D	RST	#20
 	CALL	L_1C82
-	CALL	L_1BEE
+	CALL	CHECK_END
 	RST	#28	;*calc
 ;
 ;#2395
@@ -5582,7 +5586,7 @@ L_23C1	CALL	L_247D
 ;
 ;#2408
 	LD	A,(#5C7D)
-	CALL	L_2D28
+	CALL	STACK_A
 	RST	#28	;*calc
 ;
 ;#240F
@@ -5593,7 +5597,7 @@ L_23C1	CALL	L_247D
 ;
 ;#2413
 	LD	A,(#5C7E)
-	CALL	L_2D28
+	CALL	STACK_A
 	RST	#28	;*calc
 ;
 ;#241A
@@ -5645,7 +5649,7 @@ L_2439	PUSH	BC
 ;
 ;#2441
 	LD	A,(#5C7D)
-	CALL	L_2D28
+	CALL	STACK_A
 	RST	#28	;*calc
 ;
 ;#2448
@@ -5660,7 +5664,7 @@ L_2439	PUSH	BC
 ;
 ;#2450
 	LD	A,(#5C7E)
-	CALL	L_2D28
+	CALL	STACK_A
 	RST	#28	;*calc
 ;
 ;#2457
@@ -5681,7 +5685,7 @@ L_245F	RST	#28	;*calc
 ;
 ;#2464
 	LD	A,(#5C7D)
-	CALL	L_2D28
+	CALL	STACK_A
 	RST	#28	;*calc
 ;
 ;#246B
@@ -5691,7 +5695,7 @@ L_245F	RST	#28	;*calc
 ;
 ;#246E
 	LD	A,(#5C7E)
-	CALL	L_2D28
+	CALL	STACK_A
 	RST	#28	;*calc
 ;
 ;#2475
@@ -5725,7 +5729,7 @@ L_247D	RST	#28	;*calc
 	JR	NC,L_2497
 L_2495	LD	A,#FC
 L_2497	PUSH	AF
-	CALL	L_2D28
+	CALL	STACK_A
 	RST	#28	;*calc
 ;
 ;#249C
@@ -5821,7 +5825,7 @@ L_24FB	RST	#18
 	LD	B,#00
 	PUSH	BC
 L_24FF	LD	C,A
-	CALL	L_386E
+	CALL	HEXA
 	CALL	L_16DC
 	LD	A,C
 	JP	NC,L_2684
@@ -5873,7 +5877,7 @@ L_254F	PUSH	BC
 	XOR	(HL)
 	JR	Z,L_255A
 	INC	A
-	JR	NZ,L_2573
+	JR	NZ,S_SCR_NXT
 	DEC	A
 L_255A	LD	C,A
 	LD	B,#07
@@ -5882,7 +5886,7 @@ L_255D	INC	D
 	LD	A,(DE)
 	XOR	(HL)
 	XOR	C
-	JR	NZ,L_2573
+	JR	NZ,S_SCR_NXT
 	DJNZ	L_255D
 	POP	BC
 	POP	BC
@@ -5892,21 +5896,19 @@ L_255D	INC	D
 	LD	BC,#0001
 	RST	#30
 	LD	(DE),A
-	JR	L_257D
-;
-L_2573	POP	HL
-	LD	DE,#0008
-	ADD	HL,DE
-	POP	DE
-	POP	BC
-	DJNZ	L_254F
-	LD	C,B
-L_257D	RET
-;
-	OR	D
-	LD	HL,(L_07CD)
-L_2580	EQU	$-2
-	INC	HL
+	JR	S_SCR_STO
+
+S_SCR_NXT:	POP	HL
+		LD	DE,#0008
+		ADD	HL,DE
+		POP	DE
+		POP	BC
+		DJNZ	L_254F
+		LD	C,B
+S_SCR_STO:	RET				; bugfix ?
+
+		DB	#B2,#2A			; remain of CALL STK_STO_D (#2AB2)
+L_2580	CALL	L_2307
 	LD	A,C
 	RRCA
 	RRCA
@@ -5920,7 +5922,7 @@ L_2580	EQU	$-2
 	XOR	#58
 	LD	H,A
 	LD	A,(HL)
-	JP	L_2D28
+	JP	STACK_A
 ;
 L_2596	DB	#22
 	DB	#1C
@@ -5995,7 +5997,7 @@ L_25DB	LD	HL,#5C3B
 	CALL	L_2530
 	JR	Z,L_2625
 	LD	BC,(#5C76)
-	CALL	L_2D2B
+	CALL	STACK_BC
 	RST	#28	;*calc
 ;
 ;#2605
@@ -6136,7 +6138,7 @@ L_26DF	LD	BC,#09DB
 	JR	Z,L_270D
 L_26ED	SUB	#AF
 	JP	C,L_1C8A
-	LD	BC,L_04F0
+	LD	BC,#04F0			; was L_04F0
 	CP	#14
 	JR	Z,L_270D
 	JP	NC,L_1C8A
@@ -6201,7 +6203,7 @@ L_274C	PUSH	DE
 	JR	L_2764
 ;
 L_275B	LD	A,E
-	CALL	L_38AA
+	CALL	VAL1
 	AND	#40
 L_2761	JP	NZ,L_1C8A
 L_2764	POP	DE
@@ -7017,7 +7019,7 @@ L_2C05	JP	NZ,L_1C8A
 	JR	NZ,L_2C15
 	RES	6,C
 	CALL	L_2996
-	CALL	L_1BEE
+	CALL	CHECK_END
 L_2C15	JR	C,L_2C1F
 	PUSH	BC
 	CALL	L_19B8
@@ -7128,7 +7130,7 @@ L_2CA2	RST	#20
 ;
 L_2CB3	LD	B,D
 	LD	C,E
-	JP	L_2D2B
+	JP	STACK_BC
 ;
 L_2CB8	CP	#2E
 	JR	Z,L_2CCB
@@ -7158,7 +7160,7 @@ L_2CD5	RST	#28	;*calc
 	DB	#38
 ;
 L_2CDA	RST	#18
-	CALL	L_2D22
+	CALL	STK_DIGIT
 	JR	C,L_2CEB
 	RST	#28	;*calc
 ;
@@ -7208,20 +7210,20 @@ NUMERIC:	CP	#30
 		CCF
 		RET
 
-;
-L_2D22	CALL	NUMERIC
-	RET	C
-	SUB	#30
-L_2D28	LD	C,A
-	LD	B,#00
-L_2D2B	LD	IY,#5C3A
-	XOR	A
-	LD	E,A
-	LD	D,C
-	LD	C,B
-	LD	B,A
-	CALL	L_2AB6
-	RST	#28	;*calc
+; Stack digit
+STK_DIGIT:	CALL	NUMERIC
+		RET	C
+		SUB	#30
+STACK_A:	LD	C,A		;Stack accumulator
+		LD	B,#00
+STACK_BC:	LD	IY,#5C3A	;Stack BC register pair
+		XOR	A
+		LD	E,A
+		LD	D,C
+		LD	C,B
+		LD	B,A
+		CALL	L_2AB6
+		RST	#28		;*calc
 ;
 ;#2D38
 	DB	#38
@@ -7239,7 +7241,7 @@ L_2D3B	PUSH	AF
 ;
 ;#2D3F
 	POP	AF
-L_2D40	CALL	L_2D22
+L_2D40	CALL	STK_DIGIT
 	RET	C
 	RST	#28	;*calc
 ;
@@ -7417,25 +7419,23 @@ L_2DD5	CALL	L_2DA2
 ;
 L_2DE1	POP	AF
 	RET
-;
-L_2DE3	RST	#28	;*calc
-;
-;#2DE4
-	DB	#31
-	DB	#36
-	DB	#00
-	DB	#0B
-	DB	#31
-	DB	#37
-	DB	#00
-	DB	#0D
-	DB	#02
-	DB	#38
-;
-;#2DEE
-	LD	A,#30
-	RST	#10
-	RET
+
+; Print a floating point number
+PRINT_FP:	RST	#28		;*calc
+		DB	#31		;DUPLICATE
+		DB	#36		;LESS_0
+		DB	#00		;JUMP_TRUE
+		DB	#0B		;to PF_NEGTVE
+		DB	#31		;DUPLICATE
+		DB	#37		;GREATER_0
+		DB	#00		;JUMP_TRUE
+		DB	#0D		;to PS_POSTVE
+		DB	#02		;DELETE
+		DB	#38		;END_CALC
+
+		LD	A,#30
+		RST	#10
+		RET
 ;
 ;#2DF2
 	DB	#2A
@@ -7724,7 +7724,7 @@ L_2F6C	LD	D,B
 L_2F83	LD	A,#2B
 L_2F85	RST	#10
 	LD	B,#00
-	JP	L_1A1B
+	JP	OUT_NUM_1
 ;
 L_2F8B	PUSH	DE
 	LD	L,A
@@ -8444,7 +8444,7 @@ L_32D7	DW	L_368F
 	DW	L_342D
 	DW	L_340F
 
-;The Calculator
+; The Calculator
 CALCULATE:	CALL	L_35BF
 L_335E	LD	A,B
 	LD	(#5C67),A
@@ -8704,10 +8704,10 @@ L_34A5	CALL	FIND_INT2
 ;
 L_34AC	CALL	FIND_INT2
 	LD	A,(BC)
-L_34B0	JP	L_2D28
+L_34B0	JP	STACK_A
 ;
 L_34B3	CALL	FIND_INT2
-	LD	HL,L_2D2B
+	LD	HL,STACK_BC
 	PUSH	HL
 	PUSH	BC
 	RET
@@ -8736,7 +8736,7 @@ L_34D3	DEC	A
 	LD	C,A
 	JR	NC,L_34E4
 	INC	B
-L_34E4	JP	L_2D2B
+L_34E4	JP	STACK_BC
 ;
 L_34E7	RST	#08
 ;
@@ -8941,7 +8941,7 @@ L_35DC	RST	#08
 ;#35DD
 	DB	#0A
 ;
-L_35DE	CALL	L_38B4
+L_35DE	CALL	VAL2
 	PUSH	HL
 	LD	A,B
 	ADD	A,#E3
@@ -8983,7 +8983,7 @@ L_361F	LD	BC,#0001
 	PUSH	HL
 	LD	A,#FF
 	CALL	L_1601
-	CALL	L_2DE3
+	CALL	PRINT_FP
 	POP	HL
 	CALL	L_1615
 	POP	DE
@@ -9018,10 +9018,10 @@ L_3669	CALL	L_2BF1
 	OR	C
 	JR	Z,L_3671
 	LD	A,(DE)
-L_3671	JP	L_2D28
+L_3671	JP	STACK_A
 ;
 L_3674	CALL	L_2BF1
-	JP	L_2D2B
+	JP	STACK_BC
 ;
 L_367A	EXX
 	PUSH	HL
@@ -9217,7 +9217,7 @@ L_3713	RST	#28	;*calc
 ;#371F
 	LD	A,(HL)
 	LD	(HL),#80
-	CALL	L_2D28
+	CALL	STACK_A
 	RST	#28	;*calc
 ;
 ;#3726
@@ -9601,96 +9601,100 @@ L_3851	RST	#28	;*calc
 ;
 ;#386D
 	RET
-;
-L_386E	LD	HL,L_2596
-	CP	#25
-	RET	NZ
-	POP	AF
-	CALL	L_2530
-	JP	NZ,L_26B5
-	LD	DE,#0000
-L_387E	RST	#20
-	CALL	L_2C88
-	JR	NC,L_38A4
-	CP	#41
-	JR	C,L_3890
-	OR	#20
-	CP	#67
-	JR	NC,L_38A4
-	SUB	#27
-L_3890	AND	#0F
-	LD	C,A
-	LD	A,D
-	AND	#F0
-	JP	NZ,L_31AD
-	LD	A,C
-	EX	DE,HL
-	ADD	HL,HL
-	ADD	HL,HL
-	ADD	HL,HL
-	ADD	HL,HL
-	OR	L
-	LD	L,A
-	EX	DE,HL
-	JR	L_387E
-;
-L_38A4	CALL	L_2CB3
-	JP	L_2695
-;
-L_38AA	CP	#18
-	RET	Z
-	CP	#9D
-	RET	Z
-	XOR	(IY+#01)
-	RET
-;
-L_38B4	LD	HL,(#5C5D)
-	BIT	6,(IY+#01)
-	RET	Z
-	POP	AF
-	PUSH	BC
-	CALL	FIND_INT2
-	POP	AF
-	RRCA
-	JR	NC,L_38CD
-	LD	H,B
-	LD	L,C
-	LD	C,(HL)
-	INC	HL
-	LD	B,(HL)
-	JP	L_2D2B
-;
-L_38CD	PUSH	BC
-	LD	BC,#0004
-	RST	#30
-	POP	HL
-	PUSH	DE
-	LD	A,H
-	CALL	L_38E0
-	LD	A,L
-	CALL	L_38E0
-	POP	DE
-	JP	L_35D7
-;
-L_38E0	PUSH	AF
-	RRCA
-	RRCA
-	RRCA
-	RRCA
-	CALL	L_38E9
-	POP	AF
-L_38E9	AND	#0F
-	OR	#30
-	CP	#3A
-	JR	C,L_38F3
-	ADD	A,#27
-L_38F3	LD	(DE),A
-	INC	DE
-	RET
-;
-L_38F6	LD	DE,L_153E
-	CALL	L_0C13
-	JP	L_39F5
+
+; Input of HEX numbers
+HEXA:		LD	HL,L_2596
+		CP	#25
+		RET	NZ
+		POP	AF
+		CALL	L_2530
+		JP	NZ,L_26B5
+		LD	DE,#0000
+HEX1:		RST	#20
+		CALL	L_2C88
+		JR	NC,HEXEND
+		CP	#41
+		JR	C,CIS
+		OR	#20
+		CP	#67
+		JR	NC,HEXEND
+		SUB	#27
+CIS:		AND	#0F
+		LD	C,A
+		LD	A,D
+		AND	#F0
+		JP	NZ,L_31AD
+		LD	A,C
+		EX	DE,HL
+		ADD	HL,HL
+		ADD	HL,HL
+		ADD	HL,HL
+		ADD	HL,HL
+		OR	L
+		LD	L,A
+		EX	DE,HL
+		JR	HEX1
+
+HEXEND:		CALL	L_2CB3
+		JP	L_2695
+
+; Allow number in VAL$ and VAL
+VAL1:		CP	#18
+		RET	Z
+		CP	#9D
+		RET	Z
+		XOR	(IY+#01)
+		RET
+
+; Evaluation of VAL and VAL$
+VAL2:		LD	HL,(#5C5D)
+		BIT	6,(IY+#01)
+		RET	Z
+		POP	AF
+		PUSH	BC
+		CALL	FIND_INT2
+		POP	AF
+		RRCA
+		JR	NC,DOLAR
+		LD	H,B
+		LD	L,C
+		LD	C,(HL)
+		INC	HL
+		LD	B,(HL)
+		JP	STACK_BC
+
+DOLAR:		PUSH	BC
+		LD	BC,#0004
+		RST	#30
+		POP	HL
+		PUSH	DE
+		LD	A,H
+		CALL	HEX99
+		LD	A,L
+		CALL	HEX99
+		POP	DE
+		JP	L_35D7
+
+; Hex numbers
+HEX99:		PUSH	AF
+		RRCA
+		RRCA
+		RRCA
+		RRCA
+		CALL	HEX98
+		POP	AF
+HEX98:		AND	#0F
+		OR	#30
+		CP	#3A
+		JR	C,HEX98_1
+		ADD	A,#27
+HEX98_1:	LD	(DE),A
+		INC	DE
+		RET
+
+INFSUB:		LD	DE,L_153E
+		CALL	L_0C13
+		JP	HLO
 
 MM:		DW	#FFFF
 
@@ -9698,7 +9702,7 @@ USERJP:		JP	#0052
 
 DISKTOOLS:	DW	#0052
 
-RESET128K:	DI
+RES128:		DI
 		XOR	A
 		LD	I,A
 		OUT	(#FE),A
@@ -9763,37 +9767,37 @@ PUST:		CALL	KEY_SCAN
 		LD	A,XH
 		LD	HL,MMRET
 		PUSH	HL
-		CP	'U'				; U - user function.
+		CP	'U'			; U - user function.
 		JR	Z,USERJP
-		CP	'E'				; E - extended 128k reset.
-		JR	Z,RESET128K
-		CP	'I'				; I - quiet AY. Reset FDC, DMA and stop disk drive if MB-02 is present.
-		JP	Z,DEVRESET
-		CP	'T'				; T - set tape as actual device (only on MB-02).
+		CP	'E'			; E - extended 128k reset.
+		JR	Z,RES128
+		CP	'I'			; I - quiet AY. Reset FDC, DMA and stop disk drive if MB-02 is present.
+		JP	Z,HARD
+		CP	'T'			; T - set tape as actual device (only on MB-02).
 		JP	Z,JP15522
-		CP	'D'				; D - set disk as actual device (only on MB-02)
+		CP	'D'			; D - set disk as actual device (only on MB-02)
 		JP	Z,JP15524
-		CP	'B'				; B - warm start. BASIC program with variables is not deleted.
-		JP	Z,INIT
-		CP	'Z'				; Z - user function like 'U' but this key is reserved for MB-02 applications.
+		CP	'B'			; B - warm start. BASIC program with variables is not deleted.
+		JP	Z,BASIC
+		CP	'Z'			; Z - user function like 'U' but this key is reserved for MB-02 applications.
 		LD	HL,(DISKTOOLS)
 		JR	NZ,DSKIP
 		JP	(HL)
-DSKIP:		CP	'N'				; N - CLEAR #5FFF: NEW - memory above #6000 is not changed.
+DSKIP:		CP	'N'			; N - CLEAR #5FFF: NEW - memory above #6000 is not changed.
 		LD	DE,#5FFF
 		JR	Z,RESNEW
-		CP	'R'				; R - CLEAR #FFFF: NEW - classic 48k reset.
+		CP	'R'			; R - CLEAR #FFFF: NEW - classic 48k reset.
 		LD	D,E
 RESNEW:		JP	Z,L_11BE
-		CP	'S'				; S - save SCREEN$ on tape, or disk if MB-02 is present.
+NERES:		CP	'S'			; S - save SCREEN$ on tape, or disk if MB-02 is present.
 		JR	NZ,NESAV
 		LD	IX,#4000
 		LD	DE,#1B00
 		LD	A,#FF
-		JP	L_04C6
-NESAV:		CP	'Q'				; Q - quit / return from NMI menu.
+		JP	SA_BYTES1
+NESAV:		CP	'Q'			; Q - quit / return from NMI menu.
 		JR	Z,QUIT
-		CP	'M'				; M - jump to MRS debugger (MRS must be loaded in memory).
+		CP	'M'			; M - jump to MRS debugger (MRS must be loaded in memory).
 		JR	Z,MRS
 		CALL	NUMERIC
 		RET	C
@@ -9806,12 +9810,12 @@ DD0:		POP	BC
 		JP	MMRET
 
 ; Quit from NMI Menu		
-QUIT		POP	AF
+QUIT:		POP	AF
 		POP	AF
 		LD	I,A
 		JP	PO,RET_I
 		EI
-RET_I		POP	IX
+RET_I:		POP	IX
 		POP	DE
 		POP	BC
 		POP	HL
@@ -9832,192 +9836,196 @@ MRS:		POP	AF
 		LD	(#F544),HL
 		JP	#F514
 
-L_39F2	LD	A,#3A
-	RST	#10
-L_39F5	LD	B,H
-	LD	C,L
-	CALL	L_2D2B
-	JP	L_2DE3
-;
-;#39FD
-	DB	#00
-	DB	#00
-	DB	#FF
-	DB	#FF
-;
-L_3A01	LD	C,A
-	LD	A,(IY+#02)
-	CP	#10
-	LD	A,C
-	JR	NZ,L_3A31
-	LD	BC,#FBFE
-	IN	C,(C)
-	RRC	C
-	JR	C,L_3A22
-L_3A13	XOR	A
-	IN	A,(#FE)
-	RRCA
-	JR	NC,L_3A13
-	LD	SP,(#5C3F)
-	RES	5,(IY+#01)
-	RET
-;
-L_3A22	LD	C,(IY+#76)
-	BIT	1,C
-	JR	Z,L_3A31
-	CP	#0D
-	JR	Z,L_3A31
-	CP	#20
-	JR	C,L_3A34
-L_3A31	JP	L_0B03
-;
-L_3A34	BIT	2,C
-	JR	NZ,L_3A39
-	POP	AF
-L_3A39	LD	A,#1E
-	JR	L_3A31
-;
-L_3A3D	PUSH	DE
-	PUSH	HL
-	LD	E,#20
-	LD	B,#69
-L_3A42	EQU	$-1
-	LD	BC,#D8F0
-	CALL	L_192A
-	JP	L_1A30
-;
-L_3A4C	CALL	L_1695
-	PUSH	HL
-	LD	HL,(#5C53)
-	LD	A,(HL)
-	POP	HL
-	RET
-;
-L_3A56	RST	#18
-	CALL	NUMERIC
-	PUSH	AF
-	CALL	L_19FB
-	POP	AF
-	RET
-;
-L_3A60	LD	A,(IY+#02)
-	CP	#10
-	JR	Z,L_3A69
-	LD	D,#20
-L_3A69	PUSH	HL
-	XOR	A
-	LD	HL,(#5C51)
-	LD	BC,#5CC0
-	SBC	HL,BC
-	POP	HL
-	JR	Z,L_3A7E
-	BIT	0,(IY+#76)
-	JP	Z,L_1A28
-	LD	BC,#0016
-L_3A7E	EQU	$-2
-	PUSH	DE
-	LD	D,(HL)
-	INC	HL
-	LD	E,(HL)
-	EX	DE,HL
-	CALL	L_3A3D
-	EX	DE,HL
-	POP	DE
-	RET
-;
-L_3A8B	CALL	L_100C
-	LD	IX,L_100C
-	JR	NZ,L_3AA5
-	LD	HL,#5C49
-	RET
-;
-L_3A98	CALL	L_1007
-	LD	IX,L_1007
-	JR	NC,L_3AA5
-	LD	HL,(#5C49)
-	RET
-;
-L_3AA5	POP	BC
-	LD	B,#00
-L_3AA8	INC	B
-L_3AA9	BIT	5,B
-	RET	NZ
-	PUSH	BC
-	CALL	L_03F0
-	POP	BC
-	LD	A,(HL)
-	CP	#0D
-	RET	Z
-	CP	#20
-	JR	C,L_3AA9
-	SUB	#A5
-	JR	C,L_3AA8
-	EXX
-	LD	HL,L_3ACD
-	LD	(#5C51),HL
-	CALL	L_0C10
-	CALL	L_1071
-	EXX
-	JR	L_3AA9
-;
-L_3ACD	RST	#08
-	LD	A,(L_04D9)
-	EXX
-	RET
-;
-L_3AD3	RST	#20
-	CALL	L_1CDE
-	CALL	L_1BEE
-	CALL	FIND_INT1
+; Print general number
+HLODVA:		LD	A,':'
+		RST	#10
+HLO:		LD	B,H
+		LD	C,L
+		CALL	STACK_BC
+		JP	PRINT_FP
+
+TT:		DW	#0000			;DS #39FF-TT
+UU:		DW	#FFFF
+
+DISPL:		LD	C,A
+		LD	A,(IY+#02)
+		CP	#10
+		LD	A,C
+		JR	NZ,DIS
+		LD	BC,#FBFE
+		IN	C,(C)
+		RRC	C
+		JR	C,DII
+PUSTI:		XOR	A
+		IN	A,(#FE)
+		RRCA
+		JR	NC,PUSTI
+		LD	SP,(#5C3F)		;LISTSP
+		RES	5,(IY+#01)
+		RET
+
+DII:		LD	C,(IY+#76)
+		BIT	1,C			;bit1=1 don't show colors during autolist
+		JR	Z,DIS
+		CP	#0D
+		JR	Z,DIS
+		CP	#20
+		JR	C,DIP
+DIS:		JP	PO_FETCH
+
+DIP:		BIT	2,C			;bit2=1 show comma instead of codes
+		JR	NZ,DID
+		POP	AF
+DID:		LD	A,#1E
+		JR	DIS
+
+; General number printing with spaces
+NUMBER:		PUSH	DE
+		PUSH	HL
+		LD	E,' '
+		DB	#06
+NUMCOM:		LD	L,C
+		LD	BC,#D8F0
+		CALL	OUT_SP_NO
+		JP	OUT_NUM_3
+
+; Check of BASIC program presence
+LIN2:		CALL	LINE_NO
+		PUSH	HL
+		LD	HL,(#5C53)
+		LD	A,(HL)
+		POP	HL
+		RET
+
+; Test of numbers at the begin of line
+LIN3:		RST	#18
+		CALL	NUMERIC
+		PUSH	AF
+		CALL	E_LINE_NO
+		POP	AF
+		RET
+
+; Show '*' instead of ' ' 
+LIN4:		LD	A,(IY+#02)
+		CP	#10
+		JR	Z,LL40
+		LD	D,#20
+LL40:		PUSH	HL
+		XOR	A
+		LD	HL,(#5C51)		;channel R?
+		LD	BC,#5CC0
+		SBC	HL,BC
+		POP	HL
+		JR	Z,LL41
+		BIT	0,(IY+#76)
+		JP	Z,OUT_NUM_2
+		DB	#01
+LL41:		LD	D,#00			; no cursor at 'R'
+		PUSH	DE
+		LD	D,(HL)
+		INC	HL
+		LD	E,(HL)
+		EX	DE,HL
+		CALL	NUMBER
+		EX	DE,HL
+		POP	DE
+		RET
+
+; Moving around edit zone
+DOLE:		CALL	L_100C
+		LD	IX,L_100C
+		JR	NZ,HORDOL
+		LD	HL,#5C49
+		RET
+
+HORE:		CALL	L_1007
+		LD	IX,L_1007
+		JR	NC,HORDOL
+		LD	HL,(#5C49)
+		RET
+
+HORDOL:		POP	BC
+		LD	B,#00
+HD1:		INC	B
+		BIT	5,B
+		RET	NZ
+		PUSH	BC
+		CALL	L_03F0
+		POP	BC
+		LD	A,(HL)
+		CP	#0D
+		RET	Z
+		CP	' '
+		JR	C,HD1+1
+		SUB	#A5
+		JR	C,HD1
+		EXX
+		LD	HL,INCB-2
+		LD	(#5C51),HL
+		CALL	L_0C10
+		CALL	L_1071
+		EXX
+		JR	HD1+1
+
+		DW	INCB
+INCB:		EXX
+		inc	B
+		EXX
+		RET
+
+; Switch 128k bank
+BANKA:		RST	#20
+		CALL	FETCH_NUM
+		CALL	CHECK_END
+		CALL	FIND_INT1
 OUT128:		AND	#0F
 		OR	#10
 		LD	BC,#7FFD
 		OUT	(C),A
 		RET
-;
-L_3AE7	RST	#20
-	CALL	L_1CDE
-	CALL	L_1BEE
-	CALL	FIND_INT2
-	LD	(#5C49),BC
-	CALL	L_16B0
-	CALL	L_0D6E
-	RES	5,(IY+#37)
-	RST	#38
-	RST	#38
-	RES	3,(IY+#01)
-	CALL	L_0FA9
-	LD	SP,(#5C3D)
-	POP	AF
-	JP	L_12AC
-L_3B0E	EQU	$-2
-;
-L_3B10	CALL	FIND_INT1
-	OR	A
-	JR	Z,L_3B1F
-	LD	(#5C48),A
-	LD	(#5C8D),A
-	CALL	L_053F
-L_3B1F	JP	L_0D6B
-;
-L_3B22	CP	#27
-	JR	Z,L_3AD3
-	CP	#2C
-	JR	Z,L_3AE7
-	LD	HL,NEWTAB
-L_3B2D	BIT	7,(HL)
-	JP	NZ,L_1FCD
-	CP	(HL)
-	INC	HL
-	LD	E,(HL)
-	INC	HL
-	LD	D,(HL)
-	INC	HL
-	JR	NZ,L_3B2D
-	RST	#20
-	CALL	L_1BEE
-	EX	DE,HL
-	JP	(HL)
+
+; Comma instead of semicolon
+EDIT:		RST	#20
+		CALL	FETCH_NUM
+		CALL	CHECK_END
+		CALL	FIND_INT2
+		LD	(#5C49),BC
+		CALL	L_16B0
+		CALL	L_0D6E
+		RES	5,(IY+#37)
+VV:		DW	#FFFF
+		RES	3,(IY+#01)
+		CALL	L_0FA9
+		LD	SP,(#5C3D)
+		POP	AF
+		JP	L_12AC
+
+CLS:		CALL	FIND_INT1
+		OR	A
+		JR	Z,NECOL
+		LD	(#5C48),A
+		LD	(#5C8D),A
+		CALL	SA_LD_RET
+NECOL:		JP	L_0D6B
+
+COMM:		CP	#27			;"'"
+		JR	Z,BANKA
+		CP	#2C			;","
+		JR	Z,EDIT
+		LD	HL,NEWTAB
+COM1:		BIT	7,(HL)
+		JP	NZ,L_1FCD
+		CP	(HL)
+		INC	HL
+		LD	E,(HL)
+		INC	HL
+		LD	D,(HL)
+		INC	HL
+		JR	NZ,COM1
+		RST	#20
+		CALL	CHECK_END
+		EX	DE,HL
+		JP	(HL)
 
 NEWTAB:		DB	'#'
 		DW	54885	
@@ -10028,16 +10036,16 @@ NEWTAB:		DB	'#'
 		DB	'?'
 		DW	INFO
 		DB	#7F			;(c)
-		DW	INIT
+		DW	BASIC
 		DB	'^'
-		DW	RESET128K
+		DW	RES128
 		DB	'!'
-		DW	DEVRESET
+		DW	HARD
 		DB	'='
 		DW	USERJP
 
 ; Quiet AY. Reset FDC, DMA, stop drives if MB-02 is present
-DEVRESET:	XOR	A
+HARD:		XOR	A
 		LD	BC,#FFFD
 		OUT	(#13),A			; FDD motor
 		LD	A,#D0
@@ -10055,12 +10063,12 @@ DEVRESET:	XOR	A
 		RET
 
 ; Warm start
-INIT:		LD	HL,L_15AF
+BASIC:		LD	HL,L_15AF
 		LD	DE,#5CB6
 		LD	BC,#0015
 		LD	(#5C4F),DE
 		LDIR
-		LD	HL,L_3C00
+		LD	HL,#3C00
 		LD	(#5C36),HL
 		LD	HL,#0040
 		LD	(#5C38),HL
@@ -10076,158 +10084,153 @@ INIT:		LD	HL,L_15AF
 		EI
 		LD	HL,(#5C59)
 		JP	L_1256
-;
-L_3BAB	CALL	L_2530
-	CALL	NZ,FIND_INT2
-	LD	D,B
-	LD	E,C
-L_3BB3	RST	#18
-	CP	#2C
-	JR	Z,L_3BBB
-	CP	#3B
-	RET	NZ
-L_3BBB	PUSH	DE
-	PUSH	AF
-	RST	#20
-	CALL	L_24FB
-	POP	AF
-	POP	DE
-	CALL	L_2530
-	JR	Z,L_3BB3
-	BIT	6,(IY+#01)
-	JR	NZ,L_3BE8
-	PUSH	AF
-	PUSH	DE
-	CALL	L_2BF1
-	EX	DE,HL
-	POP	DE
-	LD	A,B
-	OR	C
-	JR	Z,L_3BE5
-	LDIR
-	POP	AF
-	RRCA
-	JR	NC,L_3BB3
-	LD	H,D
-	LD	L,E
-	DEC	HL
-	SET	7,(HL)
-	PUSH	AF
-L_3BE5	POP	AF
-	JR	L_3BB3
-;
-L_3BE8	PUSH	DE
-	RRCA
-	JR	C,L_3BF2
-	CALL	FIND_INT1
-	POP	DE
-	JR	L_3BFA
-;
-L_3BF2	CALL	FIND_INT2
-	POP	DE
-	LD	A,C
-	LD	(DE),A
-	INC	DE
-	LD	A,B
-L_3BFA	LD	(DE),A
-	INC	DE
-	JR	L_3BB3
-;
-;#3BFE
-	DB	#FF
-	DB	#FF
-L_3C00	DB	#FF
-;
-L_3C01	CALL	L_1980
-	RET	NC
-	LD	A,(HL)
-	AND	#C0
-	RET	NZ
-	SCF
-	RET
-;
-INFO:	CALL	L_0D6B
-	LD	A,#FE
-	CALL	L_1601
-	LD	HL,(#5C4B)
-	LD	BC,(#5C53)
-	XOR	A
-	PUSH	HL
-	SBC	HL,BC
-	CALL	L_38F6
-	POP	BC
-	SCF
-	LD	HL,(#5C59)
-	SBC	HL,BC
-	LD	A,#01
-	CALL	L_38F6
-	LD	BC,(#5C65)
-	LD	HL,#0000
-	ADD	HL,SP
-	SBC	HL,BC
-	LD	A,#02
-	CALL	L_38F6
-	JP	L_1FF8
 
-HEA:	LD	A,#FE
-	CALL	L_1601
-L_3C44	DI
-	LD	IX,#5C9E
-	LD	DE,#0010
-	XOR	A
-	INC	E
-	SCF
-	EX	AF,AF'
-	LD	A,#0E
-	OUT	(#FE),A
-	IN	A,(#FE)
-	RRA
-	CALL	L_0565
-	CALL	L_053F
-	JR	NC,L_3C44
-	LD	(#5C8C),A
-	LD	A,#17
-	RST	#10
-	XOR	A
-	RST	#10
-	RST	#10
-	LD	HL,#5C9E
-	LD	A,(HL)
-	OR	#30
-	RST	#10
-	LD	A,#3A
-	RST	#10
-	LD	B,#0A
-L_3C74	INC	HL
-	LD	A,(HL)
-	CP	#20
-	JR	NC,L_3C7C
-	LD	A,#1E
-L_3C7C	RST	#10
-	DJNZ	L_3C74
-	LD	A,#17
-	RST	#10
-	LD	A,#15
-	RST	#10
-	RST	#10
-	LD	HL,(#5CAB)
-	CALL	L_3A3D
-	LD	HL,(#5CA9)
-	CALL	L_39F2
-	LD	A,#0D
-	RST	#10
-	JR	L_3C44
+; Enhanced POKE
+POKE:		CALL	L_2530
+		CALL	NZ,FIND_INT2
+		LD	D,B
+		LD	E,C
+POKLOP:		RST	#18
+		CP	#2C
+		JR	Z,POKOK
+		CP	#3B
+		RET	NZ
+POKOK:		PUSH	DE
+		PUSH	AF
+		RST	#20
+		CALL	L_24FB
+		POP	AF
+		POP	DE
+		CALL	L_2530
+		JR	Z,POKLOP
+		BIT	6,(IY+#01)
+		JR	NZ,POKNUM
+POKRET:		PUSH	AF
+		PUSH	DE
+		CALL	L_2BF1
+		EX	DE,HL
+		POP	DE
+		LD	A,B
+		OR	C
+		JR	Z,POKNIC
+		LDIR
+		POP	AF
+		RRCA
+		JR	NC,POKLOP
+		LD	H,D
+		LD	L,E
+		DEC	HL
+		SET	7,(HL)
+		PUSH	AF
+POKNIC:		POP	AF
+		JR	POKLOP
 
-		DB	#FF
-		DB	#FF
-		DB	#FF
-		DB	#FF
-		DB	#FF
-		DB	#FF
-		DB	#FF
-		DB	#FF
-		DB	#FF
-		DB	#FF
+POKNUM:		PUSH	DE
+		RRCA
+		JR	C,POKDW
+POKDB:		CALL	FIND_INT1
+		POP	DE
+		JR	POKLD
+
+POKDW:		CALL	FIND_INT2
+		POP	DE
+		LD	A,C
+		LD	(DE),A
+		INC	DE
+		LD	A,B
+POKLD:		LD	(DE),A
+		INC	DE
+		JR	POKLOP
+
+SS:		DB	#FF
+WW:		DW	#FFFF
+
+LIN1:		CALL	L_1980
+		RET	NC
+		LD	A,(HL)
+		AND	#C0
+		RET	NZ
+		SCF
+		RET
+
+INFO:		CALL	L_0D6B
+		LD	A,#FE
+		CALL	L_1601
+		LD	HL,(#5C4B)
+		LD	BC,(#5C53)
+		XOR	A
+		PUSH	HL
+		SBC	HL,BC
+		CALL	INFSUB
+		POP	BC
+		SCF
+		LD	HL,(#5C59)
+		SBC	HL,BC
+		LD	A,#01
+		CALL	INFSUB
+		LD	BC,(#5C65)
+		LD	HL,#0000
+		ADD	HL,SP
+		SBC	HL,BC
+		LD	A,#02
+		CALL	INFSUB
+		JP	L_1FF8
+
+HEA:		LD	A,#FE
+		CALL	L_1601
+ZNOVU:		DI
+		LD	IX,#5C9E
+		LD	DE,#0010
+		XOR	A
+		INC	E
+		SCF
+		EX	AF,AF'
+		LD	A,#0E
+		OUT	(#FE),A
+		IN	A,(#FE)
+		RRA
+		CALL	LD_BYTES1
+		CALL	SA_LD_RET
+		JR	NC,ZNOVU
+		LD	(#5C8C),A
+		LD	A,#17
+		RST	#10
+		XOR	A
+		RST	#10
+		RST	#10
+		LD	HL,#5C9E
+		LD	A,(HL)
+		OR	#30
+		RST	#10
+		LD	A,#3A
+		RST	#10
+		LD	B,#0A
+MENO:		INC	HL
+		LD	A,(HL)
+		CP	#20
+		JR	NC,MENO1
+		LD	A,#1E
+MENO1:		RST	#10
+		DJNZ	MENO
+		LD	A,#17
+		RST	#10
+		LD	A,#15
+		RST	#10
+		RST	#10
+		LD	HL,(#5CAB)
+		CALL	NUMBER
+		LD	HL,(#5CA9)
+		CALL	HLODVA
+		LD	A,#0D
+		RST	#10
+		JR	ZNOVU
+
+; Unused bytes
+		DW	#FFFF
+		DW	#FFFF
+		DW	#FFFF
+		DW	#FFFF
+		DW	#FFFF
 		DB	#FF
 
 JP15522:	RET
@@ -10238,96 +10241,42 @@ JP15524:	RET
 
 		DB	#FF
 
-	DB	#20
-	DB	#42
-	DB	#75
-	DB	#73
-	DB	#79
-	DB	#20
-	DB	#73
-	DB	#6F
-	DB	#66
-	DB	#74
-	DB	#20
-	DB	#72
-	DB	#6F
-	DB	#6D
-	DB	#20
-	DB	#31
-	DB	#34
-	DB	#30
-	DB	#20
-	DB	#FF
-	DB	#FF
-	DB	#FF
-	DB	#FF
-	DB	#FF
-	DB	#FF
-	DB	#FF
-	DB	#FF
-	DB	#FF
-	DB	#FF
-	DB	#FF
-	DB	#FF
-	DB	#FF
-	DB	#FF
-	DB	#FF
-	DB	#FF
-	DB	#FF
-	DB	#FF
-	DB	#FF
-	DB	#FF
-	DB	#FF
-	DB	#FF
-	DB	#FF
-	DB	#FF
-	DB	#FF
-	DB	#FF
-	DB	#FF
-	DB	#FF
-	DB	#FF
-	DB	#FF
-	DB	#FF
-	DB	#FF
-	DB	#FF
-	DB	#FF
-	DB	#FF
-	DB	#FF
-	DB	#FF
-	DB	#FF
-	DB	#FF
-	DB	#FF
-	DB	#FF
-	DB	#FF
-	DB	#FF
-	DB	#FF
-	DB	#FF
-	DB	#FF
-	DB	#FF
-	DB	#FF
-	DB	#FF
-	DB	#FF
-	DB	#FF
-	DB	#FF
-	DB	#FF
-	DB	#FF
-	DB	#FF
-	DB	#00
-	DB	#00
-	DB	#00
-	DB	#00
-	DB	#00
-	DB	#00
-	DB	#7E
-	DB	#00
-	DB	#00
-	DB	#7E
-	DB	#7E
-	DB	#7E
-	DB	#7E
-	DB	#7E
-	DB	#7E
-	DB	#00
+		DB	" Busy soft rom " 
+		DB	VER1, VER2, VER3
+		DB	" "
+
+; Unused bytes
+		DW	#FFFF
+		DW	#FFFF
+		DW	#FFFF
+		DW	#FFFF
+		DW	#FFFF
+		DW	#FFFF
+		DW	#FFFF
+		DW	#FFFF
+		DW	#FFFF
+		DW	#FFFF
+		DW	#FFFF
+		DW	#FFFF
+		DW	#FFFF
+		DW	#FFFF
+		DW	#FFFF
+		DW	#FFFF
+		DW	#FFFF
+		DW	#FFFF
+		DW	#FFFF
+		DW	#FFFF
+		DW	#FFFF
+		DW	#FFFF
+		DW	#FFFF
+		DW	#FFFF
+		DW	#FFFF
+		DW	#FFFF
+		DW	#FFFF
+		DB	#FF
+
+H3CF0:		DB	#00,#00,#00,#00,#00,#00,#7E,#00	;line
+		DB	#00,#7E,#7E,#7E,#7E,#7E,#7E,#00	;square
 
 ; Character set
 CHAR_SET:	DB	#00,#00,#00,#00,#00,#00,#00,#00	;space
@@ -10426,7 +10375,3 @@ CHAR_SET:	DB	#00,#00,#00,#00,#00,#00,#00,#00	;space
 		DB	#00,#70,#10,#0C,#10,#10,#70,#00	;}
 		DB	#00,#14,#28,#00,#00,#00,#00,#00	;~
 		DB	#3C,#42,#99,#A1,#A1,#99,#42,#3C	;(c)
-
-ROM_LEN	EQU	$-START
-
-	savebin "bsrom140_.rom",START,ROM_LEN
