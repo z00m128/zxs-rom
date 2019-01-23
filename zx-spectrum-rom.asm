@@ -3621,7 +3621,7 @@ CLS_2:		DEC	HL		; decrease attribute address.
 		DEC	C		; decrease 32 counter.
 		JR	NZ,CLS_2	; loop back to CLS_2 until all 32 done.
 
-					;;;$0D
+					;;;$0D8E
 CLS_3:		DJNZ	CLS_1		; decrease B counter and back to CLS_1
 					; if not zero.
 		LD	(IY+$31),$02	; set DF_SZ lower screen to 2
