@@ -648,7 +648,7 @@ BE_END:		EI
 BEEP:		RST	#28			;FP_CALC
 		DB	#31			;DUPLICATE - duplicate pitch
 		DB	#27			;INT - convert to integer
-		DB	#C0			;st-mem-0 - store integer pitch to memory 0
+		DB	#C0			;ST_MEM_0 - store integer pitch to memory 0
 		DB	#03			;SUBTRACT - calculate fractional part of pitch = fp_pitch - int_pitch
 		DB	#34			;STK_DATA - push constant
 		DB	#EC			;Exponent: #7C, Bytes: 4 - constant = 0.05762265
@@ -697,7 +697,7 @@ BE_OCTAVE:	INC	B
 		LD	(HL),A
 
 		RST	#28			;FP_CALC
-		DB	#C0			;st-mem-0
+		DB	#C0			;ST_MEM_0
 		DB	#02			;DELETE
 		DB	#31			;DUPLICATE
 		DB	#38			;END_CALC
@@ -707,9 +707,9 @@ BE_OCTAVE:	INC	B
 		JR	NC,REPORT_B
 
 		RST	#28			;FP_CALC
-		DB	#E0			;get-mem-0
+		DB	#E0			;GET_MEM_0
 		DB	#04			;MULTIPLY
-		DB	#E0			;get-mem-0
+		DB	#E0			;GET_MEM_0
 		DB	#34			;STK_DATA
 		DB	#80			;Exponent #93, Bytes: 3
 		DB	#43, #55, #9F, #80
@@ -733,7 +733,7 @@ BE_OCTAVE:	INC	B
 		DEC	DE
 		JP	BEEPER
 
-REPORT_B:	RST	#08			; ERROR_1
+REPORT_B:	RST	#08			; Error report
 		DB	#0A			; Integer out of range
 
 ; Semi-tone table.
@@ -1502,24 +1502,24 @@ PRINT_OUT:	CALL	DISPL				; Busy's modification - disabled autolist of control co
 		JP	PO_FETCH
 
 ;Control character table
-CTLCHRTAB:	DB	#4E			; 06d offset #4E to Address: PO_COMMA
-		DB	#57			; 07d offset #57 to Address: PO_QUEST
-		DB	#10			; 08d offset #10 to Address: PO_BACK_1
-		DB	#29			; 09d offset #29 to Address: PO_RIGHT
-		DB	#54			; 10d offset #54 to Address: PO_QUEST
-		DB	#53			; 11d offset #53 to Address: PO_QUEST
-		DB	#52			; 12d offset #52 to Address: PO_QUEST
-		DB	#37			; 13d offset #37 to Address: PO_ENTER
-		DB	#50			; 14d offset #50 to Address: PO_QUEST
-		DB	#4F			; 15d offset #4F to Address: PO_QUEST
-		DB	#5F			; 16d offset #5F to Address: PO_1_OPER
-		DB	#5E			; 17d offset #5E to Address: PO_1_OPER
-		DB	#5D			; 18d offset #5D to Address: PO_1_OPER
-		DB	#5C			; 19d offset #5C to Address: PO_1_OPER
-		DB	#5B			; 20d offset #5B to Address: PO_1_OPER
-		DB	#5A			; 21d offset #5A to Address: PO_1_OPER
-		DB	#54			; 22d offset #54 to Address: PO_2_OPER
-		DB	#53			; 23d offset #53 to Address: PO_2_OPER
+CTLCHRTAB:	DB	#4E			; PO_COMMA
+		DB	#57			; PO_QUEST
+		DB	#10			; PO_BACK_1
+		DB	#29			; PO_RIGHT
+		DB	#54			; PO_QUEST
+		DB	#53			; PO_QUEST
+		DB	#52			; PO_QUEST
+		DB	#37			; PO_ENTER
+		DB	#50			; PO_QUEST
+		DB	#4F			; PO_QUEST
+		DB	#5F			; PO_1_OPER
+		DB	#5E			; PO_1_OPER
+		DB	#5D			; PO_1_OPER
+		DB	#5C			; PO_1_OPER
+		DB	#5B			; PO_1_OPER
+		DB	#5A			; PO_1_OPER
+		DB	#54			; PO_2_OPER
+		DB	#53			; PO_2_OPER
 
 ; Cursor left routine
 PO_BACK_1:	INC	C
@@ -1728,7 +1728,7 @@ PR_ALL:		LD	A,C			; Print all characters
 		CALL	COPY_BUFF
 		POP	DE
 		LD	A,C
-PR_ALL_1:		CP	C
+PR_ALL_1:	CP	C
 		PUSH	DE
 		CALL	Z,PO_SCR
 		POP	DE
@@ -2687,7 +2687,7 @@ CLSUJ:		PUSH	BC
 		JR	RAM_DONE1
 
 ; Modified CONTINUE command
-NEW_CONT:		CALL	FIND_INT2
+NEW_CONT:	CALL	FIND_INT2
 		LD	A,B
 		OR	C
 		JP	Z,CONTINUE
@@ -3356,7 +3356,7 @@ AUTO_L_1:	PUSH	BC
 		JR	AUTO_L_1
 
 AUTO_L_2:	LD	(#5C6C),HL
-AUTO_L_3	LD	HL,(#5C6C)
+AUTO_L_3:	LD	HL,(#5C6C)
 		CALL	LINE_ADDR
 		JR	Z,AUTO_L_4
 		EX	DE,HL
@@ -3544,7 +3544,7 @@ LN_STORE:	BIT	5,(IY+#37)
 		RET
 
 ; Outputting numbers at start of BASIC line
-OUT_SP_2	LD	A,E
+OUT_SP_2:	LD	A,E
 		AND	A
 		RET	M
 		JR	OUT_CHAR
@@ -3609,7 +3609,7 @@ CP_LINES:	LD	A,(HL)
 		RET
 
 ; Find each statement
-		INC	HL			; 3x INC HL not used
+		INC	HL			; 3x INC HL not used in this ROM
 		INC	HL
 		INC	HL
 EACH_STMT:	LD	(#5C5D),HL
@@ -4018,7 +4018,7 @@ STMT_RET:	CALL	BREAK_KEY
 		JR	C,STMT_R_1
 REPORT_L:	RST	#08			; Error report
 		DB	#14			; BREAK into program
-STMT_R_1	BIT	7,(IY+#0A)
+STMT_R_1:	BIT	7,(IY+#0A)
 		JR	NZ,STMT_NEXT
 		LD	HL,(#5C42)
 		BIT	7,H
@@ -4231,7 +4231,7 @@ CL_09_1:	CALL	CO_TEMP_2
 		JR	EXPT_2NUM
 
 ; Command class 09 - four commands handling
-	JP	SAVE_ETC
+		JP	SAVE_ETC
 
 ; Fetch a number
 FETCH_NUM:	CP	#0D
@@ -4274,10 +4274,10 @@ F_USE_1:	CALL	CHECK_END
 		DB	#A1			;STK_ONE
 		DB	#38			;END_CALC
 F_REORDER:	RST	#28			;FP_CALC
-		DB	#C0			;ST-MEM-0
+		DB	#C0			;ST_MEM_0
 		DB	#02			;DELETE
 		DB	#01			;EXCHANGE
-		DB	#E0			;GET-MEM-0
+		DB	#E0			;GET_MEM_0
 		DB	#01			;EXCHANGE
 		DB	#38			;END_CALC
 		CALL	LET
@@ -4380,10 +4380,10 @@ NEXT:		BIT	1,(IY+#37)
 		INC	HL
 		LD	(#5C68),HL
 		RST	#28			;FP_CALC
-		DB	#E0			;GET-MEM-0
-		DB	#E2			;GET-MEM-2
+		DB	#E0			;GET_MEM_0
+		DB	#E2			;GET_MEM_2
 		DB	#0F			;ADDITION
-		DB	#C0			;ST-MEM-0
+		DB	#C0			;ST_MEM_0
 		DB	#02			;DELETE
 		DB	#38			;END_CALC
 		CALL	NEXT_LOOP
@@ -4404,9 +4404,9 @@ REPORT_1:	RST	#08			; Error report
 
 ; Test iterations for FOR command
 NEXT_LOOP:	RST	#28			;FP_CALC
-		DB	#E1			;GET-MEM-1
-		DB	#E0			;GET-MEM-0
-		DB	#E2			;GET-MEM-2
+		DB	#E1			;GET_MEM_1
+		DB	#E0			;GET_MEM_0
+		DB	#E2			;GET_MEM_2
 		DB	#36			;LESS_0
 		DB	#00			;JUMP_TRUE
 		DB	#02			;NEXT_1 if step negative
@@ -5156,7 +5156,7 @@ POINT_SUB:	CALL	STK_TO_BC
 		LD	B,A
 		INC	B
 		LD	A,(HL)
-POINT_LP	RLCA
+POINT_LP:	RLCA
 		DJNZ	POINT_LP
 		AND	#01
 		JP	STACK_A
@@ -5183,7 +5183,7 @@ PL_TST_IN:	BIT	2,C
 		JR	NZ,PLOT_END
 		XOR	B
 		CPL
-PLOT_END	LD	(HL),A
+PLOT_END:	LD	(HL),A
 		JP	PO_ATTR
 
 ; Put two numbers in BC register
@@ -5229,14 +5229,14 @@ C_R_GRE_1:	RST	#28			;FP_CALC
 		DB	#38			;END_CALC
 		LD	(HL),#83
 		RST	#28			;FP_CALC
-		DB	#C5			;ST-MEM-5
+		DB	#C5			;ST_MEM_5
 		DB	#02			;DELETE
 		DB	#38			;END_CALC
 		CALL	CD_PRMS1
 		PUSH	BC
 		RST	#28			;FP_CALC
 		DB	#31			;DUPLICATE
-		DB	#E1			;GET-MEM-1
+		DB	#E1			;GET_MEM_1
 		DB	#04			;MULTIPLY
 		DB	#38			;END_CALC
 		LD	A,(HL)
@@ -5250,23 +5250,23 @@ C_R_GRE_1:	RST	#28			;FP_CALC
 		JP	PLOT
 
 C_ARC_GE1:	RST	#28			;FP_CALC
-		DB	#C2			;ST-MEM-2
+		DB	#C2			;ST_MEM_2
 		DB	#01			;EXCHANGE
-		DB	#C0			;ST-MEM-0
+		DB	#C0			;ST_MEM_0
 		DB	#02			;DELETE
 		DB	#03			;SUBTRACT
 		DB	#01			;EXCHANGE
-		DB	#E0			;GET-MEM-0
+		DB	#E0			;GET_MEM_0
 		DB	#0F			;ADDITION
-		DB	#C0			;ST-MEM-0
+		DB	#C0			;ST_MEM_0
 		DB	#01			;EXCHANGE
 		DB	#31			;DUPLICATE
-		DB	#E0			;GET-MEM-0
+		DB	#E0			;GET_MEM_0
 		DB	#01			;EXCHANGE
 		DB	#31			;DUPLICATE
-		DB	#E0			;GET-MEM-0
+		DB	#E0			;GET_MEM_0
 		DB	#A0			;STK_ZERO
-		DB	#C1			;ST-MEM-1
+		DB	#C1			;ST_MEM_1
 		DB	#02			;DELETE
 		DB	#38			;END_CALC
 		INC	(IY+#62)
@@ -5291,7 +5291,7 @@ DR_3_PRMS:	RST	#20
 		CALL	EXPT_1NUM
 		CALL	CHECK_END
 		RST	#28			;FP_CALC
-		DB	#C5			;ST-MEM-5
+		DB	#C5			;ST_MEM_5
 		DB	#A2			;STK_HALF
 		DB	#04			;MULTIPLY
 		DB	#1F			;SIN
@@ -5304,21 +5304,21 @@ DR_3_PRMS:	RST	#20
 		DB	#38			;END_CALC
 		JP	LINE_DRAW
 
-DR_SIN_NZ:	DB	#C0			;ST-MEM-0
+DR_SIN_NZ:	DB	#C0			;ST_MEM_0
 		DB	#02			;DELETE
-		DB	#C1			;ST-MEM-1
+		DB	#C1			;ST_MEM_1
 		DB	#02			;DELETE
 		DB	#31			;DUPLICATE
 		DB	#2A			;ABS
-		DB	#E1			;GET-MEM-1
+		DB	#E1			;GET_MEM_1
 		DB	#01			;EXCHANGE
-		DB	#E1			;GET-MEM-1
+		DB	#E1			;GET_MEM_1
 		DB	#2A			;ABS
 		DB	#0F			;ADDITION
-		DB	#E0			;GET-MEM-0
+		DB	#E0			;GET_MEM_0
 		DB	#05			;DIVISION
 		DB	#2A			;ABS
-		DB	#E0			;GET-MEM-0
+		DB	#E0			;GET_MEM_0
 		DB	#01			;EXCHANGE
 		DB	#3D			;RE_STACK
 		DB	#38			;END_CALC
@@ -5335,56 +5335,56 @@ DR_PRMS:	CALL	CD_PRMS1
 		PUSH	BC
 		RST	#28			;FP_CALC
 		DB	#02			;DELETE
-		DB	#E1			;GET-MEM-1
+		DB	#E1			;GET_MEM_1
 		DB	#01			;EXCHANGE
 		DB	#05			;DIVISION
-		DB	#C1			;ST-MEM-1
+		DB	#C1			;ST_MEM_1
 		DB	#02			;DELETE
 		DB	#01			;EXCHANGE
 		DB	#31			;DUPLICATE
-		DB	#E1			;GET-MEM-1
+		DB	#E1			;GET_MEM_1
 		DB	#04			;MULTIPLY
-		DB	#C2			;ST-MEM-2
+		DB	#C2			;ST_MEM_2
 		DB	#02			;DELETE
 		DB	#01			;EXCHANGE
 		DB	#31			;DUPLICATE
-		DB	#E1			;GET-MEM-1
+		DB	#E1			;GET_MEM_1
 		DB	#04			;MULTIPLY
-		DB	#E2			;GET-MEM-2
-		DB	#E5			;GET-MEM-5
-		DB	#E0			;GET-MEM-0
+		DB	#E2			;GET_MEM_2
+		DB	#E5			;GET_MEM_5
+		DB	#E0			;GET_MEM_0
 		DB	#03			;SUBTRACT
 		DB	#A2			;STK_HALF
 		DB	#04			;MULTIPLY
 		DB	#31			;DUPLICATE
 		DB	#1F			;SIN
-		DB	#C5			;ST-MEM-5
+		DB	#C5			;ST_MEM_5
 		DB	#02			;DELETE
 		DB	#20			;COS
-		DB	#C0			;ST-MEM-0
+		DB	#C0			;ST_MEM_0
 		DB	#02			;DELETE
-		DB	#C2			;ST-MEM-2
+		DB	#C2			;ST_MEM_2
 		DB	#02			;DELETE
-		DB	#C1			;ST-MEM-1
-		DB	#E5			;GET-MEM-5
+		DB	#C1			;ST_MEM_1
+		DB	#E5			;GET_MEM_5
 		DB	#04			;MULTIPLY
-		DB	#E0			;GET-MEM-0
-		DB	#E2			;GET-MEM-2
+		DB	#E0			;GET_MEM_0
+		DB	#E2			;GET_MEM_2
 		DB	#04			;MULTIPLY
 		DB	#0F			;ADDITION
-		DB	#E1			;GET-MEM-1
+		DB	#E1			;GET_MEM_1
 		DB	#01			;EXCHANGE
-		DB	#C1			;ST-MEM-1
+		DB	#C1			;ST_MEM_1
 		DB	#02			;DELETE
-		DB	#E0			;GET-MEM-0
+		DB	#E0			;GET_MEM_0
 		DB	#04			;MULTIPLY
-		DB	#E2			;GET-MEM-2
-		DB	#E5			;GET-MEM-5
+		DB	#E2			;GET_MEM_2
+		DB	#E5			;GET_MEM_5
 		DB	#04			;MULTIPLY
 		DB	#03			;SUBTRACT
-		DB	#C2			;ST-MEM-2
+		DB	#C2			;ST_MEM_2
 		DB	#2A			;ABS
-		DB	#E1			;GET-MEM-1
+		DB	#E1			;GET_MEM_1
 		DB	#2A			;ABS
 		DB	#0F			;ADDITION
 		DB	#02			;DELETE
@@ -5400,17 +5400,17 @@ DR_PRMS:	CALL	CD_PRMS1
 		LD	A,(#5C7D)
 		CALL	STACK_A
 		RST	#28			;FP_CALC
-		DB	#C0			;ST-MEM-0
+		DB	#C0			;ST_MEM_0
 		DB	#0F			;ADDITION
 		DB	#01			;EXCHANGE
 		DB	#38			;END_CALC
 		LD	A,(#5C7E)
 		CALL	STACK_A
 		RST	#28			;FP_CALC
-		DB	#C5			;ST-MEM-5
+		DB	#C5			;ST_MEM_5
 		DB	#0F			;ADDITION
-		DB	#E0			;GET-MEM-0
-		DB	#E5			;GET-MEM-5
+		DB	#E0			;GET_MEM_0
+		DB	#E5			;GET_MEM_5
 		DB	#38			;END_CALC
 		POP	BC
 DRW_STEPS:	DEC	B
@@ -5418,30 +5418,30 @@ DRW_STEPS:	DEC	B
 		JR	ARC_START
 
 ARC_LOOP:	RST	#28			;FP_CALC
-		DB	#E1			;GET-MEM-1
+		DB	#E1			;GET_MEM_1
 		DB	#31			;DUPLICATE
-		DB	#E3			;GET-MEM-3
+		DB	#E3			;GET_MEM_3
 		DB	#04			;MULTIPLY
-		DB	#E2			;GET-MEM-2
-		DB	#E4			;GET-MEM-4
+		DB	#E2			;GET_MEM_2
+		DB	#E4			;GET_MEM_4
 		DB	#04			;MULTIPLY
 		DB	#03			;SUBTRACT
-		DB	#C1			;ST-MEM-1
+		DB	#C1			;ST_MEM_1
 		DB	#02			;DELETE
-		DB	#E4			;GET-MEM-4
+		DB	#E4			;GET_MEM_4
 		DB	#04			;MULTIPLY
-		DB	#E2			;GET-MEM-2
-		DB	#E3			;GET-MEM-3
+		DB	#E2			;GET_MEM_2
+		DB	#E3			;GET_MEM_3
 		DB	#04			;MULTIPLY
 		DB	#0F			;ADDITION
-		DB	#C2			;ST-MEM-2
+		DB	#C2			;ST_MEM_2
 		DB	#02			;DELETE
 		DB	#38			;END_CALC
-ARC_START	PUSH	BC
+ARC_START:	PUSH	BC
 		RST	#28			;FP_CALC
-		DB	#C0			;ST-MEM-0
+		DB	#C0			;ST_MEM_0
 		DB	#02			;DELETE
-		DB	#E1			;GET-MEM-1
+		DB	#E1			;GET_MEM_1
 		DB	#0F			;ADDITION
 		DB	#31			;DUPLICATE
 		DB	#38			;END_CALC
@@ -5449,12 +5449,12 @@ ARC_START	PUSH	BC
 		CALL	STACK_A
 		RST	#28			;FP_CALC
 		DB	#03			;SUBTRACT
-		DB	#E0			;GET-MEM-0
-		DB	#E2			;GET-MEM-2
+		DB	#E0			;GET_MEM_0
+		DB	#E2			;GET_MEM_2
 		DB	#0F			;ADDITION
-		DB	#C0			;ST-MEM-0
+		DB	#C0			;ST_MEM_0
 		DB	#01			;EXCHANGE
-		DB	#E0			;GET-MEM-0
+		DB	#E0			;GET_MEM_0
 		DB	#38			;END_CALC
 		LD	A,(#5C7E)
 		CALL	STACK_A
@@ -5492,7 +5492,7 @@ CD_PRMS1:	RST	#28			;FP_CALC
 		DB	#00			;
 		DB	#01			;EXCHANGE
 		DB	#05			;DIVISION
-		DB	#E5			;GET-MEM-5
+		DB	#E5			;GET_MEM_5
 		DB	#01			;EXCHANGE
 		DB	#05			;DIVISION
 		DB	#2A			;ABS
@@ -5506,20 +5506,20 @@ USE_252:	LD	A,#FC
 DRAW_SAVE:	PUSH	AF
 		CALL	STACK_A
 		RST	#28			;FP_CALC
-		DB	#E5			;GET-MEM-5
+		DB	#E5			;GET_MEM_5
 		DB	#01			;EXCHANGE
 		DB	#05			;DIVISION
 		DB	#31			;DUPLICATE
 		DB	#1F			;SIN
-		DB	#C4			;ST-MEM-4
+		DB	#C4			;ST_MEM_4
 		DB	#02			;DELETE
 		DB	#31			;DUPLICATE
 		DB	#A2			;STK_HALF
 		DB	#04			;MULTIPLY
 		DB	#1F			;SIN
-		DB	#C1			;ST-MEM-1
+		DB	#C1			;ST_MEM_1
 		DB	#01			;EXCHANGE
-		DB	#C0			;ST-MEM-0
+		DB	#C0			;ST_MEM_0
 		DB	#02			;DELETE
 		DB	#31			;DUPLICATE
 		DB	#04			;MULTIPLY
@@ -5528,7 +5528,7 @@ DRAW_SAVE:	PUSH	AF
 		DB	#A1			;STK_ONE
 		DB	#03			;SUBTRACT
 		DB	#1B			;NEGATE
-		DB	#C3			;ST-MEM-3
+		DB	#C3			;ST_MEM_3
 		DB	#02			;DELETE
 		DB	#38			;END_CALC
 		POP	BC
@@ -5844,7 +5844,8 @@ S_ALPHNUM:	CALL	ALPHANUM
 		JR	NC,S_NEGATE
 		CP	#41
 		JR	NC,S_LETTER
-S_BIN:		CALL	SYNTAX_Z		; also S_DECIMAL
+S_DECIMAL:		
+S_BIN:		CALL	SYNTAX_Z
 		JR	NZ,S_STK_DEC
 		CALL	DEC_TO_FP
 S_BIN_1:	RST	#18
@@ -6867,7 +6868,7 @@ DEC_RPT_C:	JP	C,REPORT_C
 
 DEC_STO_1:	RST	#28			;FP_CALC
 		DB	#A1			;STK_ONE
-		DB	#C0			;ST-MEM-0
+		DB	#C0			;ST_MEM_0
 		DB	#02			;DELETE
 		DB	#38			;END_CALC
 
@@ -6875,10 +6876,10 @@ NXT_DGT_1:	RST	#18
 		CALL	STK_DIGIT
 		JR	C,E_FORMAT
 		RST	#28			;FP_CALC
-		DB	#E0			;GET-MEM-0
+		DB	#E0			;GET_MEM_0
 		DB	#A4			;STK_TEN
 		DB	#05			;DIVISION
-		DB	#C0			;ST-MEM-0
+		DB	#C0			;ST_MEM_0
 		DB	#04			;MULTIPLY
 		DB	#0F			;ADDITION
 		DB	#38			;END_CALC
@@ -6970,15 +6971,15 @@ E_LOOP:		SRL	A
 		JR	NC,E_TST_END
 		PUSH	AF
 		RST	#28			;FP_CALC
-		DB	#C1			;ST-MEM-1
-		DB	#E0			;GET-MEM-0
+		DB	#C1			;ST_MEM_1
+		DB	#E0			;GET_MEM_0
 		DB	#00			;JUMP_TRUE
 		DB	#04			;to E_DIVSN
 		DB	#04			;MULTIPLY
 		DB	#33			;JUMP
 		DB	#02			;to E_FETCH
 E_DIVSN:	DB	#05			;DIVISION
-E_FETCH:	DB	#E1			;GET-MEM-1
+E_FETCH:	DB	#E1			;GET_MEM_1
 		DB	#38			;END_CALC
 		POP	AF
 E_TST_END:	JR	Z,E_END
@@ -7118,9 +7119,9 @@ PF_NEGTVE:	DB	#2A		;ABS
 		RST	#10
 		RST	#28		;FP_CALC
 PF_POSTVE:	DB	#A0		;STK_ZERO
-		DB	#C3		;ST-MEM-3
-		DB	#C4		;ST-MEM-4
-		DB	#C5		;ST-MEM-5
+		DB	#C3		;ST_MEM_3
+		DB	#C4		;ST_MEM_4
+		DB	#C5		;ST_MEM_5
 		DB	#02		;DELETE
 		DB	#38		;END_CALC
 		EXX
@@ -7129,11 +7130,11 @@ PF_POSTVE:	DB	#A0		;STK_ZERO
 PF_LOOP:	RST	#28		;FP_CALC
 		DB	#31		;DUPLICATE
 		DB	#27		;INT
-		DB	#C2		;ST-MEM-2
+		DB	#C2		;ST_MEM_2
 		DB	#03		;SUBTRACT
-		DB	#E2		;GET-MEM-2
+		DB	#E2		;GET_MEM_2
 		DB	#01		;EXCHANGE
-		DB	#C2		;ST-MEM-2
+		DB	#C2		;ST_MEM_2
 		DB	#02		;DELETE
 		DB	#38		;END_CALC
 		LD	A,(HL)
@@ -7155,7 +7156,7 @@ PF_SAVE:	PUSH	DE
 		JR	PF_BITS
 
 PF_SMALL:	RST	#28		;FP_CALC
-		DB	#E2		;GET-MEM-2
+		DB	#E2		;GET_MEM_2
 		DB	#38		;END_CALC
 		LD	A,(HL)
 		SUB	#7E
@@ -7169,9 +7170,9 @@ PF_SMALL:	RST	#28		;FP_CALC
 		RST	#28		;FP_CALC
 		DB	#31		;DUPLICATE
 		DB	#27		;21
-		DB	#C1		;ST-MEM-1
+		DB	#C1		;ST_MEM_1
 		DB	#03		;SUBTRACT
-		DB	#E1		;GET-MEM-1
+		DB	#E1		;GET_MEM_1
 		DB	#38		;END_CALC
 		CALL	FP_TO_A
 		PUSH	HL
@@ -7256,7 +7257,7 @@ PF_ALL_9:	DJNZ	PF_DIGITS
 
 PF_MORE:	RST	#28			;FP_CALC
 		DB	#02			;DELETE
-		DB	#E2			;GET-MEM-2
+		DB	#E2			;GET_MEM_2
 		DB	#38			;END_CALC
 
 PF_FRACTN:	EX	DE,HL
@@ -8308,26 +8309,26 @@ SERIES_XX:	LD	B,A
 		CALL	GEN_ENT_1
 		DB	#31			;DUPLICATE
 		DB	#0F			;ADDITION
-		DB	#C0			;ST-MEM-0
+		DB	#C0			;ST_MEM_0
 		DB	#02			;DELETE
 		DB	#A0			;STK_ZERO
-		DB	#C2			;ST-MEM-2
+		DB	#C2			;ST_MEM_2
 G_LOOP:		DB	#31			;DUPLICATE
-		DB	#E0			;GET-MEM-0
+		DB	#E0			;GET_MEM_0
 		DB	#04			;MULTIPLY
-		DB	#E2			;GET-MEM-2
-		DB	#C1			;ST-MEM-1
+		DB	#E2			;GET_MEM_2
+		DB	#C1			;ST_MEM_1
 		DB	#03			;SUBTRACT
 		DB	#38			;END_CALC
 		CALL	STK_DATA
 		CALL	GEN_ENT_2
 		DB	#0F			;ADDITION
 		DB	#01			;EXCHANGE
-		DB	#C2			;ST-MEM-2
+		DB	#C2			;ST_MEM_2
 		DB	#02			;DELETE
 		DB	#35			;DEC_JR_NZ
 		DB	#EE			;back to G_LOOP
-		DB	#E1			;GET-MEM-1
+		DB	#E1			;GET_MEM_1
 		DB	#03			;SUBTRACT
 		DB	#38			;END_CALC
 		RET
@@ -8778,18 +8779,18 @@ END_CALC:	POP	AF
 
 ; Modulus
 N_MOD_M:	RST	#28			;FP_CALC
-		DB	#C0			;ST-MEM-0
+		DB	#C0			;ST_MEM_0
 		DB	#02			;DELETE
 		DB	#31			;DUPLICATE
-		DB	#E0			;GET-MEM-0
+		DB	#E0			;GET_MEM_0
 		DB	#05			;DIVISION
 		DB	#27			;INT
-		DB	#E0			;GET-MEM-0
+		DB	#E0			;GET_MEM_0
 		DB	#01			;EXCHANGE
-		DB	#C0			;ST-MEM-0
+		DB	#C0			;ST_MEM_0
 		DB	#04			;MULTIPLY
 		DB	#03			;SUBTRACT
-		DB	#E0			;GET-MEM-0
+		DB	#E0			;GET_MEM_0
 		DB	#38			;END_CALC
 		RET
 
@@ -8805,9 +8806,9 @@ INT:		RST	#28			;FP_CALC
 
 X_NEG:		DB	#31			;DUPLICATE
 		DB	#3A			;TRUNCATE
-		DB	#C0			;ST-MEM-0
+		DB	#C0			;ST_MEM_0
 		DB	#03			;SUBTRACT
-		DB	#E0			;GET-MEM-0
+		DB	#E0			;GET_MEM_0
 		DB	#01			;EXCHANGE
 		DB	#30			;NOT
 		DB	#00			;JUMP_TRUE
@@ -8829,7 +8830,7 @@ EXP:		RST	#28			;FP_CALC
 		DB	#04			;MULTIPLY
 		DB	#31			;DUPLICATE
 		DB	#27			;INT
-		DB	#C3			;ST-MEM-3
+		DB	#C3			;ST_MEM_3
 		DB	#03			;SUBTRACT
 		DB	#31			;DUPLICATE
 		DB	#0F			;ADDITION
@@ -8869,7 +8870,7 @@ EXP:		RST	#28			;FP_CALC
 		DB	#7E			;
 		DB	#F8			;
 		DB	#CF			;
-		DB	#E3			;GET-MEM-3
+		DB	#E3			;GET_MEM_3
 		DB	#38			;END-CALC
 		CALL	FP_TO_A
 		JR	NZ,N_NEGTV
@@ -8932,12 +8933,8 @@ VALID:		DB	#A0			;STK_ZERO
 		DB	#03			;SUBTRACT
 		DB	#01			;EXCHANGE
 		DB	#38			;END_CALC
-;
-;#373B
 	INC	(HL)
 	RST	#28	;FP_CALC
-;
-;#373D
 	DB	#01
 	DB	#34
 	DB	#F0
@@ -9007,13 +9004,9 @@ VALID:		DB	#A0			;STK_ZERO
 	DB	#04
 	DB	#0F
 	DB	#38
-;
-;#3782
 	RET
 ;
 L_3783	RST	#28	;FP_CALC
-;
-;#3784
 	DB	#3D
 	DB	#34
 	DB	#EE
@@ -9042,11 +9035,8 @@ L_3783	RST	#28	;FP_CALC
 	DB	#04
 	DB	#02
 	DB	#38
-;
-;#37A0
 	RET
-;
-;#37A1
+
 	DB	#A1
 	DB	#03
 	DB	#01
@@ -9055,13 +9045,9 @@ L_3783	RST	#28	;FP_CALC
 	DB	#02
 	DB	#1B
 	DB	#38
-;
-;#37A9
 	RET
 ;
 L_37AA	RST	#28	;FP_CALC
-;
-;#37AB
 	DB	#39
 	DB	#2A
 	DB	#A1
@@ -9074,8 +9060,6 @@ L_37AA	RST	#28	;FP_CALC
 	DB	#03
 ;
 L_37B5	RST	#28	;FP_CALC
-;
-;#37B6
 	DB	#39
 	DB	#31
 	DB	#31
@@ -9111,21 +9095,15 @@ L_37B5	RST	#28	;FP_CALC
 	DB	#EA
 	DB	#04
 	DB	#38
-;
-;#37D9
 	RET
 ;
 L_37DA	RST	#28	;FP_CALC
-;
-;#37DB
 	DB	#31
 	DB	#1F
 	DB	#01
 	DB	#20
 	DB	#05
 	DB	#38
-;
-;#37E1
 	RET
 ;
 L_37E2	CALL	RE_STACK
@@ -9133,8 +9111,6 @@ L_37E2	CALL	RE_STACK
 	CP	#81
 	JR	C,L_37F8
 	RST	#28	;FP_CALC
-;
-;#37EB
 	DB	#A1
 	DB	#1B
 	DB	#01
@@ -9150,8 +9126,6 @@ L_37E2	CALL	RE_STACK
 	DB	#03
 ;
 L_37F8	RST	#28	;FP_CALC
-;
-;#37F9
 	DB	#A0
 	DB	#01
 	DB	#31
@@ -9209,13 +9183,9 @@ L_37F8	RST	#28	;FP_CALC
 	DB	#04
 	DB	#0F
 	DB	#38
-;
-;#3832
 	RET
 ;
 L_3833	RST	#28	;FP_CALC
-;
-;#3834
 	DB	#31
 	DB	#31
 	DB	#04
@@ -9230,25 +9200,17 @@ L_3833	RST	#28	;FP_CALC
 	DB	#31
 	DB	#0F
 	DB	#38
-;
-;#3842
 	RET
 ;
 L_3843	RST	#28	;FP_CALC
-;
-;#3844
 	DB	#22
 	DB	#A3
 	DB	#03
 	DB	#1B
 	DB	#38
-;
-;#3849
 	RET
 ;
 L_384A	RST	#28	;FP_CALC
-;
-;#384B
 	DB	#31
 	DB	#30
 	DB	#00
@@ -9257,8 +9219,6 @@ L_384A	RST	#28	;FP_CALC
 	DB	#38
 ;
 L_3851	RST	#28	;FP_CALC
-;
-;#3852
 	DB	#01
 	DB	#31
 	DB	#30
@@ -9267,11 +9227,7 @@ L_3851	RST	#28	;FP_CALC
 	DB	#25
 	DB	#04
 	DB	#38
-;
-;#385A
 	JP	EXP
-;
-;#385D
 	DB	#02
 	DB	#31
 	DB	#30
@@ -9288,8 +9244,6 @@ L_3851	RST	#28	;FP_CALC
 	DB	#02
 	DB	#A1
 	DB	#38
-;
-;#386D
 	RET
 
 ; Input of HEX numbers
@@ -9659,7 +9613,7 @@ HD1:		INC	B
 
 		DW	INCB
 INCB:		EXX
-		inc	B
+		INC	B
 		EXX
 		RET
 
@@ -9965,7 +9919,7 @@ JP15524:	RET
 		DW	#FFFF
 		DB	#FF
 
-H3CF0:		DB	#00,#00,#00,#00,#00,#00,#7E,#00	;line
+CHAR_SET_N:	DB	#00,#00,#00,#00,#00,#00,#7E,#00	;line
 		DB	#00,#7E,#7E,#7E,#7E,#7E,#7E,#00	;square
 
 ; Character set
