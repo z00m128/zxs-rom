@@ -12349,7 +12349,7 @@ L_LENGTH:	EX	(SP),HL		; (*) length to stack, pointer to HL.
 					; leaving prepared spaces.
 		LDIR			; else copy bytes overwriting some spaces.
 
-					;; L_IN_W_S
+					;;;$2BA3
 L_IN_W_S:	POP	BC		; pop the new length.  (*)
 		POP	DE		; pop pointer to new area.
 		POP	HL		; pop pointer to variable in assignment.
