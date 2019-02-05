@@ -11836,7 +11836,7 @@ SV_MULT:	PUSH	BC		; save dimension number.
 		BIT	7,C		; are we checking syntax ?
 					; then we've got a joker here.
 
-					;; SV_RPT_C
+					;;;$2A12
 SV_RPT_C:	JR	NZ,SL_RPT_C	; forward to SL_RPT_C if so
 					; 'Nonsense in Basic'
 					; more than 256 subscripts in Basic line.
