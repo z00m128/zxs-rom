@@ -19,12 +19,12 @@ VER3		EQU	'0'+VERF
 START:		DI
 		XOR	A
 		LD	DE,#FFFF
-		JP	NMI_MENU		; Busy's modification - jumps to NMI menu instead of START_NEW
+		JP	NMI_MENU		; BSROM - jumps to NMI menu instead of START_NEW
 
 ; Error restart
 ; RST #08
 ERROR_1:	LD	HL,(#5C5D)
-		CALL	TOERR			; Busy's modification - cursor jumps to error
+		CALL	TOERR			; BSROM - cursor jumps to error
 		JR	ERROR_2
 
 ; Print a character
@@ -751,7 +751,7 @@ SEMI_TONE:	DB	#89, #02, #D0, #12, #86
 		DB	#89, #69, #14, #F6, #24
 		DB	#89, #76, #F1, #10, #05
 
-; Busy's modification - file name is optional now.
+; BSROM - file name is optional now.
 ; There was ZX81_NAME routine at this place, but it was not used anyway.
 NONAME:		RST	#18
 		LD	HL,NNTAB
@@ -877,7 +877,7 @@ LD_BYTES1:	AND	#20
 LD_BREAK:	RET	NZ
 LD_START:	CALL	LD_EDGE_1
 		JR	NC,LD_BREAK
-		LD	HL,#0115		; Busy's modification - short delay (was #0415 in orig. ROM)
+		LD	HL,#0115		; BSROM - short delay (was #0415 in orig. ROM)
 LD_WAIT:	DJNZ	LD_WAIT
 		DEC	HL
 		LD	A,H
@@ -978,7 +978,7 @@ SAVE_ETC:	POP	AF
 		LD	A,(#5C74)
 		SUB	#E0
 		LD	(#5C74),A
-		CALL	NONAME			; Busy's modification - file name is optional now
+		CALL	NONAME			; BSROM - file name is optional now
 		CALL	SYNTAX_Z
 		JR	Z,SA_DATA
 		LD	BC,#0011
@@ -1467,7 +1467,7 @@ SA_1_SEC:	HALT
 		DJNZ	SA_1_SEC
 		LD	E,(IX+#0B)
 		LD	D,(IX+#0C)
-		POP	IX
+		POP	IX			; BSROM - LD A,#FF and POP IX swapped
 		LD	A,#FF
 		JP	SA_BYTES
 
@@ -1485,7 +1485,7 @@ TAPE_MSGS2:	EQU	$-1
 		DC	"Bytes: "
 
 ; Genereal PRINT routine
-PRINT_OUT:	CALL	DISPL				; Busy's modification - disabled autolist of control codes
+PRINT_OUT:	CALL	DISPL			; BSROM - disabled autolist of control codes
 		CP	#1E
 		JP	NC,PO_ABLE
 		CP	#06
@@ -1530,7 +1530,7 @@ PO_BACK_1:	INC	C
 		JR	NZ,PO_BACK_2
 		INC	B
 		LD	C,#02
-		LD	A,#19
+		LD	A,#19			; BSROM - bugfix - was LD A,#18
 		CP	B
 		JR	NZ,PO_BACK_3
 		DEC	B
@@ -1542,7 +1542,7 @@ PO_RIGHT:	LD	A,(#5C91)
 		PUSH	AF
 		LD	(IY+#57),#01
 		LD	A,#20
-		CALL	PO_ABLE
+		CALL	PO_ABLE			; BSROM - bugfix - was CALL PO_BACK
 		POP	AF
 		LD	(#5C91),A
 		RET
@@ -2362,7 +2362,7 @@ ED_EDIT:	LD	HL,(#5C49)
 		BIT	5,(IY+#37)
 		JP	NZ,CLEAR_SP
 		CALL	LINE_ADDR
-		CALL	LIN2			; Busy's modification
+		CALL	LIN2			; BSROM - don't test line 0
 		AND	#C0
 		JP	NZ,CLEAR_SP
 		PUSH	HL
@@ -2391,12 +2391,12 @@ ED_EDIT:	LD	HL,(#5C49)
 		POP	HL
 		JP	CHAN_FLAG
 
-TOERR:		LD	(#5C5F),HL		; Busy's modification - cursor jumps to error
+TOERR:		LD	(#5C5F),HL		; BSROM - cursor jumps to error
 		LD	(#5C5B),HL
 		RET
 
 ; Cursor down editing
-ED_DOWN:	CALL	DOLE			; Busy's modification - free cursor moving
+ED_DOWN:	CALL	DOLE			; BSROM - free cursor moving
 		BIT	5,(IY+#37)
 		RET	NZ
 		NOP
@@ -2467,7 +2467,7 @@ ED_EDGE_2:	AND	A
 		RET
 
 ; Cursor up editing
-ED_UP:		CALL	HORE			; Busy's modification - free cursor moving
+ED_UP:		CALL	HORE			; BSROM - free cursor moving
 		BIT	5,(IY+#37)
 		RET	NZ
 		CALL	LINE_ADDR
@@ -2663,7 +2663,7 @@ NEW_1:		EXX
 		LD	DE,(#5C38)
 		LD	HL,(#5C7B)
 		EXX
-START_NEW:	LD	B,A			; Busy's modification - better NEW command, RAM is not tested for errors
+START_NEW:	LD	B,A			; BSROM - better NEW command, RAM is not tested for errors
 		XOR	A
 		LD	I,A
 		LD	C,A
@@ -2751,7 +2751,7 @@ WARM_ST:	LD	(HL),#0D
 		LD	(#5C8D),A
 		LD	(#5C8F),A
 		LD	(#5C48),A
-		LD	HL,#0114		; Busy's modification - REPDEL and REPPER were changed, was #0523
+		LD	HL,#0114		; BSROM - REPDEL and REPPER were changed, was #0523
 		LD	(#5C09),HL
 		DEC	(IY-#3A)
 		DEC	(IY-#36)
@@ -2759,7 +2759,7 @@ WARM_ST:	LD	(HL),#0D
 		LD	DE,#5C10
 		LD	BC,#000E
 		LDIR
-		LD	(IY+#31),#02		; Busy's modification - printer vars initialization removed
+		LD	(IY+#31),#02		; BSROM - printer vars initialization removed
 		LD	(IY+#0E),#0F
 		CALL	HARD			; reset AY, DMA, FDC
 		CALL	SET_MIN
@@ -2804,7 +2804,7 @@ MAIN_3:		LD	HL,(#5C59)
 		LD	(IY+#00),#FF
 		LD	(IY+#0A),#01
 		CALL	LINE_RUN
-MAIN_4:		RST	#38
+MAIN_4:		RST	#38			; BSROM - bugfix - was HALT
 		RES	5,(IY+#01)
 		BIT	1,(IY+#30)
 		CALL	NZ,COPY_BUFF
@@ -2895,7 +2895,7 @@ RPT_MESGS:	DB	#80
 		DC	"Tape loading error"
 COMMA_SP:	DC	", "
 
-; Busy's modification - here is copyright message in the original ZX Spectrum ROM.
+; BSROM - here is copyright message in the original ZX Spectrum ROM.
 COPYRIGHT:	DC	"Rom 140"
 		DC	"Prog:"
 		DB	#16
@@ -3418,9 +3418,9 @@ LIST_ALL_2:	CALL	OUT_LINE
 ; Print a whole BASIC line
 OUT_LINE:	LD	BC,(#5C49)
 		CALL	CP_LINES
-		LD	D,#2A			; Busy's modification - line cursor is "*" instead of ">"
+		LD	D,#2A			; BSROM - line cursor is "*" instead of ">"
 		JR	Z,OUT_LINE1
-		LD	DE,#2000		; Busy's modification - " " instead of suppressing line cursor
+		LD	DE,#2000		; BSROM - " " instead of suppressing line cursor
 		RL	E
 OUT_LINE1:	LD	(IY+#2D),E
 		LD	A,(HL)
@@ -3428,7 +3428,7 @@ OUT_LINE1:	LD	(IY+#2D),E
 		POP	BC
 		RET	NC
 		PUSH	BC
-		CALL	LIN4			; Busy's modification - "*" cursor
+		CALL	LIN4			; BSROM - "*" cursor
 		INC	HL
 		INC	HL
 		INC	HL
@@ -3797,7 +3797,7 @@ P_LET:		DB	#01
 		DB	"="
 		DB	#02
 
-P_GO_TO:	DB	#03			; Busy's modification - enhanced GOTO command
+P_GO_TO:	DB	#03			; BSROM - enhanced GOTO command
 		DW	GO_TO
 		DB	#00
 
@@ -3806,7 +3806,7 @@ P_IF:		DB	#06
 		DB	#05
 		DW	IF_CMD
 
-P_GO_SUB:	DB	#03			; Busy's modification - enhanced GOSUB command
+P_GO_SUB:	DB	#03			; BSROM - enhanced GOSUB command
 		DW	GO_SUB
 		DB	#00
 	
@@ -3849,27 +3849,27 @@ P_RUN:		DB	#03
 P_LIST:		DB	#05
 		DW	LIST
 
-P_POKE:		DB	#06			; Busy's modification - enhanced POKE comand
+P_POKE:		DB	#06			; BSROM - enhanced POKE comand
 		DB	#05
 		DW	NEW_POKE
 
 P_RANDOM:	DB	#03
 		DW	RANDOMIZE
 
-P_CONT:		DB	#03			; Busy's modification - enhanced CONTINUE command
+P_CONT:		DB	#03			; BSROM - enhanced CONTINUE command
 		DW	NEW_CONT
 	
 P_CLEAR:	DB	#03
 		DW	CLEAR
 
-P_CLS:		DB	#03			; Busy's modification - new CLS command
+P_CLS:		DB	#03			; BSROM - new CLS command
 		DW	NEW_CLS
 
 P_PLOT:		DB	#09
 		DB	#00
 		DW	PLOT
 
-P_PAUSE:	DB	#03			; Busy's modification - enhanced PAUSE command
+P_PAUSE:	DB	#03			; BSROM - enhanced PAUSE command
 		DW	PAUSE
 		DB	#00
 
@@ -3919,7 +3919,7 @@ P_OUT:		DB	#08
 		DB	#00
 		DW	OUT_CMD
 
-P_BORDER:	DB	#03			; Busy's modification - enhanced BORDER command
+P_BORDER:	DB	#03			; BSROM - enhanced BORDER command
 		DW	BORDER
 		DB	#00
 	
@@ -4507,12 +4507,12 @@ OUT_CMD:	CALL	TWO_PARAM
 		OUT	(C),A
 		RET
 
-; Busy's modification - fix for rewriting first bytes of ROM
+; BSROM - fix for rewriting first bytes of ROM
 ; was POKE command handling originally
 NO_RW_AT0:	LD	DE,(#5C65)
 		RET
 
-; Busy's modification - extended command parameters
+; BSROM - extended command parameters
 TWO_PARAM:	CALL	FP_TO_A
 		PUSH	AF
 		CALL	FIND_INT2
@@ -5679,7 +5679,7 @@ S_SCR_NXT:	POP	HL
 		POP	BC
 		DJNZ	S_SCRN_LP
 		LD	C,B
-S_SCR_STO:	RET				; Busy's modification - bugfix - don't store string after SCREEN$
+S_SCR_STO:	RET				; BSROM - bugfix - don't store string after SCREEN$
 		DB	#B2,#2A			; remains of JP STK_STO_D (#2AB2)
 
 ; Scanning attributes
@@ -5959,7 +5959,7 @@ S_STK_LST:	PUSH	DE
 		JR	S_RUNTEST
 
 S_SYNTEST:	LD	A,E
-		CALL	VAL1			; Busy's modification - Hexadecimal routines
+		CALL	VAL1			; BSROM - Hexadecimal routines
 		AND	#40
 S_RPORT_C2:	JP	NZ,REPORT_C
 S_RUNTEST:	POP	DE
@@ -7876,7 +7876,7 @@ NO_RSTORE:	SCF
 COUNT_ONE:	INC	B
 		JP	M,DIV_LOOP
 		PUSH	AF
-		JR	Z,DIV_34TH
+		JR	Z,DIV_34TH		; BSROM - bugfix - was DIV_START
 		LD	E,A
 		LD	D,C
 		EXX
@@ -7898,7 +7898,7 @@ TRUNCATE:	LD	A,(HL)
 		AND	A
 		RET	Z
 		CP	#81
-		JR	NC,T_GR_ZERO		; Busy's modification - modified INT
+		JR	NC,T_GR_ZERO		; BSROM - modified INT
 		LD	(HL),#00
 		LD	A,#20
 		JR	NIL_BYTES
@@ -7914,7 +7914,7 @@ E65536:		JR	NZ,S65536
 S65536:		POP	AF
 		JP	ADDN_OFLW
 
-NEW_CHR:	CALL	FP_TO_A			; Busy's modification - CHR can have negative parameter
+NEW_CHR:	CALL	FP_TO_A			; BSROM - CHR can have negative parameter
 		RET	C
 		RET	Z
 		POP	AF
@@ -7922,7 +7922,7 @@ NEW_CHR:	CALL	FP_TO_A			; Busy's modification - CHR can have negative parameter
 		LD	BC,#FFFF
 		JP	CHR_DLR1
 
-T_GR_ZERO:	CP	#91			; Busy's modification - modified INT
+T_GR_ZERO:	CP	#91			; BSROM - modified INT
 T_SMALL:	JR	NC,X_LARGE
 		PUSH	DE
 		CPL
@@ -8241,7 +8241,7 @@ SKIP_CONS:	AND	A
 SKIP_NEXT:	RET	Z
 		PUSH	AF
 		PUSH	DE
-		CALL	NO_RW_AT0		; Busy's modification - fix for rewriting first bytes of ROM
+		CALL	NO_RW_AT0		; BSROM - fix for rewriting first bytes of ROM
 		CALL	STK_CONST
 		POP	DE
 		POP	AF
@@ -8649,7 +8649,7 @@ REPORT_BD:	RST	#08			; Error report
 
 ; Handle VAL and VAL$
 VAL:
-VAL_DLR:	CALL	VAL2			; Busy's modification - enhanced VAL$
+VAL_DLR:	CALL	VAL2			; BSROM - enhanced VAL$
 		PUSH	HL
 		LD	A,B
 		ADD	A,#E3
