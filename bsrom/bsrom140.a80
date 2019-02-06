@@ -2754,7 +2754,7 @@ WARM_ST:	LD	(HL),#0D
 		LD	(#5C61),HL
 		LD	(#5C63),HL
 		LD	(#5C65),HL
-		LD	A,#07			; BSROM - changed colors, blue border and paper, white ink
+		LD	A,#07			; BSROM - changed colors, blue border, black paper, white ink
 		LD	(#5C8D),A
 		LD	(#5C8F),A
 		LD	(#5C48),A
