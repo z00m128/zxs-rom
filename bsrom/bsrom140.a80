@@ -108,7 +108,7 @@ ERROR_3:	LD	(IY+#00),L
 
 ; Non-maskable interrupt routine
 ; RST #66
-RESET:		JP	NMI_MENU		; Busy's modfication - jumps to NMI menu
+RESET:		JP	NMI_MENU		; BSROM - jumps to NMI menu
 
 		DB	#B0			; Looks like this is unused torso 
 		DB	#5C			; of the original RESET routine.
