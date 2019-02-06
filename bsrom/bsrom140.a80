@@ -1,17 +1,24 @@
+;##########################################################################
+;# BSrom140 - Modified ZX Spectrum ROM - (c) Busy soft - Release 22.04.97 #
+;##########################################################################
+;                   Original ROM: (c) Amstrad
+
+
+
 		OUTPUT	"bsrom140.rom"
 
-VERZIA		EQU	140
+VERZIA:		EQU	140
 
-VERA		EQU	VERZIA/100
-VERB		EQU	VERA*100
-VERC		EQU	VERZIA-VERB
-VERD		EQU	VERC/10
-VERE		EQU	VERD*10
-VERF		EQU	VERC-VERE
+VERA:		EQU	VERZIA/100
+VERB:		EQU	VERA*100
+VERC:		EQU	VERZIA-VERB
+VERD:		EQU	VERC/10
+VERE:		EQU	VERD*10
+VERF:		EQU	VERC-VERE
 
-VER1		EQU	'0'+VERA
-VER2		EQU	'0'+VERD
-VER3		EQU	'0'+VERF
+VER1:		EQU	'0'+VERA
+VER2:		EQU	'0'+VERD
+VER3:		EQU	'0'+VERF
 
 		ORG	#0000
 
@@ -595,7 +602,7 @@ K_KLC_DGT:	INC	B
 		RET
 
 ; Substitute ascii '@'
-K_AT_CHAR	LD	A,#40
+K_AT_CHAR:	LD	A,#40
 		RET
 
 ; Routine to control loudspeaker
@@ -819,13 +826,13 @@ SA_BIT_1:	DJNZ	SA_BIT_1
 		JR	NC,SA_OUT
 		LD	B,#42
 SA_SET:		DJNZ	SA_SET
-SA_OUT		OUT	(#FE),A
+SA_OUT:		OUT	(#FE),A
 		LD	B,#3E
 		JR	NZ,SA_BIT_2
 		DEC	B
 		XOR	A
 		INC	A
-SA_8_BITS	RL	L
+SA_8_BITS:	RL	L
 		JP	NZ,SA_BIT_1
 		DEC	DE
 		INC	IX
@@ -838,11 +845,11 @@ SA_8_BITS	RL	L
 		INC	A
 		JP	NZ,SA_LOOP
 		LD	B,#3B
-SA_DELAY	DJNZ	SA_DELAY
+SA_DELAY:	DJNZ	SA_DELAY
 		RET
 
 ; Reset border nad check BREAK for LOAD and SAVE
-SA_LD_RET	PUSH	AF
+SA_LD_RET:	PUSH	AF
 		LD	A,(#5C48)
 		AND	#38
 		RRCA
@@ -955,7 +962,7 @@ LD_EDGE_1:	LD	A,#16
 LD_DELAY:	DEC	A
 		JR	NZ,LD_DELAY
 		AND	A
-LD_SAMPLE	INC	B
+LD_SAMPLE:	INC	B
 		RET	Z
 		LD	A,#7F
 		IN	A,(#FE)
@@ -1096,7 +1103,7 @@ SA_CODE_2:	CALL	USE_ZERO
 
 SA_CODE_3:	RST	#20
 		CALL	EXPT_1NUM
-SA_CODE_4	CALL	CHECK_END
+SA_CODE_4:	CALL	CHECK_END
 		CALL	FIND_INT2
 		LD	(IX+#0B),C
 		LD	(IX+#0C),B
@@ -1105,7 +1112,7 @@ SA_CODE_4	CALL	CHECK_END
 		LD	(IX+#0E),B
 		LD	H,B
 		LD	L,C
-SA_TYPE_3	LD	(IX+#00),#03
+SA_TYPE_3:	LD	(IX+#00),#03
 		JR	SA_ALL
 
 SA_LINE:	CP	#CA
@@ -1150,7 +1157,7 @@ LD_LOOK_H:	PUSH	IX
 		JR	NC,LD_LOOK_H
 		LD	A,#FE
 		CALL	CHAN_OPEN
-		LD	(IY+#52),#FF
+		LD	(IY+#52),#FF		; BSROM - fixed "scroll?" troubles when tape header is shown, was LD (IY+$52),$03
 		LD	C,#80
 		LD	A,(IX+#00)
 		CP	(IX-#11)
@@ -2340,7 +2347,7 @@ ED_KEYS:	LD	E,A
 		LD	D,#00
 		LD	HL,ED_KEYS_T-7
 		ADD	HL,DE
-L_0F99		LD	E,(HL)
+		LD	E,(HL)
 		ADD	HL,DE
 		PUSH	HL
 		LD	HL,(#5C5B)
@@ -2362,7 +2369,7 @@ ED_EDIT:	LD	HL,(#5C49)
 		BIT	5,(IY+#37)
 		JP	NZ,CLEAR_SP
 		CALL	LINE_ADDR
-		CALL	LIN2			; BSROM - don't test line 0
+		CALL	LIN2			; BSROM - modified BASIC program presence test
 		AND	#C0
 		JP	NZ,CLEAR_SP
 		PUSH	HL
@@ -2383,7 +2390,7 @@ ED_EDIT:	LD	HL,(#5C49)
 		CALL	CHAN_OPEN
 		POP	HL
 		DEC	HL
-		CALL	OUT_LINE
+		CALL	OUT_LINE		;BSROM - cursor placement after EDIT
 		LD	DE,#0005
 		LD	HL,(#5C59)
 		ADD	HL,DE
@@ -2490,7 +2497,7 @@ ED_ERROR:	BIT	4,(IY+#30)
 		LD	(IY+#00),#FF
 		LD	D,#00
 		LD	E,(IY-#02)
-		LD	HL,#0190
+		LD	HL,#0190		; BSROM - higher tone of error beep, was LD HL,#1A90
 		CALL	BEEPER
 		JP	ED_AGAIN
 
@@ -2547,7 +2554,7 @@ KEY_MODE:	CP	#0E
 		LD	(HL),A
 		JR	NZ,KEY_FLAG
 		LD	(HL),#00
-KEY_FLAG	SET	3,(IY+#02)
+KEY_FLAG:	SET	3,(IY+#02)
 		CP	A
 		RET
 
@@ -2613,7 +2620,7 @@ ED_SPACES:	LD	A,#20
 ; Error handling
 ED_FULL:	LD	D,#00
 		LD	E,(IY-#02)
-		LD	HL,#0190
+		LD	HL,#0190		; BSROM - higher tone of error beep, was LD HL,#1A90
 		CALL	BEEPER
 		LD	(IY+#00),#FF
 		LD	DE,(#5C8A)
@@ -2621,7 +2628,7 @@ ED_FULL:	LD	D,#00
 
 ED_C_DONE:	POP	DE
 		POP	HL
-ED_C_END	POP	HL
+ED_C_END:	POP	HL
 		LD	(#5C3D),HL
 		POP	BC
 		PUSH	DE
@@ -2663,8 +2670,8 @@ NEW_1:		EXX
 		LD	DE,(#5C38)
 		LD	HL,(#5C7B)
 		EXX
-START_NEW:	LD	B,A			; BSROM - better NEW command, RAM is not tested for errors
-		XOR	A
+START_NEW:	LD	B,A
+		XOR	A			; BSROM - faster RAM clear, RAM is not tested for errors
 		LD	I,A
 		LD	C,A
 		LD	H,D
@@ -2699,7 +2706,7 @@ RAM_DONE1:	EXX
 		LD	(#5C38),DE
 		LD	(#5C7B),HL
 		EXX	
-		INC	A
+		INC	A			; BSROM - changed for new NEW command, was INC B
 		JR	Z,RAM_SET
 RAM_DONE2:	LD	(#5CB4),HL
 		LD	DE,#3EAF
@@ -2747,7 +2754,7 @@ WARM_ST:	LD	(HL),#0D
 		LD	(#5C61),HL
 		LD	(#5C63),HL
 		LD	(#5C65),HL
-		LD	A,#07
+		LD	A,#07			; BSROM - changed colors, black border and paper, white ink
 		LD	(#5C8D),A
 		LD	(#5C8F),A
 		LD	(#5C48),A
@@ -2787,10 +2794,10 @@ MAIN_2:		LD	A,#00
 
 MAIN_3:		LD	HL,(#5C59)
 		LD	(#5C5D),HL
-		CALL	LIN3
+		CALL	LIN3			; BSROM - modified test of number at the begin of BASIC line
 		NOP
 		NOP
-		JP	NC,MAIN_ADD
+		JP	NC,MAIN_ADD		; BSROM - don't test zero, so line 0 can be used and/or edited
 		RST	#18
 		CP	#0D
 		JR	Z,MAIN_EXEC
@@ -2895,7 +2902,7 @@ RPT_MESGS:	DB	#80
 		DC	"Tape loading error"
 COMMA_SP:	DC	", "
 
-; BSROM - here is copyright message in the original ZX Spectrum ROM.
+; BSROM - here was the copyright message in the original ZX Spectrum ROM.
 COPYRIGHT:	DC	"Rom 140"
 		DC	"Prog:"
 		DB	#16
@@ -3002,7 +3009,7 @@ WAIT_KEY1:	CALL	INPUT_AD
 		JR	Z,WAIT_KEY1
 REPORT_8:	RST	#08			; Error report
 		DB	#07			; End of file
-INPUT_AD	EXX
+INPUT_AD:	EXX
 		PUSH	HL
 		LD	HL,(#5C51)
 		INC	HL
@@ -3053,7 +3060,7 @@ CHAN_FLAG:	LD	(#5C51),HL		; Set channel flags
 		LD	D,#00
 		LD	E,(HL)
 		ADD	HL,DE
-CALL_JUMP	JP	(HL)
+CALL_JUMP:	JP	(HL)
 
 ; Channel code lookup table
 CH_CD_LU:	DB	"K", #06		; CHAN_K
@@ -3428,7 +3435,7 @@ OUT_LINE1:	LD	(IY+#2D),E
 		POP	BC
 		RET	NC
 		PUSH	BC
-		CALL	LIN4			; BSROM - "*" cursor
+		CALL	LIN4			; BSROM - no cursor
 		INC	HL
 		INC	HL
 		INC	HL
@@ -3591,7 +3598,7 @@ LINE_ADDR:	PUSH	HL
 		LD	D,H
 		LD	E,L
 LINE_AD_1:	POP	BC
-		CALL	LIN1
+		CALL	LIN1			; BSROM - modified line number test
 		RET	NC
 		PUSH	BC
 		CALL	NEXT_ONE
@@ -3706,7 +3713,7 @@ E_LINE_NO:	LD	HL,(#5C59)
 		CALL	INT_TO_FP
 		CALL	FP_TO_BC
 		JR	C,E_L_1
-		LD	HL,#C000
+		LD	HL,#C000		; BSROM - line number can be 0..16383 now, was LD HL,$D8F0 (max 9999 lines)
 		ADD	HL,BC
 E_L_1:		JP	C,REPORT_C
 		JP	SET_STK
@@ -3718,7 +3725,7 @@ OUT_NUM_1:	PUSH	DE
 		BIT	7,B
 		JR	NZ,OUT_NUM_4
 		LD	H,B
-		LD	E,#FF
+		LD	E,#FF			;BSROM - lines 0..16383
 		JP	NUMCOM
 
 OUT_NUM_2:	PUSH	DE
@@ -3797,7 +3804,7 @@ P_LET:		DB	#01
 		DB	"="
 		DB	#02
 
-P_GO_TO:	DB	#03			; BSROM - enhanced GOTO command
+P_GO_TO:	DB	#03			; BSROM - enhanced GOTO command, parameter is optional
 		DW	GO_TO
 		DB	#00
 
@@ -3806,7 +3813,7 @@ P_IF:		DB	#06
 		DB	#05
 		DW	IF_CMD
 
-P_GO_SUB:	DB	#03			; BSROM - enhanced GOSUB command
+P_GO_SUB:	DB	#03			; BSROM - enhanced GOSUB command, parameter is optional
 		DW	GO_SUB
 		DB	#00
 	
@@ -3849,27 +3856,27 @@ P_RUN:		DB	#03
 P_LIST:		DB	#05
 		DW	LIST
 
-P_POKE:		DB	#06			; BSROM - enhanced POKE comand
+P_POKE:		DB	#06			; BSROM - enhanced POKE comand, added more items
 		DB	#05
 		DW	NEW_POKE
 
 P_RANDOM:	DB	#03
 		DW	RANDOMIZE
 
-P_CONT:		DB	#03			; BSROM - enhanced CONTINUE command
+P_CONT:		DB	#03			; BSROM - enhanced CONTINUE command, added numeric parameter
 		DW	NEW_CONT
 	
 P_CLEAR:	DB	#03
 		DW	CLEAR
 
-P_CLS:		DB	#03			; BSROM - new CLS command
+P_CLS:		DB	#03			; BSROM - enhanced CLS command, added numeric parameter
 		DW	NEW_CLS
 
 P_PLOT:		DB	#09
 		DB	#00
 		DW	PLOT
 
-P_PAUSE:	DB	#03			; BSROM - enhanced PAUSE command
+P_PAUSE:	DB	#03			; BSROM - enhanced PAUSE command, parameter is optional
 		DW	PAUSE
 		DB	#00
 
@@ -3919,7 +3926,7 @@ P_OUT:		DB	#08
 		DB	#00
 		DW	OUT_CMD
 
-P_BORDER:	DB	#03			; BSROM - enhanced BORDER command
+P_BORDER:	DB	#03			; BSROM - enhanced BORDER command, parameter s optional
 		DW	BORDER
 		DB	#00
 	
@@ -3975,7 +3982,7 @@ STMT_L_1:	CALL	SET_WORK
 		JR	Z,STMT_LOOP
 		LD	HL,STMT_RET
 		PUSH	HL
-		CP	#CE
+		CP	#CE			;BSROM - automatic print
 		JP	C,COMM
 		SUB	#CE
 		LD	C,A
@@ -4508,7 +4515,7 @@ OUT_CMD:	CALL	TWO_PARAM
 		RET
 
 ; BSROM - fix for rewriting first bytes of ROM
-; was POKE command handling originally
+; was POKE command handling here originally
 NO_RW_AT0:	LD	DE,(#5C65)
 		RET
 
@@ -4627,7 +4634,7 @@ REPORT_7:	PUSH	DE
 
 ; Handle PAUSE command
 PAUSE:		CALL	FIND_INT2
-PAUSE_1		HALT
+PAUSE_1:	HALT
 		DEC	BC
 		LD	A,B
 		OR	C
@@ -5596,7 +5603,7 @@ SCANNING:	RST	#18
 		LD	B,#00
 		PUSH	BC
 S_LOOP_1:	LD	C,A
-		CALL	HEXA
+		CALL	HEXA			; BSROM - hexadecimal numbers handling
 		CALL	INDEXER
 		LD	A,C
 		JP	NC,S_ALPHNUM
@@ -5621,7 +5628,7 @@ S_2_COORD:	RST	#20
 		CALL	NEXT_2NUM
 		RST	#18
 		CP	#29
-S_RPORT_C	JP	NZ,REPORT_C
+S_RPORT_C:	JP	NZ,REPORT_C
 
 ; Check syntax
 SYNTAX_Z:	BIT	7,(IY+#01)
@@ -5959,7 +5966,7 @@ S_STK_LST:	PUSH	DE
 		JR	S_RUNTEST
 
 S_SYNTEST:	LD	A,E
-		CALL	VAL1			; BSROM - Hexadecimal routines
+		CALL	VAL1			; BSROM - enhanced VAL & VAL$
 		AND	#40
 S_RPORT_C2:	JP	NZ,REPORT_C
 S_RUNTEST:	POP	DE
@@ -6534,7 +6541,7 @@ INT_EXP2:	PUSH	DE
 		SBC	HL,BC
 I_CARRY:	LD	A,D
 		SBC	A,#00
-I_RESTORE	POP	HL
+I_RESTORE:	POP	HL
 		POP	DE
 		RET
 
@@ -7898,7 +7905,7 @@ TRUNCATE:	LD	A,(HL)
 		AND	A
 		RET	Z
 		CP	#81
-		JR	NC,T_GR_ZERO		; BSROM - modified INT
+		JR	NC,T_GR_ZERO		; BSROM - bugfixed INT
 		LD	(HL),#00
 		LD	A,#20
 		JR	NIL_BYTES
@@ -7914,7 +7921,7 @@ E65536:		JR	NZ,S65536
 S65536:		POP	AF
 		JP	ADDN_OFLW
 
-NEW_CHR:	CALL	FP_TO_A			; BSROM - CHR can have negative parameter
+NEW_CHR:	CALL	FP_TO_A			; BSROM - bugfixed CHR$
 		RET	C
 		RET	Z
 		POP	AF
@@ -7969,7 +7976,7 @@ NIL_BYTES:	PUSH	DE
 BYTE_ZERO:	LD	(HL),#00
 		DEC	HL
 		DJNZ	BYTE_ZERO
-BITS_ZERO	AND	#07
+BITS_ZERO:	AND	#07
 		JR	Z,IX_END
 		LD	B,A
 		LD	A,#FF
@@ -8056,7 +8063,7 @@ TBL_ADDRS:	DW	JUMP_TRUE
 		DW	SUBTRACT
 		DW	MULTIPLY
 		DW	DIVISION
-		DW	L_3851
+		DW	TO_POWER
 		DW	OR_FUNC
 		DW	NO_AND_NO
 		DW	NO_L_EQL
@@ -8081,16 +8088,16 @@ TBL_ADDRS:	DW	JUMP_TRUE
 		DW	CODE
 		DW	VAL
 		DW	LEN
-		DW	L_37B5
-		DW	L_37AA
-		DW	L_37DA
-		DW	L_3833
-		DW	L_3843
-		DW	L_37E2
+		DW	SIN_FUNC
+		DW	COS_FUNC
+		DW	TAN_FUNC
+		DW	ASN_FUNC
+		DW	ACS_FUNC
+		DW	ATN_FUNC
 		DW	LN
 		DW	EXP
 		DW	INT
-		DW	L_384A
+		DW	SQR_FUNC
 		DW	SGN
 		DW	ABS
 		DW	PEEK
@@ -8107,7 +8114,7 @@ TBL_ADDRS:	DW	JUMP_TRUE
 		DW	LESS_0
 		DW	GREATER_0
 		DW	END_CALC
-		DW	L_3783
+		DW	GET_ARGT
 		DW	TRUNCATE
 		DW	FP_CALC_2
 		DW	E_TO_FP
@@ -8632,7 +8639,7 @@ STK_PNTRS:	LD	HL,(#5C65)
 		RET
 
 ; Handle CHR$
-CHR_DLR:	CALL	NEW_CHR
+CHR_DLR:	CALL	NEW_CHR			;BSROM - bugfixed CHR$
 		JR	C,REPORT_BD
 		JR	NZ,REPORT_BD
 		PUSH	AF
@@ -8649,7 +8656,7 @@ REPORT_BD:	RST	#08			; Error report
 
 ; Handle VAL and VAL$
 VAL:
-VAL_DLR:	CALL	VAL2			; BSROM - enhanced VAL$
+VAL_DLR:	CALL	VAL2			; BSROM - enhanced VAL & VAL$
 		PUSH	HL
 		LD	A,B
 		ADD	A,#E3
@@ -8836,7 +8843,7 @@ EXP:		RST	#28			;FP_CALC
 		DB	#0F			;ADDITION
 		DB	#A1			;STK_ONE
 		DB	#03			;SUBTRACT
-		DB	#88			;SERIES-08
+		DB	#88			;SERIES_08
 		DB	#13			;Exponent
 		DB	#36			;
 		DB	#58			;Exponent
@@ -8933,319 +8940,329 @@ VALID:		DB	#A0			;STK_ZERO
 		DB	#03			;SUBTRACT
 		DB	#01			;EXCHANGE
 		DB	#38			;END_CALC
-	INC	(HL)
-	RST	#28	;FP_CALC
-	DB	#01
-	DB	#34
-	DB	#F0
-	DB	#31
-	DB	#72
-	DB	#17
-	DB	#F8
-	DB	#04
-	DB	#01
-	DB	#A2
-	DB	#03
-	DB	#A2
-	DB	#03
-	DB	#31
-	DB	#34
-	DB	#32
-	DB	#20
-	DB	#04
-	DB	#A2
-	DB	#03
-	DB	#8C
-	DB	#11
-	DB	#AC
-	DB	#14
-	DB	#09
-	DB	#56
-	DB	#DA
-	DB	#A5
-	DB	#59
-	DB	#30
-	DB	#C5
-	DB	#5C
-	DB	#90
-	DB	#AA
-	DB	#9E
-	DB	#70
-	DB	#6F
-	DB	#61
-	DB	#A1
-	DB	#CB
-	DB	#DA
-	DB	#96
-	DB	#A4
-	DB	#31
-	DB	#9F
-	DB	#B4
-	DB	#E7
-	DB	#A0
-	DB	#FE
-	DB	#5C
-	DB	#FC
-	DB	#EA
-	DB	#1B
-	DB	#43
-	DB	#CA
-	DB	#36
-	DB	#ED
-	DB	#A7
-	DB	#9C
-	DB	#7E
-	DB	#5E
-	DB	#F0
-	DB	#6E
-	DB	#23
-	DB	#80
-	DB	#93
-	DB	#04
-	DB	#0F
-	DB	#38
-	RET
-;
-L_3783	RST	#28	;FP_CALC
-	DB	#3D
-	DB	#34
-	DB	#EE
-	DB	#22
-	DB	#F9
-	DB	#83
-	DB	#6E
-	DB	#04
-	DB	#31
-	DB	#A2
-	DB	#0F
-	DB	#27
-	DB	#03
-	DB	#31
-	DB	#0F
-	DB	#31
-	DB	#0F
-	DB	#31
-	DB	#2A
-	DB	#A1
-	DB	#03
-	DB	#31
-	DB	#37
-	DB	#C0
-	DB	#00
-	DB	#04
-	DB	#02
-	DB	#38
-	RET
+		INC	(HL)
+		RST	#28			;FP_CALC
+GRE_8:		DB	#01			;EXCHANGE
+		DB	#34			;STK_DATA
+		DB	#F0			;Exponent
+		DB	#31			;
+		DB	#72			;
+		DB	#17			;
+		DB	#F8			;
+		DB	#04			;MULTIPLY
+		DB	#01			;EXCHANGE
+		DB	#A2			;STK_HALF
+		DB	#03			;SUBTRACT
+		DB	#A2			;STK_HALF
+		DB	#03			;SUBTRACT
+		DB	#31			;DUPLICATE
+		DB	#34			;STK_DATA
+		DB	#32			;Exponent
+		DB	#20			;
+		DB	#04			;MULTIPLY
+		DB	#A2			;STK_HALF
+		DB	#03			;SUBTRACT
+		DB	#8C			;SERIES_0C
+		DB	#11			;Exponent
+		DB	#AC			;
+		DB	#14			;Exponent
+		DB	#09			;
+		DB	#56			;Exponent
+		DB	#DA			;
+		DB	#A5			;
+		DB	#59			;Exponent
+		DB	#30			;
+		DB	#C5			;
+		DB	#5C			;Exponent
+		DB	#90			;
+		DB	#AA			;
+		DB	#9E			;Exponent
+		DB	#70			;
+		DB	#6F			;
+		DB	#61			;
+		DB	#A1			;Exponent
+		DB	#CB			;
+		DB	#DA			;
+		DB	#96			;
+		DB	#A4			;Exponent
+		DB	#31			;
+		DB	#9F			;
+		DB	#B4			;
+		DB	#E7			;Exponent
+		DB	#A0			;
+		DB	#FE			;
+		DB	#5C			;
+		DB	#FC			;
+		DB	#EA			;Exponent
+		DB	#1B			;
+		DB	#43			;
+		DB	#CA			;
+		DB	#36			;
+		DB	#ED			;Exponent
+		DB	#A7			;	
+		DB	#9C			;
+		DB	#7E			;
+		DB	#5E			;
+		DB	#F0			;Exponent
+		DB	#6E			;
+		DB	#23			;
+		DB	#80			;
+		DB	#93			;
+		DB	#04			;MULTIPLY
+		DB	#0F			;ADDITION
+		DB	#38			;END_CALC
+		RET
 
-	DB	#A1
-	DB	#03
-	DB	#01
-	DB	#36
-	DB	#00
-	DB	#02
-	DB	#1B
-	DB	#38
-	RET
-;
-L_37AA	RST	#28	;FP_CALC
-	DB	#39
-	DB	#2A
-	DB	#A1
-	DB	#03
-	DB	#E0
-	DB	#00
-	DB	#06
-	DB	#1B
-	DB	#33
-	DB	#03
-;
-L_37B5	RST	#28	;FP_CALC
-	DB	#39
-	DB	#31
-	DB	#31
-	DB	#04
-	DB	#31
-	DB	#0F
-	DB	#A1
-	DB	#03
-	DB	#86
-	DB	#14
-	DB	#E6
-	DB	#5C
-	DB	#1F
-	DB	#0B
-	DB	#A3
-	DB	#8F
-	DB	#38
-	DB	#EE
-	DB	#E9
-	DB	#15
-	DB	#63
-	DB	#BB
-	DB	#23
-	DB	#EE
-	DB	#92
-	DB	#0D
-	DB	#CD
-	DB	#ED
-	DB	#F1
-	DB	#23
-	DB	#5D
-	DB	#1B
-	DB	#EA
-	DB	#04
-	DB	#38
-	RET
-;
-L_37DA	RST	#28	;FP_CALC
-	DB	#31
-	DB	#1F
-	DB	#01
-	DB	#20
-	DB	#05
-	DB	#38
-	RET
-;
-L_37E2	CALL	RE_STACK
-	LD	A,(HL)
-	CP	#81
-	JR	C,L_37F8
-	RST	#28	;FP_CALC
-	DB	#A1
-	DB	#1B
-	DB	#01
-	DB	#05
-	DB	#31
-	DB	#36
-	DB	#A3
-	DB	#01
-	DB	#00
-	DB	#06
-	DB	#1B
-	DB	#33
-	DB	#03
-;
-L_37F8	RST	#28	;FP_CALC
-	DB	#A0
-	DB	#01
-	DB	#31
-	DB	#31
-	DB	#04
-	DB	#31
-	DB	#0F
-	DB	#A1
-	DB	#03
-	DB	#8C
-	DB	#10
-	DB	#B2
-	DB	#13
-	DB	#0E
-	DB	#55
-	DB	#E4
-	DB	#8D
-	DB	#58
-	DB	#39
-	DB	#BC
-	DB	#5B
-	DB	#98
-	DB	#FD
-	DB	#9E
-	DB	#00
-	DB	#36
-	DB	#75
-	DB	#A0
-	DB	#DB
-	DB	#E8
-	DB	#B4
-	DB	#63
-	DB	#42
-	DB	#C4
-	DB	#E6
-	DB	#B5
-	DB	#09
-	DB	#36
-	DB	#BE
-	DB	#E9
-	DB	#36
-	DB	#73
-	DB	#1B
-	DB	#5D
-	DB	#EC
-	DB	#D8
-	DB	#DE
-	DB	#63
-	DB	#BE
-	DB	#F0
-	DB	#61
-	DB	#A1
-	DB	#B3
-	DB	#0C
-	DB	#04
-	DB	#0F
-	DB	#38
-	RET
-;
-L_3833	RST	#28	;FP_CALC
-	DB	#31
-	DB	#31
-	DB	#04
-	DB	#A1
-	DB	#03
-	DB	#1B
-	DB	#28
-	DB	#A1
-	DB	#0F
-	DB	#05
-	DB	#24
-	DB	#31
-	DB	#0F
-	DB	#38
-	RET
-;
-L_3843	RST	#28	;FP_CALC
-	DB	#22
-	DB	#A3
-	DB	#03
-	DB	#1B
-	DB	#38
-	RET
-;
-L_384A	RST	#28	;FP_CALC
-	DB	#31
-	DB	#30
-	DB	#00
-	DB	#1E
-	DB	#A2
-	DB	#38
-;
-L_3851	RST	#28	;FP_CALC
-	DB	#01
-	DB	#31
-	DB	#30
-	DB	#00
-	DB	#07
-	DB	#25
-	DB	#04
-	DB	#38
-	JP	EXP
-	DB	#02
-	DB	#31
-	DB	#30
-	DB	#00
-	DB	#09
-	DB	#A0
-	DB	#01
-	DB	#37
-	DB	#00
-	DB	#06
-	DB	#A1
-	DB	#01
-	DB	#05
-	DB	#02
-	DB	#A1
-	DB	#38
-	RET
+; Reduce argument
+GET_ARGT:	RST	#28			;FP_CALC
+		DB	#3D			;RE_STACK
+		DB	#34			;STK_DATA
+		DB	#EE			;Exponent
+		DB	#22			;
+		DB	#F9			;
+		DB	#83			;
+		DB	#6E			;
+		DB	#04			;MULTIPLY
+		DB	#31			;DUPLICATE
+		DB	#A2			;STK_HALF
+		DB	#0F			;ADDITION
+		DB	#27			;INT
+		DB	#03			;SUBTRACT
+		DB	#31			;DUPLICATE
+		DB	#0F			;ADDITION
+		DB	#31			;DUPLICATE
+		DB	#0F			;ADDITION
+		DB	#31			;DUPLICATE
+		DB	#2A			;ABS
+		DB	#A1			;STK_ONE
+		DB	#03			;SUBTRACT
+		DB	#31			;DUPLICATE
+		DB	#37			;GREATER_0
+		DB	#C0			;ST-MEM-0
+		DB	#00			;JUMP_TRUE
+		DB	#04			;to ZPLUS
+		DB	#02			;DELETE
+		DB	#38			;END_CALC
+		RET
 
+ZPLUS:		DB	#A1			;STK_ONE
+		DB	#03			;SUBTRACT
+		DB	#01			;EXCHANGE
+		DB	#36			;LESS_0
+		DB	#00			;JUMP_TRUE
+		DB	#02			;to YNEG
+		DB	#1B			;NEGATE
+YNEG:		DB	#38			;END_CALC
+		RET
+
+; Handle cosine
+COS_FUNC:	RST	#28			;FP_CALC
+		DB	#39			;GET_ARGT
+		DB	#2A			;ABS
+		DB	#A1			;STK_ONE
+		DB	#03			;SUBTRACT
+		DB	#E0			;GET-MEM-0
+		DB	#00			;JUMP_TRUE
+		DB	#06			;fwd to C_ENT
+		DB	#1B			;NEGATE
+		DB	#33			;jump
+		DB	#03			;fwd to C_ENT
+
+; Handle sine
+SIN_FUNC:	RST	#28			;FP_CALC
+		DB	#39			;GET_ARGT
+C_ENT:		DB	#31			;DUPLICATE
+		DB	#31			;DUPLICATE
+		DB	#04			;MULTIPLY
+		DB	#31			;DUPLICATE
+		DB	#0F			;ADDITION
+		DB	#A1			;STK_ONE
+		DB	#03			;SUBTRACT
+		DB	#86			;SERIES-06
+		DB	#14			;Exponent			
+		DB	#E6			;
+		DB	#5C			;Exponent
+		DB	#1F			;
+		DB	#0B			;
+		DB	#A3			;Exponent
+		DB	#8F			;
+		DB	#38			;
+		DB	#EE			;
+		DB	#E9			;Exponent
+		DB	#15			;
+		DB	#63			;
+		DB	#BB			;
+		DB	#23			;
+		DB	#EE			;Exponent
+		DB	#92			;
+		DB	#0D			;
+		DB	#CD			;
+		DB	#ED			;
+		DB	#F1			;Exponent
+		DB	#23			;
+		DB	#5D			;
+		DB	#1B			;
+		DB	#EA			;
+		DB	#04			;MULTIPLY
+		DB	#38			;END_CALC
+		RET
+
+; Handle tangent
+TAN_FUNC:	RST	#28			;FP_CALC
+		DB	#31			;DUPLICATE
+		DB	#1F			;SIN
+		DB	#01			;EXCHANGE
+		DB	#20			;COS
+		DB	#05			;DIVISION
+		DB	#38			;END_CALC
+		RET
+
+; Handle arctan
+ATN_FUNC:	CALL	RE_STACK
+		LD	A,(HL)
+		CP	#81
+		JR	C,SMALL
+		RST	#28			;FP_CALC
+		DB	#A1			;STK_ONE
+		DB	#1B			;NEGATE
+		DB	#01			;EXCHANGE
+		DB	#05			;DIVISION
+		DB	#31			;DUPLICATE
+		DB	#36			;LESS_0
+		DB	#A3			;STK_PI_2
+		DB	#01			;EXCHANGE
+		DB	#00			;JUMP_TRUE
+		DB	#06			;to CASES
+		DB	#1B			;NEGATE
+		DB	#33			;jump
+		DB	#03			;to CASES
+SMALL:		RST	#28			;FP_CALC
+		DB	#A0			;STK_ZERO
+CASES:		DB	#01			;EXCHANGE
+		DB	#31			;DUPLICATE
+		DB	#31			;DUPLICATE
+		DB	#04			;MULTIPLY
+		DB	#31			;DUPLICATE
+		DB	#0F			;ADDITION
+		DB	#A1			;STK_ONE
+		DB	#03			;SUBTRACT
+		DB	#8C			;SERIES_0C
+		DB	#10			;Exponent
+		DB	#B2			;
+		DB	#13			;Exponent
+		DB	#0E			;
+		DB	#55			;Exponent
+		DB	#E4			;
+		DB	#8D			;
+		DB	#58			;Exponent
+		DB	#39			;
+		DB	#BC			;
+		DB	#5B			;Exponent
+		DB	#98			;
+		DB	#FD			;
+		DB	#9E			;Exponent
+		DB	#00			;
+		DB	#36			;
+		DB	#75			;
+		DB	#A0			;Exponent
+		DB	#DB			;
+		DB	#E8			;
+		DB	#B4			;
+		DB	#63			;Exponent
+		DB	#42			;
+		DB	#C4			;
+		DB	#E6			;Exponent
+		DB	#B5			;
+		DB	#09			;
+		DB	#36			;
+		DB	#BE			;
+		DB	#E9			;Exponent
+		DB	#36			;
+		DB	#73			;
+		DB	#1B			;
+		DB	#5D			;
+		DB	#EC			;Exponent
+		DB	#D8			;
+		DB	#DE			;
+		DB	#63			;
+		DB	#BE			;
+		DB	#F0			;Exponent
+		DB	#61			;
+		DB	#A1			;
+		DB	#B3			;
+		DB	#0C			;
+		DB	#04			;MULTIPLY
+		DB	#0F			;ADDITION
+		DB	#38			;END_CALC
+		RET
+
+; Handle arcsin
+ASN_FUNC:	RST	#28			;FP_CALC
+		DB	#31			;DUPLICATE
+		DB	#31			;DUPLICATE
+		DB	#04			;MULTIPLY
+		DB	#A1			;STK_ONE
+		DB	#03			;SUBTRACT
+		DB	#1B			;NEGATE
+		DB	#28			;SQR
+		DB	#A1			;STK_ONE
+		DB	#0F			;ADDITION
+		DB	#05			;DIVISION
+		DB	#24			;ATN
+		DB	#31			;DUPLICATE
+		DB	#0F			;ADDITION
+		DB	#38			;END_CALC
+		RET
+
+; Handle arccos
+ACS_FUNC:	RST	#28			;FP_CALC
+		DB	#22			;ASN
+		DB	#A3			;STK_PI_2
+		DB	#03			;SUBTRACT
+		DB	#1B			;NEGATE
+		DB	#38			;END_CALC
+		RET
+
+; Handle square root
+SQR_FUNC:	RST	#28			;FP_CALC
+		DB	#31			;DUPLICATE
+		DB	#30			;NOT
+		DB	#00			;JUMP_TRUE
+		DB	#1E			;to LAST
+		DB	#A2			;STK_HALF
+		DB	#38			;END_CALC
+
+; Handle exponential
+TO_POWER:	RST	#28			;FP_CALC
+		DB	#01			;EXCHANGE
+		DB	#31			;DUPLICATE
+		DB	#30			;NOT
+		DB	#00			;JUMP_TRUE
+		DB	#07			;to XISO
+		DB	#25			;LN
+		DB	#04			;MULTIPLY
+		DB	#38			;END_CALC
+		JP	EXP			
+
+XISO:		DB	#02			;DELETE
+		DB	#31			;DUPLICATE
+		DB	#30			;NOT
+		DB	#00			;JUMP_TRUE
+		DB	#09			;to ONE
+		DB	#A0			;STK_ZERO
+		DB	#01			;EXCHANGE
+		DB	#37			;GREATER_0
+		DB	#00			;JUMP_TRUE
+		DB	#06			;to LAST
+		DB	#A1			;STK_ONE
+		DB	#01			;EXCHANGE
+		DB	#05			;DIVISION
+ONE:		DB	#02			;DELETE
+		DB	#A1			;STK_ONE
+LAST:		DB	#38			;END_CALC
+		RET
+
+; BSROM additional routines
 ; Input of HEX numbers
 HEXA:		LD	HL,SCAN_FUNC
 		CP	#25
@@ -9346,6 +9363,7 @@ USERJP:		JP	#0052
 
 DISKTOOLS:	DW	#0052
 
+; 128k reset
 RES128:		DI
 		XOR	A
 		LD	I,A
@@ -9374,7 +9392,7 @@ CC2:		LD	(BC),A
 		DEC	HL
 		JP	RAM_DONE2
 
-;NMI Menu
+; NMI Menu
 NMI_MENU:	PUSH	AF
 		PUSH	HL
 		LD	HL,#BFE0
@@ -9549,7 +9567,7 @@ LIN3:		RST	#18
 		POP	AF
 		RET
 
-; Show '*' instead of ' ' 
+; Show empty cursor instead of '*' 
 LIN4:		LD	A,(IY+#02)
 		CP	#10
 		JR	Z,LL40
@@ -9644,6 +9662,7 @@ VV:		DW	#FFFF
 		POP	AF
 		JP	MAIN_2
 
+; Modified CLS command
 NEW_CLS:	CALL	FIND_INT1
 		OR	A
 		JR	Z,NECOL
@@ -9652,6 +9671,7 @@ NEW_CLS:	CALL	FIND_INT1
 		CALL	SA_LD_RET
 NECOL:		JP	CLS
 
+; New commands
 COMM:		CP	#27			;"'"
 		JR	Z,BANKA
 		CP	#2C			;","
@@ -9789,6 +9809,7 @@ POKLD:		LD	(DE),A
 SS:		DB	#FF
 WW:		DW	#FFFF
 
+; New line number test
 LIN1:		CALL	CP_LINES
 		RET	NC
 		LD	A,(HL)
@@ -9797,6 +9818,7 @@ LIN1:		CALL	CP_LINES
 		SCF
 		RET
 
+; New boot screen
 INFO:		CALL	CLS
 		LD	A,#FE
 		CALL	CHAN_OPEN
@@ -9820,6 +9842,7 @@ INFO:		CALL	CLS
 		CALL	INFSUB
 		JP	PRINT_5
 
+; Header command
 HEA:		LD	A,#FE
 		CALL	CHAN_OPEN
 ZNOVU:		DI
@@ -9918,7 +9941,7 @@ JP15524:	RET
 		DW	#FFFF
 		DW	#FFFF
 		DB	#FF
-
+; BSROM - new characters
 CHAR_SET_N:	DB	#00,#00,#00,#00,#00,#00,#7E,#00	;line
 		DB	#00,#7E,#7E,#7E,#7E,#7E,#7E,#00	;square
 
@@ -9955,7 +9978,7 @@ CHAR_SET:	DB	#00,#00,#00,#00,#00,#00,#00,#00	;space
 		DB	#00,#00,#00,#3E,#00,#3E,#00,#00	;=
 		DB	#00,#00,#10,#08,#04,#08,#10,#00	;>
 		DB	#00,#3C,#42,#04,#08,#00,#08,#00	;?
-		DB	#00,#3C,#02,#3A,#4A,#4A,#3C,#00	;@
+		DB	#00,#3C,#02,#3A,#4A,#4A,#3C,#00	;@ BSROM - more beautiful @ character
 		DB	#00,#3C,#42,#42,#7E,#42,#42,#00	;A
 		DB	#00,#7C,#42,#7C,#42,#42,#7C,#00	;B
 		DB	#00,#3C,#42,#40,#40,#42,#3C,#00	;C
