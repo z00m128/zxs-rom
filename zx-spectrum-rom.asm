@@ -5661,7 +5661,7 @@ LINE_ZERO:	DEFB	$00, $00	; dummy line number used for direct commands
 
 					;;;$1691
 LINE_NO_A:	EX	DE,HL		; fetch the previous line to HL and set
-		LD	DE,$168F	; DE to LINE_ZERO should HL also fail.
+		LD	DE,LINE_ZERO	; DE to LINE_ZERO should HL also fail.
 
 					; -> The Entry Point.
 
@@ -7915,7 +7915,7 @@ IF_CMD:		POP	BC		; drop return address - STMT_RET
 		CALL	TEST_ZERO	; routine TEST_ZERO
 		JP	C,LINE_END	; jump to LINE_END if FALSE (0)
 
-					;; IF_1
+					;;;$1D00
 IF_1:	JP	STMT_L_1		; to STMT_L_1, if true (1) to execute command
 					; after 'THEN' token.
 
@@ -7929,7 +7929,7 @@ IF_1:	JP	STMT_L_1		; to STMT_L_1, if true (1) to execute command
 ; CLASS_04 has also checked the variable and the name is in STRLEN_lo.
 ; The routine begins by checking for an optional STEP.
 
-					;; 1D03
+					;;;$1D03
 FOR:		CP	$CD		; is there a 'STEP' ?
 		JR	NZ,F_USE_1	; to F_USE_1 if not to use 1 as default.
 
@@ -8584,7 +8584,7 @@ REPORT_4:	LD	L,$03		; prepare 'Out of Memory'
 ; This routine is not used by the ROM but allows users to evaluate
 ; approximate free memory with PRINT 65536 - USR 7962.
 
-					;; FREE_MEM
+					;;$1F1A
 FREE_MEM:	LD	BC,$0000	; allow no overhead.
 		CALL	TEST_ROOM	; routine TEST_ROOM.
 		LD	B,H		; transfer the result
